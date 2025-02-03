@@ -1,0 +1,208 @@
+--entrypoints Init;
+
+(:[]).    [Module] ::= Module;
+(:).      [Module] ::= Module [Module];
+
+rules Visible ::= "hidden" | "show";
+rules ChanPoll ::= "full" | "empty" "nfull" "nempty";
+rules Separator ::= ";" | "->";
+rules Typename ::= "bit" | "bool" | "byte" | "short" | "int" | "mtype" | "chan" | Uname;
+rules AndOr ::= "&&" | "||";
+rules BinOp ::= "+" | "-" | "*" | "/" | "%" | "&" | "^" | "|" | ">" | "<" | ">" "=" | "<" "=" | "=" "=" | "!" "=" | "<<" | ">>" | AndOr;
+rules UnrOp ::= "~" | "-" | "!";
+rules Const ::= "true" | "false" | "skip" | Integer;
+rules PrintType ::= "" | "f" | "m";
+
+Mproc. Module ::= Proctype;
+Minit. Module ::= Init;
+Mnever. Module ::= Never;
+Mtrace. Module ::= Trace;
+Mutype. Module ::= Utype;
+Mmtype. Module ::= Mtype;
+MdeclList. Module ::= DeclList;
+
+Ptype. Proctype ::= Pactive "proctype" Name "(" PdeclList ")" Ppriority Penabler "{" Sequence "}";
+
+PactiveNone. Pactive ::= ""; 
+PactiveOne. Pactive ::= Active;
+
+PdeclListNone. PdeclList ::= "";
+PdeclListOne. PdeclList ::= DeclList;
+
+PpriorityNone. Ppriority ::= "";
+PpriorityOne. Ppriority ::= Priority;
+
+PenablerNone. Penabler ::= "";
+PenablerOne. Penabler ::= Enabler;
+
+Initialise. Init ::= "init" Ipriority "{" Sequence "}";
+
+IpriorityNone. Ipriority ::= "";
+IpriorityOne. Ipriority ::= Priority;
+
+Nvr. Never ::= "never" "{" Sequence "}";
+Trc. Trace ::= "trace" "{" Sequence "}";
+
+Utp. Utype ::= "typedef" Name "{" DeclListTD "}";
+
+Mtp. Mtype ::= "mtype" Mequals "{" Mname "}";
+Meq. Mequals ::= "";
+Meq. Mequals ::= "=";
+
+MnameOne. Mname ::= Name;
+Mnamecons. Mname ::= Name "," Mname;
+
+DclListOne. DeclList ::= Decl;
+DclListCons. DeclList ::= Decl Separator DeclList;
+
+DclListTDOne. DeclListTD ::= DeclTD;
+DclListTDCons. DeclListTD ::= DeclTD Separator DeclListTD;
+
+DclTDOne. DeclTD ::= DeclVisible Typename DclIvar;
+DclTDOneAssign. DeclTD ::= DeclVisible Typename DclIvar Assign;
+DclTDOneUnsigned. DeclTD ::= DeclVisible UnsignedDecl;
+
+DclOne. Decl ::= DeclVisible Typename DclIvar;
+DclOneUnsigned. Decl ::= DeclVisible UnsignedDecl;
+
+DclIvarCons. DclIvar ::= Ivar "," DclIvar;
+DclIvarSub. DclIvar ::= Ivar;
+
+DclVisNone. DeclVisible ::= "";
+DclVisOne. DeclVisible ::= Visible;
+
+UDcl. UnsignedDecl ::= "unsigned" Name ":" Const UDclAssign;
+UDclAssignNone. UDclAssign ::= "";
+UdclAssignOne. UDclAssign ::= "=" AnyExpr;
+
+
+Active. Active ::= "active" AConst;
+
+AconstNone. AConst ::= "";
+AconstOne. AConst ::= "[" Const "]";
+
+Priority. Priority ::= "priority" Const;
+Enabler. Enabler ::= "provided" "(" Expr ")";
+
+SeqOne. Sequence ::= Step;
+SeqCons. Sequence ::= Step Separator Sequence;
+
+UStmtNone. UStmt ::= "";
+UStmtOne. UStmt ::= "unless" Stmt;
+
+StepStmt. Step ::= Stmt UStmt;
+StepDclList. Step ::= DeclList;
+StepXR. Step ::= "xr" VarRefList;
+StepXS. Step ::= "xs" VarRefList;
+
+VarRefListOne. VarRefList ::= VarRef;
+VarRefListCons. VarRefList ::= VarRef "," VarRefList;
+
+AnyExprParen. AnyExpr ::= "(" AnyExpr ")";
+AnyExprBinOp. AnyExpr ::= AnyExpr BinOp AnyExpr;
+AnyExprUnrOp. AnyExpr ::= UnrOp AnyExpr;
+AnyExprCond. AnyExpr ::= "(" AnyExpr "->" AnyExpr ":" AnyExpr ")";
+AnyExprLen. AnyExpr ::= "len" "(" VarRef ")";
+AnyExprPoll. AnyExpr ::= Poll;
+AnyExprConst. AnyExpr ::= Const;
+AnyExprTimeout. AnyExpr ::= "timeout";
+AnyExprNp. AnyExpr ::= "np_";
+AnyExprEnabled. AnyExpr ::= "enabled" "(" AnyExpr ")";
+AnyExprPCValue. AnyExpr ::= "pc_value" "(" AnyExpr ")";
+AnyExprName. AnyExpr ::= Name "[" AnyExpr "]" "@" Name;
+AnyExprRun. AnyExpr ::= "run" Name "(" RunArgs ")" RunPrio;
+AnyExprGetPrio. AnyExpr ::= "get_priority" "(" Expr ")";
+AnyExprSetPrio. AnyExpr ::= "set_priority" "(" Expr "," Expr ")";
+
+Ivar. Ivar ::= Name IvarConst IvarAssign;
+IvarConstNone. IvarConst ::= ""; 
+IvarConstOne. IvarConst ::= "[" Const "]";
+IvarAssignNone. IvarAssign ::= "";
+IvarAssignAnyExpr. IvarAssign ::= "=" AnyExpr;
+IvarAssignChInit. IvarAssign ::= "=" ChInit;
+
+ChInit. ChInit ::= "[" Const "]" "of" "{" ChType "}";
+
+ChTypeOne. ChType ::= Typename;
+ChTypeCons. ChType ::= Typename "," ChType;
+
+VarRef. VarRef ::= Name VarRefAnyExpr VarRefTypedef;
+VarRefAnyExprNone. VarRefAnyExpr ::= "";
+VarRefAnyExprOne. VarRefAnyExpr ::= "[" AnyExpr "]";
+VarRefTypedefNone. VarRefTypedef ::= "";
+VarRefTypedefOne. VarRefTypedef ::= "." VarRef;
+
+SendNormal. Send ::= VarRef "!" SendArgs;
+SendSorted. Send ::= VarRef "!" "!" SendArgs;
+
+ReceiveNormal. Receive ::= VarRef "?" RecvArgs;
+ReceiveRandom. Receive ::= VarRef "?" "?" RecvArgs;
+ReceivePoll. Receive ::= VarRef "?" "<" RecvArgs ">";
+ReceivePollSecond. Receive ::= VarRef "?" "?" "<" RecvArgs ">";
+
+PollNoSideEffect. Poll ::= VarRef "?" "[" RecvArgs "]";
+PollNoSideEffectSecond. Poll ::= VarRef "?" "?" "[" RecvArgs "]";
+
+SendArgs. SendArgs ::= ArgList;
+SendArgsExpr. SendArgs ::= AnyExpr "(" ArgList ")";
+
+ArgListCons. ArgList ::= AnyExpr "," ArgList;
+ArgListOne. ArgList ::= AnyExpr;
+
+RecvArgsList. RecvArgs ::= RecvArgList;
+RecvArgsParen. RecvArgs ::= RecvArgList "(" RecvArgs ")";
+
+RecvArgListOne. RecvArgList ::= RecvArg;
+RecvArgListCons. RecvArgList ::= RecvArg RecvArgList;
+
+UnaryMinusNone. UnaryMinus ::= "";
+UnaryMinusOne. UnaryMinus ::= "-";
+
+RecvArgRef. RecvArg ::= VarRef;
+RecvArgEval. RecvArg ::= "eval" "(" VarRef ")";
+RecvArgConst. RecvArg ::= UnaryMinus Const;
+
+AssignStd. Assign ::= VarRef "=" AnyExpr;
+AssignInc. Assign ::= VarRef "+" "+";
+AssignDec. Assign ::= VarRef "-" "-";
+
+PArgListNone. PArgList ::= "";
+PargListOne. PargList ::= "," ArgList;
+
+StmtIf. Stmt ::= "if" Options "fi";
+StmtDo. Stmt ::= "do" Options "od";
+StmtFor. Stmt ::= "for" "(" Range ")" "{" Sequence "}";
+StmtAtomic. Stmt ::= "atomic" "{" Sequence "}";
+StmtDAtomic. Stmt ::= "d_step" "{" Sequence "}";
+StmtSelect. Stmt ::= "select" "(" Sequence ")";
+StmtNorm. Stmt ::= "{" Sequence "}";
+StmtSend. Stmt ::= Send;
+StmtRec. Stmt ::= Receive;
+StmtAssign. Stmt ::= Assign;
+StmtElse. Stmt ::= "else";
+StmtBreak. Stmt ::= "break";
+StmtGoto. Stmt ::= "goto" Name;
+StmtLabel. Stmt ::= Name ":" Stmt;
+StmtPrint. Stmt ::= "print" PrintType "(" String PArgList ")";
+StmtAssert. Stmt ::= "assert" Expr;
+
+RangeIn. Range ::= Name "in" Name;
+RangeNoIn. Range ::= Name ":" AnyExpr ".." AnyExpr;
+
+OptionsOne. Options ::= "::" Sequence;
+OptionsCons. Options ::= "::" Sequence Options;
+
+RunPrioNone. RunPrio ::= "";
+RunPrioOne. RunPrio ::= Priority;
+
+RunArgsNone. RunArgs ::= "";
+RunArgsOne. RunArgs ::= ArgList;
+
+
+ExprAny. Expr ::= AnyExpr;
+ExprParen. Expr ::= "(" Expr ")";
+ExprAndOr. Expr ::= Expr AndOr Expr;
+ExprChanPoll. Expr ::= ChanPoll "(" VarRef ")";
+
+Uname. Uname ::= Name;
+Name. Name ::= Ident;
