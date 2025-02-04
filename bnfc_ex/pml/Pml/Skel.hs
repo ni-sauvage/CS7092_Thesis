@@ -15,9 +15,9 @@ type Result = Err String
 failure :: Show a => a -> Result
 failure x = Left $ "Undefined case: " ++ show x
 
-transIdent :: Pml.Abs.Ident -> Result
-transIdent x = case x of
-  Pml.Abs.Ident string -> failure x
+transPIdent :: Pml.Abs.PIdent -> Result
+transPIdent x = case x of
+  Pml.Abs.PIdent string -> failure x
 
 transVisible :: Pml.Abs.Visible -> Result
 transVisible x = case x of
@@ -85,13 +85,14 @@ transConst x = case x of
 
 transPrintType :: Pml.Abs.PrintType -> Result
 transPrintType x = case x of
-  Pml.Abs.PrintType_ -> failure x
-  Pml.Abs.PrintType_f -> failure x
-  Pml.Abs.PrintType_m -> failure x
+  Pml.Abs.PrintType_print -> failure x
+  Pml.Abs.PrintType_printf -> failure x
+  Pml.Abs.PrintType_printm -> failure x
 
 transModule :: Pml.Abs.Module -> Result
 transModule x = case x of
   Pml.Abs.Mproc proctype -> failure x
+  Pml.Abs.Minline inline -> failure x
   Pml.Abs.Minit init -> failure x
   Pml.Abs.Mnever never -> failure x
   Pml.Abs.Mtrace trace -> failure x
@@ -102,6 +103,10 @@ transModule x = case x of
 transProctype :: Pml.Abs.Proctype -> Result
 transProctype x = case x of
   Pml.Abs.Ptype pactive name pdecllist ppriority penabler sequence -> failure x
+
+transInline :: Pml.Abs.Inline -> Result
+transInline x = case x of
+  Pml.Abs.Iline name arglist sequence -> failure x
 
 transPactive :: Pml.Abs.Pactive -> Result
 transPactive x = case x of
@@ -142,11 +147,16 @@ transTrace x = case x of
 
 transUtype :: Pml.Abs.Utype -> Result
 transUtype x = case x of
-  Pml.Abs.Utp name decllisttd -> failure x
+  Pml.Abs.Utp name decllist -> failure x
 
 transMtype :: Pml.Abs.Mtype -> Result
 transMtype x = case x of
-  Pml.Abs.Mtp mequals mname -> failure x
+  Pml.Abs.Mtp mequals mname msep -> failure x
+
+transMsep :: Pml.Abs.Msep -> Result
+transMsep x = case x of
+  Pml.Abs.MsepNone -> failure x
+  Pml.Abs.MsepOne -> failure x
 
 transMequals :: Pml.Abs.Mequals -> Result
 transMequals x = case x of
@@ -159,19 +169,9 @@ transMname x = case x of
 
 transDeclList :: Pml.Abs.DeclList -> Result
 transDeclList x = case x of
-  Pml.Abs.DclListOne decl -> failure x
+  Pml.Abs.DclListOne decl separator -> failure x
+  Pml.Abs.DclListOneNoSep decl -> failure x
   Pml.Abs.DclListCons decl separator decllist -> failure x
-
-transDeclListTD :: Pml.Abs.DeclListTD -> Result
-transDeclListTD x = case x of
-  Pml.Abs.DclListTDOne decltd -> failure x
-  Pml.Abs.DclListTDCons decltd separator decllisttd -> failure x
-
-transDeclTD :: Pml.Abs.DeclTD -> Result
-transDeclTD x = case x of
-  Pml.Abs.DclTDOne declvisible typename dclivar -> failure x
-  Pml.Abs.DclTDOneAssign declvisible typename dclivar assign -> failure x
-  Pml.Abs.DclTDOneUnsigned declvisible unsigneddecl -> failure x
 
 transDecl :: Pml.Abs.Decl -> Result
 transDecl x = case x of
@@ -217,6 +217,8 @@ transEnabler x = case x of
 transSequence :: Pml.Abs.Sequence -> Result
 transSequence x = case x of
   Pml.Abs.SeqOne step -> failure x
+  Pml.Abs.SeqOneSep step separator -> failure x
+  Pml.Abs.SeqNoStep step sequence -> failure x
   Pml.Abs.SeqCons step separator sequence -> failure x
 
 transUStmt :: Pml.Abs.UStmt -> Result
@@ -226,6 +228,7 @@ transUStmt x = case x of
 
 transStep :: Pml.Abs.Step -> Result
 transStep x = case x of
+  Pml.Abs.StepMType mtype -> failure x
   Pml.Abs.StepStmt stmt ustmt -> failure x
   Pml.Abs.StepDclList decllist -> failure x
   Pml.Abs.StepXR varreflist -> failure x
@@ -244,6 +247,7 @@ transAnyExpr x = case x of
   Pml.Abs.AnyExprCond anyexpr1 anyexpr2 anyexpr3 -> failure x
   Pml.Abs.AnyExprLen varref -> failure x
   Pml.Abs.AnyExprPoll poll -> failure x
+  Pml.Abs.AnyExprVarRef varref -> failure x
   Pml.Abs.AnyExprConst const -> failure x
   Pml.Abs.AnyExprTimeout -> failure x
   Pml.Abs.AnyExprNp -> failure x
@@ -318,6 +322,7 @@ transArgList :: Pml.Abs.ArgList -> Result
 transArgList x = case x of
   Pml.Abs.ArgListCons anyexpr arglist -> failure x
   Pml.Abs.ArgListOne anyexpr -> failure x
+  Pml.Abs.ArgListNone -> failure x
 
 transRecvArgs :: Pml.Abs.RecvArgs -> Result
 transRecvArgs x = case x of
@@ -346,6 +351,12 @@ transAssign x = case x of
   Pml.Abs.AssignInc varref -> failure x
   Pml.Abs.AssignDec varref -> failure x
 
+transPargs :: Pml.Abs.Pargs -> Result
+transPargs x = case x of
+  Pml.Abs.PArgsString string -> failure x
+  Pml.Abs.PArgsNoString arglist -> failure x
+  Pml.Abs.PArgsBoth string arglist -> failure x
+
 transPArgList :: Pml.Abs.PArgList -> Result
 transPArgList x = case x of
   Pml.Abs.PArgListNone -> failure x
@@ -370,8 +381,10 @@ transStmt x = case x of
   Pml.Abs.StmtBreak -> failure x
   Pml.Abs.StmtGoto name -> failure x
   Pml.Abs.StmtLabel name stmt -> failure x
-  Pml.Abs.StmtPrint printtype string parglist -> failure x
+  Pml.Abs.StmtPrint printtype pargs -> failure x
   Pml.Abs.StmtAssert expr -> failure x
+  Pml.Abs.StmtCall name arglist -> failure x
+  Pml.Abs.StmtExpr expr -> failure x
 
 transRange :: Pml.Abs.Range -> Result
 transRange x = case x of
@@ -406,4 +419,4 @@ transUname x = case x of
 
 transName :: Pml.Abs.Name -> Result
 transName x = case x of
-  Pml.Abs.Name ident -> failure x
+  Pml.Abs.Name pident -> failure x

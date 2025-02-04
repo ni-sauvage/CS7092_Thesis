@@ -20,6 +20,7 @@ module Pml.Par
   , pPrintType
   , pModule
   , pProctype
+  , pInline
   , pPactive
   , pPdeclList
   , pPpriority
@@ -30,11 +31,10 @@ module Pml.Par
   , pTrace
   , pUtype
   , pMtype
+  , pMsep
   , pMequals
   , pMname
   , pDeclList
-  , pDeclListTD
-  , pDeclTD
   , pDecl
   , pDclIvar
   , pDeclVisible
@@ -67,6 +67,7 @@ module Pml.Par
   , pUnaryMinus
   , pRecvArg
   , pAssign
+  , pPargs
   , pPArgList
   , pPargList
   , pStmt
@@ -98,6 +99,7 @@ import Pml.Lex
 %name pPrintType PrintType
 %name pModule Module
 %name pProctype Proctype
+%name pInline Inline
 %name pPactive Pactive
 %name pPdeclList PdeclList
 %name pPpriority Ppriority
@@ -108,11 +110,10 @@ import Pml.Lex
 %name pTrace Trace
 %name pUtype Utype
 %name pMtype Mtype
+%name pMsep Msep
 %name pMequals Mequals
 %name pMname Mname
 %name pDeclList DeclList
-%name pDeclListTD DeclListTD
-%name pDeclTD DeclTD
 %name pDecl Decl
 %name pDclIvar DclIvar
 %name pDeclVisible DeclVisible
@@ -145,6 +146,7 @@ import Pml.Lex
 %name pUnaryMinus UnaryMinus
 %name pRecvArg RecvArg
 %name pAssign Assign
+%name pPargs Pargs
 %name pPArgList PArgList
 %name pPargList PargList
 %name pStmt Stmt
@@ -159,106 +161,111 @@ import Pml.Lex
 %monad { Err } { (>>=) } { return }
 %tokentype {Token}
 %token
-  '!'            { PT _ (TS _ 1)  }
-  '%'            { PT _ (TS _ 2)  }
-  '&'            { PT _ (TS _ 3)  }
-  '&&'           { PT _ (TS _ 4)  }
-  '('            { PT _ (TS _ 5)  }
-  ')'            { PT _ (TS _ 6)  }
-  '*'            { PT _ (TS _ 7)  }
-  '+'            { PT _ (TS _ 8)  }
-  ','            { PT _ (TS _ 9)  }
-  '-'            { PT _ (TS _ 10) }
-  '->'           { PT _ (TS _ 11) }
-  '.'            { PT _ (TS _ 12) }
-  '..'           { PT _ (TS _ 13) }
-  '/'            { PT _ (TS _ 14) }
-  ':'            { PT _ (TS _ 15) }
-  '::'           { PT _ (TS _ 16) }
-  ';'            { PT _ (TS _ 17) }
-  '<'            { PT _ (TS _ 18) }
-  '<<'           { PT _ (TS _ 19) }
-  '='            { PT _ (TS _ 20) }
-  '>'            { PT _ (TS _ 21) }
-  '>>'           { PT _ (TS _ 22) }
-  '?'            { PT _ (TS _ 23) }
-  '@'            { PT _ (TS _ 24) }
-  '['            { PT _ (TS _ 25) }
-  ']'            { PT _ (TS _ 26) }
-  '^'            { PT _ (TS _ 27) }
-  'active'       { PT _ (TS _ 28) }
-  'assert'       { PT _ (TS _ 29) }
-  'atomic'       { PT _ (TS _ 30) }
-  'bit'          { PT _ (TS _ 31) }
-  'bool'         { PT _ (TS _ 32) }
-  'break'        { PT _ (TS _ 33) }
-  'byte'         { PT _ (TS _ 34) }
-  'chan'         { PT _ (TS _ 35) }
-  'd_step'       { PT _ (TS _ 36) }
-  'do'           { PT _ (TS _ 37) }
-  'else'         { PT _ (TS _ 38) }
-  'empty'        { PT _ (TS _ 39) }
-  'enabled'      { PT _ (TS _ 40) }
-  'eval'         { PT _ (TS _ 41) }
-  'f'            { PT _ (TS _ 42) }
-  'false'        { PT _ (TS _ 43) }
-  'fi'           { PT _ (TS _ 44) }
-  'for'          { PT _ (TS _ 45) }
-  'full'         { PT _ (TS _ 46) }
-  'get_priority' { PT _ (TS _ 47) }
-  'goto'         { PT _ (TS _ 48) }
-  'hidden'       { PT _ (TS _ 49) }
-  'if'           { PT _ (TS _ 50) }
-  'in'           { PT _ (TS _ 51) }
-  'init'         { PT _ (TS _ 52) }
-  'int'          { PT _ (TS _ 53) }
-  'len'          { PT _ (TS _ 54) }
-  'm'            { PT _ (TS _ 55) }
-  'mtype'        { PT _ (TS _ 56) }
-  'nempty'       { PT _ (TS _ 57) }
-  'never'        { PT _ (TS _ 58) }
-  'nfull'        { PT _ (TS _ 59) }
-  'np_'          { PT _ (TS _ 60) }
-  'od'           { PT _ (TS _ 61) }
-  'of'           { PT _ (TS _ 62) }
-  'pc_value'     { PT _ (TS _ 63) }
-  'print'        { PT _ (TS _ 64) }
-  'priority'     { PT _ (TS _ 65) }
-  'proctype'     { PT _ (TS _ 66) }
-  'provided'     { PT _ (TS _ 67) }
-  'run'          { PT _ (TS _ 68) }
-  'select'       { PT _ (TS _ 69) }
-  'set_priority' { PT _ (TS _ 70) }
-  'short'        { PT _ (TS _ 71) }
-  'show'         { PT _ (TS _ 72) }
-  'skip'         { PT _ (TS _ 73) }
-  'timeout'      { PT _ (TS _ 74) }
-  'trace'        { PT _ (TS _ 75) }
-  'true'         { PT _ (TS _ 76) }
-  'typedef'      { PT _ (TS _ 77) }
-  'unless'       { PT _ (TS _ 78) }
-  'unsigned'     { PT _ (TS _ 79) }
-  'xr'           { PT _ (TS _ 80) }
-  'xs'           { PT _ (TS _ 81) }
-  '{'            { PT _ (TS _ 82) }
-  '|'            { PT _ (TS _ 83) }
-  '||'           { PT _ (TS _ 84) }
-  '}'            { PT _ (TS _ 85) }
-  '~'            { PT _ (TS _ 86) }
-  L_Ident        { PT _ (TV $$)   }
-  L_integ        { PT _ (TI $$)   }
-  L_quoted       { PT _ (TL $$)   }
+  '!'            { PT _ (TS _ 1)      }
+  '!='           { PT _ (TS _ 2)      }
+  '%'            { PT _ (TS _ 3)      }
+  '&'            { PT _ (TS _ 4)      }
+  '&&'           { PT _ (TS _ 5)      }
+  '('            { PT _ (TS _ 6)      }
+  ')'            { PT _ (TS _ 7)      }
+  '*'            { PT _ (TS _ 8)      }
+  '+'            { PT _ (TS _ 9)      }
+  ','            { PT _ (TS _ 10)     }
+  '-'            { PT _ (TS _ 11)     }
+  '->'           { PT _ (TS _ 12)     }
+  '.'            { PT _ (TS _ 13)     }
+  '..'           { PT _ (TS _ 14)     }
+  '/'            { PT _ (TS _ 15)     }
+  ':'            { PT _ (TS _ 16)     }
+  '::'           { PT _ (TS _ 17)     }
+  ';'            { PT _ (TS _ 18)     }
+  '<'            { PT _ (TS _ 19)     }
+  '<<'           { PT _ (TS _ 20)     }
+  '<='           { PT _ (TS _ 21)     }
+  '='            { PT _ (TS _ 22)     }
+  '=='           { PT _ (TS _ 23)     }
+  '>'            { PT _ (TS _ 24)     }
+  '>='           { PT _ (TS _ 25)     }
+  '>>'           { PT _ (TS _ 26)     }
+  '?'            { PT _ (TS _ 27)     }
+  '@'            { PT _ (TS _ 28)     }
+  '['            { PT _ (TS _ 29)     }
+  ']'            { PT _ (TS _ 30)     }
+  '^'            { PT _ (TS _ 31)     }
+  'active'       { PT _ (TS _ 32)     }
+  'assert'       { PT _ (TS _ 33)     }
+  'atomic'       { PT _ (TS _ 34)     }
+  'bit'          { PT _ (TS _ 35)     }
+  'bool'         { PT _ (TS _ 36)     }
+  'break'        { PT _ (TS _ 37)     }
+  'byte'         { PT _ (TS _ 38)     }
+  'chan'         { PT _ (TS _ 39)     }
+  'd_step'       { PT _ (TS _ 40)     }
+  'do'           { PT _ (TS _ 41)     }
+  'else'         { PT _ (TS _ 42)     }
+  'empty'        { PT _ (TS _ 43)     }
+  'enabled'      { PT _ (TS _ 44)     }
+  'eval'         { PT _ (TS _ 45)     }
+  'false'        { PT _ (TS _ 46)     }
+  'fi'           { PT _ (TS _ 47)     }
+  'for'          { PT _ (TS _ 48)     }
+  'full'         { PT _ (TS _ 49)     }
+  'get_priority' { PT _ (TS _ 50)     }
+  'goto'         { PT _ (TS _ 51)     }
+  'hidden'       { PT _ (TS _ 52)     }
+  'if'           { PT _ (TS _ 53)     }
+  'in'           { PT _ (TS _ 54)     }
+  'init'         { PT _ (TS _ 55)     }
+  'inline'       { PT _ (TS _ 56)     }
+  'int'          { PT _ (TS _ 57)     }
+  'len'          { PT _ (TS _ 58)     }
+  'mtype'        { PT _ (TS _ 59)     }
+  'nempty'       { PT _ (TS _ 60)     }
+  'never'        { PT _ (TS _ 61)     }
+  'nfull'        { PT _ (TS _ 62)     }
+  'np_'          { PT _ (TS _ 63)     }
+  'od'           { PT _ (TS _ 64)     }
+  'of'           { PT _ (TS _ 65)     }
+  'pc_value'     { PT _ (TS _ 66)     }
+  'print'        { PT _ (TS _ 67)     }
+  'printf'       { PT _ (TS _ 68)     }
+  'printm'       { PT _ (TS _ 69)     }
+  'priority'     { PT _ (TS _ 70)     }
+  'proctype'     { PT _ (TS _ 71)     }
+  'provided'     { PT _ (TS _ 72)     }
+  'run'          { PT _ (TS _ 73)     }
+  'select'       { PT _ (TS _ 74)     }
+  'set_priority' { PT _ (TS _ 75)     }
+  'short'        { PT _ (TS _ 76)     }
+  'show'         { PT _ (TS _ 77)     }
+  'skip'         { PT _ (TS _ 78)     }
+  'timeout'      { PT _ (TS _ 79)     }
+  'trace'        { PT _ (TS _ 80)     }
+  'true'         { PT _ (TS _ 81)     }
+  'typedef'      { PT _ (TS _ 82)     }
+  'unless'       { PT _ (TS _ 83)     }
+  'unsigned'     { PT _ (TS _ 84)     }
+  'xr'           { PT _ (TS _ 85)     }
+  'xs'           { PT _ (TS _ 86)     }
+  '{'            { PT _ (TS _ 87)     }
+  '|'            { PT _ (TS _ 88)     }
+  '||'           { PT _ (TS _ 89)     }
+  '}'            { PT _ (TS _ 90)     }
+  '~'            { PT _ (TS _ 91)     }
+  L_integ        { PT _ (TI $$)       }
+  L_quoted       { PT _ (TL $$)       }
+  L_PIdent       { PT _ (T_PIdent $$) }
 
 %%
-
-Ident :: { Pml.Abs.Ident }
-Ident  : L_Ident { Pml.Abs.Ident $1 }
 
 Integer :: { Integer }
 Integer  : L_integ  { (read $1) :: Integer }
 
 String  :: { String }
 String   : L_quoted { $1 }
+
+PIdent :: { Pml.Abs.PIdent }
+PIdent  : L_PIdent { Pml.Abs.PIdent $1 }
 
 ListModule :: { [Pml.Abs.Module] }
 ListModule : Module { (:[]) $1 } | Module ListModule { (:) $1 $2 }
@@ -303,10 +310,10 @@ BinOp
   | '|' { Pml.Abs.BinOp8 }
   | '>' { Pml.Abs.BinOp9 }
   | '<' { Pml.Abs.BinOp10 }
-  | '>' '=' { Pml.Abs.BinOp11 }
-  | '<' '=' { Pml.Abs.BinOp12 }
-  | '=' '=' { Pml.Abs.BinOp13 }
-  | '!' '=' { Pml.Abs.BinOp14 }
+  | '>=' { Pml.Abs.BinOp11 }
+  | '<=' { Pml.Abs.BinOp12 }
+  | '==' { Pml.Abs.BinOp13 }
+  | '!=' { Pml.Abs.BinOp14 }
   | '<<' { Pml.Abs.BinOp15 }
   | '>>' { Pml.Abs.BinOp16 }
   | AndOr { Pml.Abs.BinOpAndOr $1 }
@@ -326,13 +333,14 @@ Const
 
 PrintType :: { Pml.Abs.PrintType }
 PrintType
-  : {- empty -} { Pml.Abs.PrintType_ }
-  | 'f' { Pml.Abs.PrintType_f }
-  | 'm' { Pml.Abs.PrintType_m }
+  : 'print' { Pml.Abs.PrintType_print }
+  | 'printf' { Pml.Abs.PrintType_printf }
+  | 'printm' { Pml.Abs.PrintType_printm }
 
 Module :: { Pml.Abs.Module }
 Module
   : Proctype { Pml.Abs.Mproc $1 }
+  | Inline { Pml.Abs.Minline $1 }
   | Init { Pml.Abs.Minit $1 }
   | Never { Pml.Abs.Mnever $1 }
   | Trace { Pml.Abs.Mtrace $1 }
@@ -343,6 +351,10 @@ Module
 Proctype :: { Pml.Abs.Proctype }
 Proctype
   : Pactive 'proctype' Name '(' PdeclList ')' Ppriority Penabler '{' Sequence '}' { Pml.Abs.Ptype $1 $3 $5 $7 $8 $10 }
+
+Inline :: { Pml.Abs.Inline }
+Inline
+  : 'inline' Name '(' ArgList ')' '{' Sequence '}' { Pml.Abs.Iline $2 $4 $7 }
 
 Pactive :: { Pml.Abs.Pactive }
 Pactive
@@ -366,7 +378,7 @@ Penabler
 
 Init :: { Pml.Abs.Init }
 Init
-  : 'init' Ipriority '{' Sequence '}' { Pml.Abs.Initialise $2 $4 }
+  : 'init' Ipriority '{' Sequence '}' ';' { Pml.Abs.Initialise $2 $4 }
 
 Ipriority :: { Pml.Abs.Ipriority }
 Ipriority
@@ -380,10 +392,13 @@ Trace :: { Pml.Abs.Trace }
 Trace : 'trace' '{' Sequence '}' { Pml.Abs.Trc $3 }
 
 Utype :: { Pml.Abs.Utype }
-Utype : 'typedef' Name '{' DeclListTD '}' { Pml.Abs.Utp $2 $4 }
+Utype : 'typedef' Name '{' DeclList '}' ';' { Pml.Abs.Utp $2 $4 }
 
 Mtype :: { Pml.Abs.Mtype }
-Mtype : 'mtype' Mequals '{' Mname '}' { Pml.Abs.Mtp $2 $4 }
+Mtype : 'mtype' Mequals '{' Mname '}' Msep { Pml.Abs.Mtp $2 $4 $6 }
+
+Msep :: { Pml.Abs.Msep }
+Msep : {- empty -} { Pml.Abs.MsepNone } | ';' { Pml.Abs.MsepOne }
 
 Mequals :: { Pml.Abs.Mequals }
 Mequals : {- empty -} { Pml.Abs.Meq } | '=' { Pml.Abs.Meq }
@@ -395,19 +410,9 @@ Mname
 
 DeclList :: { Pml.Abs.DeclList }
 DeclList
-  : Decl { Pml.Abs.DclListOne $1 }
+  : Decl Separator { Pml.Abs.DclListOne $1 $2 }
+  | Decl { Pml.Abs.DclListOneNoSep $1 }
   | Decl Separator DeclList { Pml.Abs.DclListCons $1 $2 $3 }
-
-DeclListTD :: { Pml.Abs.DeclListTD }
-DeclListTD
-  : DeclTD { Pml.Abs.DclListTDOne $1 }
-  | DeclTD Separator DeclListTD { Pml.Abs.DclListTDCons $1 $2 $3 }
-
-DeclTD :: { Pml.Abs.DeclTD }
-DeclTD
-  : DeclVisible Typename DclIvar { Pml.Abs.DclTDOne $1 $2 $3 }
-  | DeclVisible Typename DclIvar Assign { Pml.Abs.DclTDOneAssign $1 $2 $3 $4 }
-  | DeclVisible UnsignedDecl { Pml.Abs.DclTDOneUnsigned $1 $2 }
 
 Decl :: { Pml.Abs.Decl }
 Decl
@@ -450,6 +455,8 @@ Enabler : 'provided' '(' Expr ')' { Pml.Abs.Enabler $3 }
 Sequence :: { Pml.Abs.Sequence }
 Sequence
   : Step { Pml.Abs.SeqOne $1 }
+  | Step Separator { Pml.Abs.SeqOneSep $1 $2 }
+  | Step Sequence { Pml.Abs.SeqNoStep $1 $2 }
   | Step Separator Sequence { Pml.Abs.SeqCons $1 $2 $3 }
 
 UStmt :: { Pml.Abs.UStmt }
@@ -459,7 +466,8 @@ UStmt
 
 Step :: { Pml.Abs.Step }
 Step
-  : Stmt UStmt { Pml.Abs.StepStmt $1 $2 }
+  : Mtype { Pml.Abs.StepMType $1 }
+  | Stmt UStmt { Pml.Abs.StepStmt $1 $2 }
   | DeclList { Pml.Abs.StepDclList $1 }
   | 'xr' VarRefList { Pml.Abs.StepXR $2 }
   | 'xs' VarRefList { Pml.Abs.StepXS $2 }
@@ -477,6 +485,7 @@ AnyExpr
   | '(' AnyExpr '->' AnyExpr ':' AnyExpr ')' { Pml.Abs.AnyExprCond $2 $4 $6 }
   | 'len' '(' VarRef ')' { Pml.Abs.AnyExprLen $3 }
   | Poll { Pml.Abs.AnyExprPoll $1 }
+  | VarRef { Pml.Abs.AnyExprVarRef $1 }
   | Const { Pml.Abs.AnyExprConst $1 }
   | 'timeout' { Pml.Abs.AnyExprTimeout }
   | 'np_' { Pml.Abs.AnyExprNp }
@@ -549,6 +558,7 @@ ArgList :: { Pml.Abs.ArgList }
 ArgList
   : AnyExpr ',' ArgList { Pml.Abs.ArgListCons $1 $3 }
   | AnyExpr { Pml.Abs.ArgListOne $1 }
+  | {- empty -} { Pml.Abs.ArgListNone }
 
 RecvArgs :: { Pml.Abs.RecvArgs }
 RecvArgs
@@ -577,6 +587,12 @@ Assign
   | VarRef '+' '+' { Pml.Abs.AssignInc $1 }
   | VarRef '-' '-' { Pml.Abs.AssignDec $1 }
 
+Pargs :: { Pml.Abs.Pargs }
+Pargs
+  : String { Pml.Abs.PArgsString $1 }
+  | ArgList { Pml.Abs.PArgsNoString $1 }
+  | String ',' ArgList { Pml.Abs.PArgsBoth $1 $3 }
+
 PArgList :: { Pml.Abs.PArgList }
 PArgList : {- empty -} { Pml.Abs.PArgListNone }
 
@@ -599,8 +615,10 @@ Stmt
   | 'break' { Pml.Abs.StmtBreak }
   | 'goto' Name { Pml.Abs.StmtGoto $2 }
   | Name ':' Stmt { Pml.Abs.StmtLabel $1 $3 }
-  | 'print' PrintType '(' String PArgList ')' { Pml.Abs.StmtPrint $2 $4 $5 }
+  | PrintType '(' Pargs ')' { Pml.Abs.StmtPrint $1 $3 }
   | 'assert' Expr { Pml.Abs.StmtAssert $2 }
+  | Name '(' ArgList ')' { Pml.Abs.StmtCall $1 $3 }
+  | Expr { Pml.Abs.StmtExpr $1 }
 
 Range :: { Pml.Abs.Range }
 Range
@@ -633,7 +651,7 @@ Uname :: { Pml.Abs.Uname }
 Uname : Name { Pml.Abs.Uname $1 }
 
 Name :: { Pml.Abs.Name }
-Name : Ident { Pml.Abs.Name $1 }
+Name : PIdent { Pml.Abs.Name $1 }
 
 {
 

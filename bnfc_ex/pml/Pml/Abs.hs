@@ -60,11 +60,13 @@ data Const
     = Const_true | Const_false | Const_skip | ConstInteger Integer
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data PrintType = PrintType_ | PrintType_f | PrintType_m
+data PrintType
+    = PrintType_print | PrintType_printf | PrintType_printm
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Module
     = Mproc Proctype
+    | Minline Inline
     | Minit Init
     | Mnever Never
     | Mtrace Trace
@@ -75,6 +77,9 @@ data Module
 
 data Proctype
     = Ptype Pactive Name PdeclList Ppriority Penabler Sequence
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
+data Inline = Iline Name ArgList Sequence
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Pactive = PactiveNone | PactiveOne Active
@@ -101,10 +106,13 @@ data Never = Nvr Sequence
 data Trace = Trc Sequence
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data Utype = Utp Name DeclListTD
+data Utype = Utp Name DeclList
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data Mtype = Mtp Mequals Mname
+data Mtype = Mtp Mequals Mname Msep
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
+data Msep = MsepNone | MsepOne
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Mequals = Meq
@@ -114,17 +122,9 @@ data Mname = MnameOne Name | Mnamecons Name Mname
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data DeclList
-    = DclListOne Decl | DclListCons Decl Separator DeclList
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
-data DeclListTD
-    = DclListTDOne DeclTD | DclListTDCons DeclTD Separator DeclListTD
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
-data DeclTD
-    = DclTDOne DeclVisible Typename DclIvar
-    | DclTDOneAssign DeclVisible Typename DclIvar Assign
-    | DclTDOneUnsigned DeclVisible UnsignedDecl
+    = DclListOne Decl Separator
+    | DclListOneNoSep Decl
+    | DclListCons Decl Separator DeclList
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Decl
@@ -156,14 +156,19 @@ data Priority = Priority Const
 data Enabler = Enabler Expr
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data Sequence = SeqOne Step | SeqCons Step Separator Sequence
+data Sequence
+    = SeqOne Step
+    | SeqOneSep Step Separator
+    | SeqNoStep Step Sequence
+    | SeqCons Step Separator Sequence
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data UStmt = UStmtNone | UStmtOne Stmt
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Step
-    = StepStmt Stmt UStmt
+    = StepMType Mtype
+    | StepStmt Stmt UStmt
     | StepDclList DeclList
     | StepXR VarRefList
     | StepXS VarRefList
@@ -180,6 +185,7 @@ data AnyExpr
     | AnyExprCond AnyExpr AnyExpr AnyExpr
     | AnyExprLen VarRef
     | AnyExprPoll Poll
+    | AnyExprVarRef VarRef
     | AnyExprConst Const
     | AnyExprTimeout
     | AnyExprNp
@@ -236,7 +242,8 @@ data Poll
 data SendArgs = SendArgs ArgList | SendArgsExpr AnyExpr ArgList
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data ArgList = ArgListCons AnyExpr ArgList | ArgListOne AnyExpr
+data ArgList
+    = ArgListCons AnyExpr ArgList | ArgListOne AnyExpr | ArgListNone
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data RecvArgs
@@ -260,6 +267,12 @@ data Assign
     = AssignStd VarRef AnyExpr | AssignInc VarRef | AssignDec VarRef
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
+data Pargs
+    = PArgsString String
+    | PArgsNoString ArgList
+    | PArgsBoth String ArgList
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
 data PArgList = PArgListNone
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
@@ -281,8 +294,10 @@ data Stmt
     | StmtBreak
     | StmtGoto Name
     | StmtLabel Name Stmt
-    | StmtPrint PrintType String PArgList
+    | StmtPrint PrintType Pargs
     | StmtAssert Expr
+    | StmtCall Name ArgList
+    | StmtExpr Expr
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Range = RangeIn Name Name | RangeNoIn Name AnyExpr AnyExpr
@@ -307,9 +322,9 @@ data Expr
 data Uname = Uname Name
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data Name = Name Ident
+data Name = Name PIdent
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-newtype Ident = Ident String
+newtype PIdent = PIdent String
   deriving (C.Eq, C.Ord, C.Show, C.Read, Data.String.IsString)
 

@@ -138,8 +138,8 @@ instance Print Integer where
 instance Print Double where
   prt _ x = doc (shows x)
 
-instance Print Pml.Abs.Ident where
-  prt _ (Pml.Abs.Ident i) = doc $ showString i
+instance Print Pml.Abs.PIdent where
+  prt _ (Pml.Abs.PIdent i) = doc $ showString i
 instance Print [Pml.Abs.Module] where
   prt _ [] = concatD []
   prt _ [x] = concatD [prt 0 x]
@@ -188,10 +188,10 @@ instance Print Pml.Abs.BinOp where
     Pml.Abs.BinOp8 -> prPrec i 0 (concatD [doc (showString "|")])
     Pml.Abs.BinOp9 -> prPrec i 0 (concatD [doc (showString ">")])
     Pml.Abs.BinOp10 -> prPrec i 0 (concatD [doc (showString "<")])
-    Pml.Abs.BinOp11 -> prPrec i 0 (concatD [doc (showString ">"), doc (showString "=")])
-    Pml.Abs.BinOp12 -> prPrec i 0 (concatD [doc (showString "<"), doc (showString "=")])
-    Pml.Abs.BinOp13 -> prPrec i 0 (concatD [doc (showString "="), doc (showString "=")])
-    Pml.Abs.BinOp14 -> prPrec i 0 (concatD [doc (showString "!"), doc (showString "=")])
+    Pml.Abs.BinOp11 -> prPrec i 0 (concatD [doc (showString ">=")])
+    Pml.Abs.BinOp12 -> prPrec i 0 (concatD [doc (showString "<=")])
+    Pml.Abs.BinOp13 -> prPrec i 0 (concatD [doc (showString "==")])
+    Pml.Abs.BinOp14 -> prPrec i 0 (concatD [doc (showString "!=")])
     Pml.Abs.BinOp15 -> prPrec i 0 (concatD [doc (showString "<<")])
     Pml.Abs.BinOp16 -> prPrec i 0 (concatD [doc (showString ">>")])
     Pml.Abs.BinOpAndOr andor -> prPrec i 0 (concatD [prt 0 andor])
@@ -211,13 +211,14 @@ instance Print Pml.Abs.Const where
 
 instance Print Pml.Abs.PrintType where
   prt i = \case
-    Pml.Abs.PrintType_ -> prPrec i 0 (concatD [])
-    Pml.Abs.PrintType_f -> prPrec i 0 (concatD [doc (showString "f")])
-    Pml.Abs.PrintType_m -> prPrec i 0 (concatD [doc (showString "m")])
+    Pml.Abs.PrintType_print -> prPrec i 0 (concatD [doc (showString "print")])
+    Pml.Abs.PrintType_printf -> prPrec i 0 (concatD [doc (showString "printf")])
+    Pml.Abs.PrintType_printm -> prPrec i 0 (concatD [doc (showString "printm")])
 
 instance Print Pml.Abs.Module where
   prt i = \case
     Pml.Abs.Mproc proctype -> prPrec i 0 (concatD [prt 0 proctype])
+    Pml.Abs.Minline inline -> prPrec i 0 (concatD [prt 0 inline])
     Pml.Abs.Minit init -> prPrec i 0 (concatD [prt 0 init])
     Pml.Abs.Mnever never -> prPrec i 0 (concatD [prt 0 never])
     Pml.Abs.Mtrace trace -> prPrec i 0 (concatD [prt 0 trace])
@@ -228,6 +229,10 @@ instance Print Pml.Abs.Module where
 instance Print Pml.Abs.Proctype where
   prt i = \case
     Pml.Abs.Ptype pactive name pdecllist ppriority penabler sequence -> prPrec i 0 (concatD [prt 0 pactive, doc (showString "proctype"), prt 0 name, doc (showString "("), prt 0 pdecllist, doc (showString ")"), prt 0 ppriority, prt 0 penabler, doc (showString "{"), prt 0 sequence, doc (showString "}")])
+
+instance Print Pml.Abs.Inline where
+  prt i = \case
+    Pml.Abs.Iline name arglist sequence -> prPrec i 0 (concatD [doc (showString "inline"), prt 0 name, doc (showString "("), prt 0 arglist, doc (showString ")"), doc (showString "{"), prt 0 sequence, doc (showString "}")])
 
 instance Print Pml.Abs.Pactive where
   prt i = \case
@@ -251,7 +256,7 @@ instance Print Pml.Abs.Penabler where
 
 instance Print Pml.Abs.Init where
   prt i = \case
-    Pml.Abs.Initialise ipriority sequence -> prPrec i 0 (concatD [doc (showString "init"), prt 0 ipriority, doc (showString "{"), prt 0 sequence, doc (showString "}")])
+    Pml.Abs.Initialise ipriority sequence -> prPrec i 0 (concatD [doc (showString "init"), prt 0 ipriority, doc (showString "{"), prt 0 sequence, doc (showString "}"), doc (showString ";")])
 
 instance Print Pml.Abs.Ipriority where
   prt i = \case
@@ -268,11 +273,16 @@ instance Print Pml.Abs.Trace where
 
 instance Print Pml.Abs.Utype where
   prt i = \case
-    Pml.Abs.Utp name decllisttd -> prPrec i 0 (concatD [doc (showString "typedef"), prt 0 name, doc (showString "{"), prt 0 decllisttd, doc (showString "}")])
+    Pml.Abs.Utp name decllist -> prPrec i 0 (concatD [doc (showString "typedef"), prt 0 name, doc (showString "{"), prt 0 decllist, doc (showString "}"), doc (showString ";")])
 
 instance Print Pml.Abs.Mtype where
   prt i = \case
-    Pml.Abs.Mtp mequals mname -> prPrec i 0 (concatD [doc (showString "mtype"), prt 0 mequals, doc (showString "{"), prt 0 mname, doc (showString "}")])
+    Pml.Abs.Mtp mequals mname msep -> prPrec i 0 (concatD [doc (showString "mtype"), prt 0 mequals, doc (showString "{"), prt 0 mname, doc (showString "}"), prt 0 msep])
+
+instance Print Pml.Abs.Msep where
+  prt i = \case
+    Pml.Abs.MsepNone -> prPrec i 0 (concatD [])
+    Pml.Abs.MsepOne -> prPrec i 0 (concatD [doc (showString ";")])
 
 instance Print Pml.Abs.Mequals where
   prt i = \case
@@ -285,19 +295,9 @@ instance Print Pml.Abs.Mname where
 
 instance Print Pml.Abs.DeclList where
   prt i = \case
-    Pml.Abs.DclListOne decl -> prPrec i 0 (concatD [prt 0 decl])
+    Pml.Abs.DclListOne decl separator -> prPrec i 0 (concatD [prt 0 decl, prt 0 separator])
+    Pml.Abs.DclListOneNoSep decl -> prPrec i 0 (concatD [prt 0 decl])
     Pml.Abs.DclListCons decl separator decllist -> prPrec i 0 (concatD [prt 0 decl, prt 0 separator, prt 0 decllist])
-
-instance Print Pml.Abs.DeclListTD where
-  prt i = \case
-    Pml.Abs.DclListTDOne decltd -> prPrec i 0 (concatD [prt 0 decltd])
-    Pml.Abs.DclListTDCons decltd separator decllisttd -> prPrec i 0 (concatD [prt 0 decltd, prt 0 separator, prt 0 decllisttd])
-
-instance Print Pml.Abs.DeclTD where
-  prt i = \case
-    Pml.Abs.DclTDOne declvisible typename dclivar -> prPrec i 0 (concatD [prt 0 declvisible, prt 0 typename, prt 0 dclivar])
-    Pml.Abs.DclTDOneAssign declvisible typename dclivar assign -> prPrec i 0 (concatD [prt 0 declvisible, prt 0 typename, prt 0 dclivar, prt 0 assign])
-    Pml.Abs.DclTDOneUnsigned declvisible unsigneddecl -> prPrec i 0 (concatD [prt 0 declvisible, prt 0 unsigneddecl])
 
 instance Print Pml.Abs.Decl where
   prt i = \case
@@ -343,6 +343,8 @@ instance Print Pml.Abs.Enabler where
 instance Print Pml.Abs.Sequence where
   prt i = \case
     Pml.Abs.SeqOne step -> prPrec i 0 (concatD [prt 0 step])
+    Pml.Abs.SeqOneSep step separator -> prPrec i 0 (concatD [prt 0 step, prt 0 separator])
+    Pml.Abs.SeqNoStep step sequence -> prPrec i 0 (concatD [prt 0 step, prt 0 sequence])
     Pml.Abs.SeqCons step separator sequence -> prPrec i 0 (concatD [prt 0 step, prt 0 separator, prt 0 sequence])
 
 instance Print Pml.Abs.UStmt where
@@ -352,6 +354,7 @@ instance Print Pml.Abs.UStmt where
 
 instance Print Pml.Abs.Step where
   prt i = \case
+    Pml.Abs.StepMType mtype -> prPrec i 0 (concatD [prt 0 mtype])
     Pml.Abs.StepStmt stmt ustmt -> prPrec i 0 (concatD [prt 0 stmt, prt 0 ustmt])
     Pml.Abs.StepDclList decllist -> prPrec i 0 (concatD [prt 0 decllist])
     Pml.Abs.StepXR varreflist -> prPrec i 0 (concatD [doc (showString "xr"), prt 0 varreflist])
@@ -370,6 +373,7 @@ instance Print Pml.Abs.AnyExpr where
     Pml.Abs.AnyExprCond anyexpr1 anyexpr2 anyexpr3 -> prPrec i 0 (concatD [doc (showString "("), prt 0 anyexpr1, doc (showString "->"), prt 0 anyexpr2, doc (showString ":"), prt 0 anyexpr3, doc (showString ")")])
     Pml.Abs.AnyExprLen varref -> prPrec i 0 (concatD [doc (showString "len"), doc (showString "("), prt 0 varref, doc (showString ")")])
     Pml.Abs.AnyExprPoll poll -> prPrec i 0 (concatD [prt 0 poll])
+    Pml.Abs.AnyExprVarRef varref -> prPrec i 0 (concatD [prt 0 varref])
     Pml.Abs.AnyExprConst const -> prPrec i 0 (concatD [prt 0 const])
     Pml.Abs.AnyExprTimeout -> prPrec i 0 (concatD [doc (showString "timeout")])
     Pml.Abs.AnyExprNp -> prPrec i 0 (concatD [doc (showString "np_")])
@@ -444,6 +448,7 @@ instance Print Pml.Abs.ArgList where
   prt i = \case
     Pml.Abs.ArgListCons anyexpr arglist -> prPrec i 0 (concatD [prt 0 anyexpr, doc (showString ","), prt 0 arglist])
     Pml.Abs.ArgListOne anyexpr -> prPrec i 0 (concatD [prt 0 anyexpr])
+    Pml.Abs.ArgListNone -> prPrec i 0 (concatD [])
 
 instance Print Pml.Abs.RecvArgs where
   prt i = \case
@@ -472,6 +477,12 @@ instance Print Pml.Abs.Assign where
     Pml.Abs.AssignInc varref -> prPrec i 0 (concatD [prt 0 varref, doc (showString "+"), doc (showString "+")])
     Pml.Abs.AssignDec varref -> prPrec i 0 (concatD [prt 0 varref, doc (showString "-"), doc (showString "-")])
 
+instance Print Pml.Abs.Pargs where
+  prt i = \case
+    Pml.Abs.PArgsString str -> prPrec i 0 (concatD [printString str])
+    Pml.Abs.PArgsNoString arglist -> prPrec i 0 (concatD [prt 0 arglist])
+    Pml.Abs.PArgsBoth str arglist -> prPrec i 0 (concatD [printString str, doc (showString ","), prt 0 arglist])
+
 instance Print Pml.Abs.PArgList where
   prt i = \case
     Pml.Abs.PArgListNone -> prPrec i 0 (concatD [])
@@ -496,8 +507,10 @@ instance Print Pml.Abs.Stmt where
     Pml.Abs.StmtBreak -> prPrec i 0 (concatD [doc (showString "break")])
     Pml.Abs.StmtGoto name -> prPrec i 0 (concatD [doc (showString "goto"), prt 0 name])
     Pml.Abs.StmtLabel name stmt -> prPrec i 0 (concatD [prt 0 name, doc (showString ":"), prt 0 stmt])
-    Pml.Abs.StmtPrint printtype str parglist -> prPrec i 0 (concatD [doc (showString "print"), prt 0 printtype, doc (showString "("), printString str, prt 0 parglist, doc (showString ")")])
+    Pml.Abs.StmtPrint printtype pargs -> prPrec i 0 (concatD [prt 0 printtype, doc (showString "("), prt 0 pargs, doc (showString ")")])
     Pml.Abs.StmtAssert expr -> prPrec i 0 (concatD [doc (showString "assert"), prt 0 expr])
+    Pml.Abs.StmtCall name arglist -> prPrec i 0 (concatD [prt 0 name, doc (showString "("), prt 0 arglist, doc (showString ")")])
+    Pml.Abs.StmtExpr expr -> prPrec i 0 (concatD [prt 0 expr])
 
 instance Print Pml.Abs.Range where
   prt i = \case
@@ -532,4 +545,4 @@ instance Print Pml.Abs.Uname where
 
 instance Print Pml.Abs.Name where
   prt i = \case
-    Pml.Abs.Name id_ -> prPrec i 0 (concatD [prt 0 id_])
+    Pml.Abs.Name pident -> prPrec i 0 (concatD [prt 0 pident])

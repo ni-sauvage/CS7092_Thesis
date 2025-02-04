@@ -8,12 +8,13 @@ rules ChanPoll ::= "full" | "empty" "nfull" "nempty";
 rules Separator ::= ";" | "->";
 rules Typename ::= "bit" | "bool" | "byte" | "short" | "int" | "mtype" | "chan" | Uname;
 rules AndOr ::= "&&" | "||";
-rules BinOp ::= "+" | "-" | "*" | "/" | "%" | "&" | "^" | "|" | ">" | "<" | ">" "=" | "<" "=" | "=" "=" | "!" "=" | "<<" | ">>" | AndOr;
+rules BinOp ::= "+" | "-" | "*" | "/" | "%" | "&" | "^" | "|" | ">" | "<" | ">=" | "<=" | "==" | "!=" | "<<" | ">>" | AndOr;
 rules UnrOp ::= "~" | "-" | "!";
 rules Const ::= "true" | "false" | "skip" | Integer;
-rules PrintType ::= "" | "f" | "m";
+rules PrintType ::= "print" | "printf" | "printm";
 
 Mproc. Module ::= Proctype;
+Minline. Module ::= Inline;
 Minit. Module ::= Init;
 Mnever. Module ::= Never;
 Mtrace. Module ::= Trace;
@@ -22,6 +23,7 @@ Mmtype. Module ::= Mtype;
 MdeclList. Module ::= DeclList;
 
 Ptype. Proctype ::= Pactive "proctype" Name "(" PdeclList ")" Ppriority Penabler "{" Sequence "}";
+Iline. Inline ::= "inline" Name "(" ArgList ")" "{" Sequence "}";
 
 PactiveNone. Pactive ::= ""; 
 PactiveOne. Pactive ::= Active;
@@ -35,7 +37,7 @@ PpriorityOne. Ppriority ::= Priority;
 PenablerNone. Penabler ::= "";
 PenablerOne. Penabler ::= Enabler;
 
-Initialise. Init ::= "init" Ipriority "{" Sequence "}";
+Initialise. Init ::= "init" Ipriority "{" Sequence "}" ;
 
 IpriorityNone. Ipriority ::= "";
 IpriorityOne. Ipriority ::= Priority;
@@ -43,24 +45,20 @@ IpriorityOne. Ipriority ::= Priority;
 Nvr. Never ::= "never" "{" Sequence "}";
 Trc. Trace ::= "trace" "{" Sequence "}";
 
-Utp. Utype ::= "typedef" Name "{" DeclListTD "}";
+Utp. Utype ::= "typedef" Name "{" DeclList "}" ";";
 
-Mtp. Mtype ::= "mtype" Mequals "{" Mname "}";
+Mtp. Mtype ::= "mtype" Mequals "{" Mname "}" Msep;
+MsepNone. Msep ::= "";
+MsepOne. Msep ::= ";";
 Meq. Mequals ::= "";
 Meq. Mequals ::= "=";
 
 MnameOne. Mname ::= Name;
 Mnamecons. Mname ::= Name "," Mname;
 
-DclListOne. DeclList ::= Decl;
+DclListOne. DeclList ::= Decl Separator;
+DclListOneNoSep. DeclList ::= Decl;
 DclListCons. DeclList ::= Decl Separator DeclList;
-
-DclListTDOne. DeclListTD ::= DeclTD;
-DclListTDCons. DeclListTD ::= DeclTD Separator DeclListTD;
-
-DclTDOne. DeclTD ::= DeclVisible Typename DclIvar;
-DclTDOneAssign. DeclTD ::= DeclVisible Typename DclIvar Assign;
-DclTDOneUnsigned. DeclTD ::= DeclVisible UnsignedDecl;
 
 DclOne. Decl ::= DeclVisible Typename DclIvar;
 DclOneUnsigned. Decl ::= DeclVisible UnsignedDecl;
@@ -75,7 +73,6 @@ UDcl. UnsignedDecl ::= "unsigned" Name ":" Const UDclAssign;
 UDclAssignNone. UDclAssign ::= "";
 UdclAssignOne. UDclAssign ::= "=" AnyExpr;
 
-
 Active. Active ::= "active" AConst;
 
 AconstNone. AConst ::= "";
@@ -85,11 +82,14 @@ Priority. Priority ::= "priority" Const;
 Enabler. Enabler ::= "provided" "(" Expr ")";
 
 SeqOne. Sequence ::= Step;
+SeqOneSep. Sequence ::= Step Separator;
+SeqNoStep. Sequence ::= Step Sequence;
 SeqCons. Sequence ::= Step Separator Sequence;
 
 UStmtNone. UStmt ::= "";
 UStmtOne. UStmt ::= "unless" Stmt;
 
+StepMType. Step ::= Mtype;
 StepStmt. Step ::= Stmt UStmt;
 StepDclList. Step ::= DeclList;
 StepXR. Step ::= "xr" VarRefList;
@@ -104,6 +104,7 @@ AnyExprUnrOp. AnyExpr ::= UnrOp AnyExpr;
 AnyExprCond. AnyExpr ::= "(" AnyExpr "->" AnyExpr ":" AnyExpr ")";
 AnyExprLen. AnyExpr ::= "len" "(" VarRef ")";
 AnyExprPoll. AnyExpr ::= Poll;
+AnyExprVarRef. AnyExpr ::= VarRef;
 AnyExprConst. AnyExpr ::= Const;
 AnyExprTimeout. AnyExpr ::= "timeout";
 AnyExprNp. AnyExpr ::= "np_";
@@ -148,6 +149,7 @@ SendArgsExpr. SendArgs ::= AnyExpr "(" ArgList ")";
 
 ArgListCons. ArgList ::= AnyExpr "," ArgList;
 ArgListOne. ArgList ::= AnyExpr;
+ArgListNone. ArgList ::= "";
 
 RecvArgsList. RecvArgs ::= RecvArgList;
 RecvArgsParen. RecvArgs ::= RecvArgList "(" RecvArgs ")";
@@ -166,6 +168,10 @@ AssignStd. Assign ::= VarRef "=" AnyExpr;
 AssignInc. Assign ::= VarRef "+" "+";
 AssignDec. Assign ::= VarRef "-" "-";
 
+PArgsString. Pargs ::= String;
+PArgsNoString. Pargs ::= ArgList;
+PArgsBoth. Pargs ::= String "," ArgList;
+
 PArgListNone. PArgList ::= "";
 PargListOne. PargList ::= "," ArgList;
 
@@ -183,8 +189,10 @@ StmtElse. Stmt ::= "else";
 StmtBreak. Stmt ::= "break";
 StmtGoto. Stmt ::= "goto" Name;
 StmtLabel. Stmt ::= Name ":" Stmt;
-StmtPrint. Stmt ::= "print" PrintType "(" String PArgList ")";
+StmtPrint. Stmt ::= PrintType "(" Pargs ")";
 StmtAssert. Stmt ::= "assert" Expr;
+StmtCall. Stmt ::= Name "(" ArgList ")";
+StmtExpr. Stmt ::= Expr;
 
 RangeIn. Range ::= Name "in" Name;
 RangeNoIn. Range ::= Name ":" AnyExpr ".." AnyExpr;
@@ -198,11 +206,12 @@ RunPrioOne. RunPrio ::= Priority;
 RunArgsNone. RunArgs ::= "";
 RunArgsOne. RunArgs ::= ArgList;
 
-
 ExprAny. Expr ::= AnyExpr;
 ExprParen. Expr ::= "(" Expr ")";
 ExprAndOr. Expr ::= Expr AndOr Expr;
 ExprChanPoll. Expr ::= ChanPoll "(" VarRef ")";
 
 Uname. Uname ::= Name;
-Name. Name ::= Ident;
+Name. Name ::= PIdent;
+
+token PIdent (letter | '_') (letter | '_' | digit)*;

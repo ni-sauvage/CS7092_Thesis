@@ -28,7 +28,7 @@ $u = [. \n]          -- universal: any character
 
 -- Symbols and non-identifier-like reserved words
 
-@rsyms = \; | \- \> | \& \& | \| \| | \+ | \- | \* | \/ | \% | \& | \^ | \| | \> | \< | \= | \! | \< \< | \> \> | \~ | \( | \) | \{ | \} | \, | \: | \[ | \] | \@ | \. | \? | \. \. | \: \:
+@rsyms = \; | \- \> | \& \& | \| \| | \+ | \- | \* | \/ | \% | \& | \^ | \| | \> | \< | \= | \! | \= \= | \~ | \( | \) | \{ | \} | \, | \: | \[ | \] | \@ | \. | \? | \. \. | \: \:
 
 :-
 
@@ -38,6 +38,10 @@ $white+ ;
 -- Symbols
 @rsyms
     { tok (eitherResIdent TV) }
+
+-- token PIdent
+(\_ | $l)(\_ | ($d | $l)) *
+    { tok (eitherResIdent T_PIdent) }
 
 -- Keywords and Ident
 $l $i*
@@ -64,6 +68,7 @@ data Tok
   | TV !String                    -- ^ Identifier.
   | TD !String                    -- ^ Float literal.
   | TC !String                    -- ^ Character literal.
+  | T_PIdent !String
   deriving (Eq, Show, Ord)
 
 -- | Smart constructor for 'Tok' for the sake of backwards compatibility.
@@ -126,6 +131,7 @@ tokenText t = case t of
   PT _ (TD s)   -> s
   PT _ (TC s)   -> s
   Err _         -> "#error"
+  PT _ (T_PIdent s) -> s
 
 -- | Convert a token to a string.
 prToken :: Token -> String
@@ -152,8 +158,8 @@ eitherResIdent tv s = treeFind resWords
 -- | The keywords and symbols of the language organized as binary search tree.
 resWords :: BTree
 resWords =
-  b "fi" 43
-    (b ">>" 22
+  b "full" 44
+    (b "?" 22
        (b "->" 11
           (b ")" 6
              (b "&" 3 (b "%" 2 (b "!" 1 N N) N) (b "(" 5 (b "&&" 4 N N) N))
@@ -161,38 +167,40 @@ resWords =
           (b ";" 17
              (b "/" 14
                 (b ".." 13 (b "." 12 N N) N) (b "::" 16 (b ":" 15 N N) N))
-             (b "=" 20 (b "<<" 19 (b "<" 18 N N) N) (b ">" 21 N N))))
-       (b "break" 33
-          (b "active" 28
-             (b "[" 25 (b "@" 24 (b "?" 23 N N) N) (b "^" 27 (b "]" 26 N N) N))
-             (b "bit" 31
-                (b "atomic" 30 (b "assert" 29 N N) N) (b "bool" 32 N N)))
-          (b "else" 38
-             (b "d_step" 36 (b "chan" 35 (b "byte" 34 N N) N) (b "do" 37 N N))
-             (b "eval" 41
-                (b "enabled" 40 (b "empty" 39 N N) N) (b "false" 42 N N)))))
-    (b "proctype" 64
-       (b "mtype" 54
-          (b "if" 49
-             (b "get_priority" 46
-                (b "full" 45 (b "for" 44 N N) N)
-                (b "hidden" 48 (b "goto" 47 N N) N))
-             (b "int" 52 (b "init" 51 (b "in" 50 N N) N) (b "len" 53 N N)))
-          (b "od" 59
-             (b "nfull" 57
-                (b "never" 56 (b "nempty" 55 N N) N) (b "np_" 58 N N))
-             (b "print" 62
-                (b "pc_value" 61 (b "of" 60 N N) N) (b "priority" 63 N N))))
-       (b "typedef" 75
-          (b "show" 70
-             (b "select" 67
-                (b "run" 66 (b "provided" 65 N N) N)
-                (b "short" 69 (b "set_priority" 68 N N) N))
-             (b "trace" 73
-                (b "timeout" 72 (b "skip" 71 N N) N) (b "true" 74 N N)))
-          (b "{" 80
-             (b "xr" 78 (b "unsigned" 77 (b "unless" 76 N N) N) (b "xs" 79 N N))
-             (b "}" 83 (b "||" 82 (b "|" 81 N N) N) (b "~" 84 N N)))))
+             (b "==" 20 (b "=" 19 (b "<" 18 N N) N) (b ">" 21 N N))))
+       (b "byte" 33
+          (b "assert" 28
+             (b "]" 25
+                (b "[" 24 (b "@" 23 N N) N) (b "active" 27 (b "^" 26 N N) N))
+             (b "bool" 31
+                (b "bit" 30 (b "atomic" 29 N N) N) (b "break" 32 N N)))
+          (b "enabled" 39
+             (b "do" 36
+                (b "d_step" 35 (b "chan" 34 N N) N)
+                (b "empty" 38 (b "else" 37 N N) N))
+             (b "fi" 42 (b "false" 41 (b "eval" 40 N N) N) (b "for" 43 N N)))))
+    (b "proctype" 66
+       (b "nempty" 55
+          (b "init" 50
+             (b "hidden" 47
+                (b "goto" 46 (b "get_priority" 45 N N) N)
+                (b "in" 49 (b "if" 48 N N) N))
+             (b "len" 53 (b "int" 52 (b "inline" 51 N N) N) (b "mtype" 54 N N)))
+          (b "pc_value" 61
+             (b "np_" 58
+                (b "nfull" 57 (b "never" 56 N N) N) (b "of" 60 (b "od" 59 N N) N))
+             (b "printm" 64
+                (b "printf" 63 (b "print" 62 N N) N) (b "priority" 65 N N))))
+       (b "typedef" 77
+          (b "show" 72
+             (b "select" 69
+                (b "run" 68 (b "provided" 67 N N) N)
+                (b "short" 71 (b "set_priority" 70 N N) N))
+             (b "trace" 75
+                (b "timeout" 74 (b "skip" 73 N N) N) (b "true" 76 N N)))
+          (b "{" 82
+             (b "xr" 80 (b "unsigned" 79 (b "unless" 78 N N) N) (b "xs" 81 N N))
+             (b "}" 85 (b "||" 84 (b "|" 83 N N) N) (b "~" 86 N N)))))
   where
   b s n = B bs (TS bs n)
     where
