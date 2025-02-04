@@ -1,2 +1,0 @@
-EInt. Exp ::= Integer;
-EPlus. Exp ::= Exp "+" Integer;

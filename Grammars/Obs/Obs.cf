@@ -1,0 +1,42 @@
+comment "^((?!@@@).)*$";
+[]. [Obs] ::= "";
+(:). [Obs] ::= Obs [Obs];
+
+Mname. Name ::= ObsString;
+
+ArgsOne. Args ::= ObsString;
+ArgsCons. Args ::= ObsString Args;
+LmsgOne. LMsg ::= ObsString;
+LmsgCons. LMsg ::= ObsString LMsg;
+
+TaskName. Taskname ::= ObsString;
+VarName. Varname ::= ObsString;
+VarVal. Varval ::= ObsString;
+TypeName. Typename ::= ObsString;
+State. State ::= ObsString;
+VarIndex. Varindex ::= Integer;
+
+ObsName. Obs ::= "@@@" Integer "NAME" Name;
+ObsLog. Obs ::= "@@@" Integer "LOG" LMsg;
+ObsInit. Obs ::= "@@@" Integer "INIT";
+ObsTask. Obs ::= "@@@" Integer "TASK" Taskname;
+ObsSignal. Obs ::= "@@@" Integer "SIGNAL" Integer;
+ObsDef. Obs ::= "@@@" Integer "DEF" Varname Varval;
+ObsDeclVal. Obs ::= "@@@" Integer "DECL" Typename Varname Varval;
+ObsDecl. Obs ::= "@@@" Integer "DECL" Typename Varname;
+ObsDeclArr. Obs ::= "@@@" Integer "DCLARRAY" Typename Varname Varval;
+ObsCall. Obs ::= "@@@" Integer "CALL" Args;
+ObsState. Obs ::= "@@@" Integer "STATE" Integer State;
+ObsStruct. Obs ::= "@@@" Integer "STRUCT" Varname;
+ObsSeq. Obs ::= "@@@" Integer "SEQ" Varname Scalar;
+ObsPtr. Obs ::= "@@@" Integer "PTR" Varname Varval;
+ObsScalar. Obs ::= "@@@" Integer "SCALAR" Varname Varval;
+ObsScalarIndex. Obs ::= "@@@" Integer "SCALAR" Varname Varindex Varval;
+ObsEnd. Obs ::= "@@@" Integer "END" Varname;
+
+ObsScalarCons. Scalar ::= "@@@" Integer "_" Varval Scalar;
+ObsScalarNone. Scalar ::= End;
+
+ObsEndSeq. End ::= "@@@" Integer "END" Varname;
+
+token ObsString (letter | digit | '_' | '\'')+  
