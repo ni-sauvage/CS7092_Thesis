@@ -163,9 +163,9 @@ All other symbols are terminals.
   |  |  **|**  | //Step// //Separator// //Sequence//
   | //UStmt// | -> | **eps**
   |  |  **|**  | ``unless`` //Stmt//
-  | //Step// | -> | //Stmt// //UStmt//
+  | //Step// | -> | //Mtype//
+  |  |  **|**  | //Stmt// //UStmt//
   |  |  **|**  | //DeclList//
-  |  |  **|**  | //Mtype//
   |  |  **|**  | ``xr`` //VarRefList//
   |  |  **|**  | ``xs`` //VarRefList//
   | //VarRefList// | -> | //VarRef//

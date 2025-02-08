@@ -15,81 +15,88 @@ type Result = Err String
 failure :: Show a => a -> Result
 failure x = Left $ "Undefined case: " ++ show x
 
-transObsString :: Obs.Abs.ObsString -> Result
-transObsString x = case x of
-  Obs.Abs.ObsString string -> failure x
-
-transInt :: Obs.Abs.Int -> Result
-transInt x = case x of
-  Obs.Abs.Int string -> failure x
-
-transTInt :: Obs.Abs.TInt -> Result
-transTInt x = case x of
-  Obs.Abs.TInt string -> failure x
-
-transName :: Obs.Abs.Name -> Result
-transName x = case x of
-  Obs.Abs.Mname obsstring -> failure x
+transObsIdent :: Obs.Abs.ObsIdent -> Result
+transObsIdent x = case x of
+  Obs.Abs.ObsIdent string -> failure x
 
 transArgs :: Obs.Abs.Args -> Result
 transArgs x = case x of
-  Obs.Abs.ArgsOne obsstring -> failure x
-  Obs.Abs.ArgsCons obsstring args -> failure x
+  Obs.Abs.ArgsOne -> failure x
+  Obs.Abs.ArgsConsInteger integer args -> failure x
+  Obs.Abs.ArgsConsDouble double args -> failure x
+  Obs.Abs.ArgsConsString string args -> failure x
 
 transLMsg :: Obs.Abs.LMsg -> Result
 transLMsg x = case x of
-  Obs.Abs.LmsgOne obsstring -> failure x
-  Obs.Abs.LmsgCons obsstring lmsg -> failure x
+  Obs.Abs.LmsgOne -> failure x
+  Obs.Abs.LmsgConsString string lmsg -> failure x
+  Obs.Abs.LmsgConsInt integer lmsg -> failure x
+  Obs.Abs.LmsgConsDouble double lmsg -> failure x
 
 transTaskname :: Obs.Abs.Taskname -> Result
 transTaskname x = case x of
-  Obs.Abs.TaskName obsstring -> failure x
+  Obs.Abs.TaskName obsident -> failure x
 
 transVarname :: Obs.Abs.Varname -> Result
 transVarname x = case x of
-  Obs.Abs.VarName obsstring -> failure x
+  Obs.Abs.VarName obsident -> failure x
 
 transVarval :: Obs.Abs.Varval -> Result
 transVarval x = case x of
-  Obs.Abs.VarVal obsstring -> failure x
+  Obs.Abs.VarValInt integer -> failure x
+  Obs.Abs.VarValDouble double -> failure x
+  Obs.Abs.VarValNull -> failure x
 
 transTypename :: Obs.Abs.Typename -> Result
 transTypename x = case x of
-  Obs.Abs.TypeName obsstring -> failure x
+  Obs.Abs.TypeName obsident -> failure x
 
 transState :: Obs.Abs.State -> Result
 transState x = case x of
-  Obs.Abs.State obsstring -> failure x
+  Obs.Abs.State obsident -> failure x
 
 transVarindex :: Obs.Abs.Varindex -> Result
 transVarindex x = case x of
   Obs.Abs.VarIndex integer -> failure x
 
+transThreadId :: Obs.Abs.ThreadId -> Result
+transThreadId x = case x of
+  Obs.Abs.ThreadId integer -> failure x
+
+transSizeDcl :: Obs.Abs.SizeDcl -> Result
+transSizeDcl x = case x of
+  Obs.Abs.SizeDclVar varval -> failure x
+  Obs.Abs.SizeDclDef obsident -> failure x
+
 transObs :: Obs.Abs.Obs -> Result
 transObs x = case x of
-  Obs.Abs.ObsName name -> failure x
-  Obs.Abs.ObsLog int lmsg -> failure x
-  Obs.Abs.ObsInit int -> failure x
-  Obs.Abs.ObsTask int taskname -> failure x
-  Obs.Abs.ObsSignal int integer -> failure x
-  Obs.Abs.ObsDef int varname varval -> failure x
-  Obs.Abs.ObsDeclVal int typename varname varval -> failure x
-  Obs.Abs.ObsDecl int typename varname -> failure x
-  Obs.Abs.ObsDeclArr int typename varname varval -> failure x
-  Obs.Abs.ObsCall int args -> failure x
-  Obs.Abs.ObsState int integer state -> failure x
-  Obs.Abs.ObsStruct int varname -> failure x
-  Obs.Abs.ObsSeq int varname scalar -> failure x
-  Obs.Abs.ObsPtr int varname varval -> failure x
-  Obs.Abs.ObsScalar int varname varval -> failure x
-  Obs.Abs.ObsScalarIndex int varname varindex varval -> failure x
-  Obs.Abs.ObsEnd int varname -> failure x
+  Obs.Abs.ObsName prefix threadid obsident -> failure x
+  Obs.Abs.ObsLog prefix threadid lmsg -> failure x
+  Obs.Abs.ObsInit prefix threadid -> failure x
+  Obs.Abs.ObsTask prefix threadid taskname -> failure x
+  Obs.Abs.ObsSignal prefix threadid integer -> failure x
+  Obs.Abs.ObsDef prefix threadid varname varval -> failure x
+  Obs.Abs.ObsDecl prefix threadid typename varname -> failure x
+  Obs.Abs.ObsDeclVal prefix threadid typename varname varval -> failure x
+  Obs.Abs.ObsDeclArr prefix threadid typename varname sizedcl -> failure x
+  Obs.Abs.ObsCall prefix threadid args -> failure x
+  Obs.Abs.ObsState prefix threadid integer state -> failure x
+  Obs.Abs.ObsStruct prefix threadid varname -> failure x
+  Obs.Abs.ObsSeq prefix threadid varname scalar -> failure x
+  Obs.Abs.ObsPtr prefix threadid varname varval -> failure x
+  Obs.Abs.ObsScalar prefix threadid varname varval -> failure x
+  Obs.Abs.ObsScalarIndex prefix threadid varname varindex varval -> failure x
+  Obs.Abs.ObsEnd prefix threadid varname -> failure x
 
 transScalar :: Obs.Abs.Scalar -> Result
 transScalar x = case x of
-  Obs.Abs.ObsScalarCons integer varval scalar -> failure x
   Obs.Abs.ObsScalarNone end -> failure x
+  Obs.Abs.ObsScalarCons prefix threadid varval scalar -> failure x
 
 transEnd :: Obs.Abs.End -> Result
 transEnd x = case x of
-  Obs.Abs.ObsEndSeq integer varname -> failure x
+  Obs.Abs.ObsEndSeq prefix threadid varname -> failure x
+
+transPrefix :: Obs.Abs.Prefix -> Result
+transPrefix x = case x of
+  Obs.Abs.Prefix -> failure x

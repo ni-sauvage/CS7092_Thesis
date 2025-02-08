@@ -27,109 +27,114 @@ import C.Lex
 %monad { Err } { (>>=) } { return }
 %tokentype {Token}
 %token
-  '!'             { PT _ (TS _ 1)             }
-  '!='            { PT _ (TS _ 2)             }
-  '%'             { PT _ (TS _ 3)             }
-  '%='            { PT _ (TS _ 4)             }
-  '&'             { PT _ (TS _ 5)             }
-  '&&'            { PT _ (TS _ 6)             }
-  '&='            { PT _ (TS _ 7)             }
-  '('             { PT _ (TS _ 8)             }
-  ')'             { PT _ (TS _ 9)             }
-  '*'             { PT _ (TS _ 10)            }
-  '*='            { PT _ (TS _ 11)            }
-  '+'             { PT _ (TS _ 12)            }
-  '++'            { PT _ (TS _ 13)            }
-  '+='            { PT _ (TS _ 14)            }
-  ','             { PT _ (TS _ 15)            }
-  '-'             { PT _ (TS _ 16)            }
-  '--'            { PT _ (TS _ 17)            }
-  '-='            { PT _ (TS _ 18)            }
-  '->'            { PT _ (TS _ 19)            }
-  '.'             { PT _ (TS _ 20)            }
-  '...'           { PT _ (TS _ 21)            }
-  '/'             { PT _ (TS _ 22)            }
-  '/='            { PT _ (TS _ 23)            }
-  ':'             { PT _ (TS _ 24)            }
-  ';'             { PT _ (TS _ 25)            }
-  '<'             { PT _ (TS _ 26)            }
-  '<<'            { PT _ (TS _ 27)            }
-  '<<='           { PT _ (TS _ 28)            }
-  '<='            { PT _ (TS _ 29)            }
-  '='             { PT _ (TS _ 30)            }
-  '=='            { PT _ (TS _ 31)            }
-  '>'             { PT _ (TS _ 32)            }
-  '>='            { PT _ (TS _ 33)            }
-  '>>'            { PT _ (TS _ 34)            }
-  '>>='           { PT _ (TS _ 35)            }
-  '?'             { PT _ (TS _ 36)            }
-  'Typedef_name'  { PT _ (TS _ 37)            }
-  '['             { PT _ (TS _ 38)            }
-  ']'             { PT _ (TS _ 39)            }
-  '^'             { PT _ (TS _ 40)            }
-  '^='            { PT _ (TS _ 41)            }
-  'auto'          { PT _ (TS _ 42)            }
-  'break'         { PT _ (TS _ 43)            }
-  'case'          { PT _ (TS _ 44)            }
-  'char'          { PT _ (TS _ 45)            }
-  'const'         { PT _ (TS _ 46)            }
-  'continue'      { PT _ (TS _ 47)            }
-  'default'       { PT _ (TS _ 48)            }
-  'do'            { PT _ (TS _ 49)            }
-  'double'        { PT _ (TS _ 50)            }
-  'else'          { PT _ (TS _ 51)            }
-  'enum'          { PT _ (TS _ 52)            }
-  'extern'        { PT _ (TS _ 53)            }
-  'float'         { PT _ (TS _ 54)            }
-  'for'           { PT _ (TS _ 55)            }
-  'goto'          { PT _ (TS _ 56)            }
-  'if'            { PT _ (TS _ 57)            }
-  'int'           { PT _ (TS _ 58)            }
-  'long'          { PT _ (TS _ 59)            }
-  'register'      { PT _ (TS _ 60)            }
-  'return'        { PT _ (TS _ 61)            }
-  'short'         { PT _ (TS _ 62)            }
-  'signed'        { PT _ (TS _ 63)            }
-  'sizeof'        { PT _ (TS _ 64)            }
-  'static'        { PT _ (TS _ 65)            }
-  'struct'        { PT _ (TS _ 66)            }
-  'switch'        { PT _ (TS _ 67)            }
-  'typedef'       { PT _ (TS _ 68)            }
-  'union'         { PT _ (TS _ 69)            }
-  'unsigned'      { PT _ (TS _ 70)            }
-  'void'          { PT _ (TS _ 71)            }
-  'volatile'      { PT _ (TS _ 72)            }
-  'while'         { PT _ (TS _ 73)            }
-  '{'             { PT _ (TS _ 74)            }
-  '|'             { PT _ (TS _ 75)            }
-  '|='            { PT _ (TS _ 76)            }
-  '||'            { PT _ (TS _ 77)            }
-  '}'             { PT _ (TS _ 78)            }
-  '~'             { PT _ (TS _ 79)            }
-  L_Ident         { PT _ (TV $$)              }
-  L_charac        { PT _ (TC $$)              }
-  L_doubl         { PT _ (TD $$)              }
-  L_integ         { PT _ (TI $$)              }
-  L_quoted        { PT _ (TL $$)              }
-  L_Unsigned      { PT _ (T_Unsigned $$)      }
-  L_Long          { PT _ (T_Long $$)          }
-  L_UnsignedLong  { PT _ (T_UnsignedLong $$)  }
-  L_Hexadecimal   { PT _ (T_Hexadecimal $$)   }
-  L_HexUnsigned   { PT _ (T_HexUnsigned $$)   }
-  L_HexLong       { PT _ (T_HexLong $$)       }
-  L_HexUnsLong    { PT _ (T_HexUnsLong $$)    }
-  L_Octal         { PT _ (T_Octal $$)         }
-  L_OctalUnsigned { PT _ (T_OctalUnsigned $$) }
-  L_OctalLong     { PT _ (T_OctalLong $$)     }
-  L_OctalUnsLong  { PT _ (T_OctalUnsLong $$)  }
-  L_CDouble       { PT _ (T_CDouble $$)       }
-  L_CFloat        { PT _ (T_CFloat $$)        }
-  L_CLongDouble   { PT _ (T_CLongDouble $$)   }
+  '!'                           { PT _ (TS _ 1)             }
+  '!='                          { PT _ (TS _ 2)             }
+  '%'                           { PT _ (TS _ 3)             }
+  '%='                          { PT _ (TS _ 4)             }
+  '&'                           { PT _ (TS _ 5)             }
+  '&&'                          { PT _ (TS _ 6)             }
+  '&='                          { PT _ (TS _ 7)             }
+  '('                           { PT _ (TS _ 8)             }
+  ')'                           { PT _ (TS _ 9)             }
+  '*'                           { PT _ (TS _ 10)            }
+  '*='                          { PT _ (TS _ 11)            }
+  '+'                           { PT _ (TS _ 12)            }
+  '++'                          { PT _ (TS _ 13)            }
+  '+='                          { PT _ (TS _ 14)            }
+  ','                           { PT _ (TS _ 15)            }
+  '-'                           { PT _ (TS _ 16)            }
+  '--'                          { PT _ (TS _ 17)            }
+  '-='                          { PT _ (TS _ 18)            }
+  '->'                          { PT _ (TS _ 19)            }
+  '.'                           { PT _ (TS _ 20)            }
+  '...'                         { PT _ (TS _ 21)            }
+  '/'                           { PT _ (TS _ 22)            }
+  '/='                          { PT _ (TS _ 23)            }
+  ':'                           { PT _ (TS _ 24)            }
+  ';'                           { PT _ (TS _ 25)            }
+  '<'                           { PT _ (TS _ 26)            }
+  '<<'                          { PT _ (TS _ 27)            }
+  '<<='                         { PT _ (TS _ 28)            }
+  '<='                          { PT _ (TS _ 29)            }
+  '='                           { PT _ (TS _ 30)            }
+  '=='                          { PT _ (TS _ 31)            }
+  '>'                           { PT _ (TS _ 32)            }
+  '>='                          { PT _ (TS _ 33)            }
+  '>>'                          { PT _ (TS _ 34)            }
+  '>>='                         { PT _ (TS _ 35)            }
+  '?'                           { PT _ (TS _ 36)            }
+  'Context'                     { PT _ (TS _ 37)            }
+  'RtemsModelEventsMgr_Context' { PT _ (TS _ 38)            }
+  'Typedef_name'                { PT _ (TS _ 39)            }
+  '['                           { PT _ (TS _ 40)            }
+  ']'                           { PT _ (TS _ 41)            }
+  '^'                           { PT _ (TS _ 42)            }
+  '^='                          { PT _ (TS _ 43)            }
+  'auto'                        { PT _ (TS _ 44)            }
+  'break'                       { PT _ (TS _ 45)            }
+  'case'                        { PT _ (TS _ 46)            }
+  'char'                        { PT _ (TS _ 47)            }
+  'const'                       { PT _ (TS _ 48)            }
+  'continue'                    { PT _ (TS _ 49)            }
+  'default'                     { PT _ (TS _ 50)            }
+  'do'                          { PT _ (TS _ 51)            }
+  'double'                      { PT _ (TS _ 52)            }
+  'else'                        { PT _ (TS _ 53)            }
+  'enum'                        { PT _ (TS _ 54)            }
+  'extern'                      { PT _ (TS _ 55)            }
+  'float'                       { PT _ (TS _ 56)            }
+  'for'                         { PT _ (TS _ 57)            }
+  'goto'                        { PT _ (TS _ 58)            }
+  'if'                          { PT _ (TS _ 59)            }
+  'int'                         { PT _ (TS _ 60)            }
+  'long'                        { PT _ (TS _ 61)            }
+  'register'                    { PT _ (TS _ 62)            }
+  'return'                      { PT _ (TS _ 63)            }
+  'rtems_event_set'             { PT _ (TS _ 64)            }
+  'rtems_id'                    { PT _ (TS _ 65)            }
+  'rtems_status_code'           { PT _ (TS _ 66)            }
+  'rtems_task_argument'         { PT _ (TS _ 67)            }
+  'rtems_task_priority'         { PT _ (TS _ 68)            }
+  'short'                       { PT _ (TS _ 69)            }
+  'signed'                      { PT _ (TS _ 70)            }
+  'size_t'                      { PT _ (TS _ 71)            }
+  'sizeof'                      { PT _ (TS _ 72)            }
+  'static'                      { PT _ (TS _ 73)            }
+  'struct'                      { PT _ (TS _ 74)            }
+  'switch'                      { PT _ (TS _ 75)            }
+  'typedef'                     { PT _ (TS _ 76)            }
+  'union'                       { PT _ (TS _ 77)            }
+  'unsigned'                    { PT _ (TS _ 78)            }
+  'void'                        { PT _ (TS _ 79)            }
+  'volatile'                    { PT _ (TS _ 80)            }
+  'while'                       { PT _ (TS _ 81)            }
+  '{'                           { PT _ (TS _ 82)            }
+  '|'                           { PT _ (TS _ 83)            }
+  '|='                          { PT _ (TS _ 84)            }
+  '||'                          { PT _ (TS _ 85)            }
+  '}'                           { PT _ (TS _ 86)            }
+  '~'                           { PT _ (TS _ 87)            }
+  L_charac                      { PT _ (TC $$)              }
+  L_doubl                       { PT _ (TD $$)              }
+  L_integ                       { PT _ (TI $$)              }
+  L_quoted                      { PT _ (TL $$)              }
+  L_Unsigned                    { PT _ (T_Unsigned $$)      }
+  L_Long                        { PT _ (T_Long $$)          }
+  L_UnsignedLong                { PT _ (T_UnsignedLong $$)  }
+  L_Hexadecimal                 { PT _ (T_Hexadecimal $$)   }
+  L_HexUnsigned                 { PT _ (T_HexUnsigned $$)   }
+  L_HexLong                     { PT _ (T_HexLong $$)       }
+  L_HexUnsLong                  { PT _ (T_HexUnsLong $$)    }
+  L_Octal                       { PT _ (T_Octal $$)         }
+  L_OctalUnsigned               { PT _ (T_OctalUnsigned $$) }
+  L_OctalLong                   { PT _ (T_OctalLong $$)     }
+  L_OctalUnsLong                { PT _ (T_OctalUnsLong $$)  }
+  L_CDouble                     { PT _ (T_CDouble $$)       }
+  L_CFloat                      { PT _ (T_CFloat $$)        }
+  L_CLongDouble                 { PT _ (T_CLongDouble $$)   }
+  L_CIdent                      { PT _ (T_CIdent $$)        }
 
 %%
-
-Ident :: { C.Abs.Ident }
-Ident  : L_Ident { C.Abs.Ident $1 }
 
 Char    :: { Char }
 Char     : L_charac { (read $1) :: Char }
@@ -184,6 +189,9 @@ CFloat  : L_CFloat { C.Abs.CFloat $1 }
 
 CLongDouble :: { C.Abs.CLongDouble }
 CLongDouble  : L_CLongDouble { C.Abs.CLongDouble $1 }
+
+CIdent :: { C.Abs.CIdent }
+CIdent  : L_CIdent { C.Abs.CIdent $1 }
 
 Program :: { C.Abs.Program }
 Program : ListExternal_declaration { C.Abs.Progr $1 }
@@ -247,6 +255,14 @@ Type_specifier
   | Struct_or_union_spec { C.Abs.Tstruct $1 }
   | Enum_specifier { C.Abs.Tenum $1 }
   | 'Typedef_name' { C.Abs.Tname }
+  | 'rtems_status_code' { C.Abs.Trtsc }
+  | 'rtems_event_set' { C.Abs.Trtes }
+  | 'rtems_id' { C.Abs.Trtid }
+  | 'Context' { C.Abs.Trtctx }
+  | 'rtems_task_priority' { C.Abs.Trttp }
+  | 'size_t' { C.Abs.Tszet }
+  | 'RtemsModelEventsMgr_Context' { C.Abs.Tevctx }
+  | 'rtems_task_argument' { C.Abs.Trtta }
 
 Storage_class_specifier :: { C.Abs.Storage_class_specifier }
 Storage_class_specifier
@@ -262,9 +278,9 @@ Type_qualifier
 
 Struct_or_union_spec :: { C.Abs.Struct_or_union_spec }
 Struct_or_union_spec
-  : Struct_or_union Ident '{' ListStruct_dec '}' { C.Abs.Tag $1 $2 $4 }
+  : Struct_or_union CIdent '{' ListStruct_dec '}' { C.Abs.Tag $1 $2 $4 }
   | Struct_or_union '{' ListStruct_dec '}' { C.Abs.Unique $1 $3 }
-  | Struct_or_union Ident { C.Abs.TagType $1 $2 }
+  | Struct_or_union CIdent { C.Abs.TagType $1 $2 }
 
 Struct_or_union :: { C.Abs.Struct_or_union }
 Struct_or_union
@@ -301,8 +317,8 @@ Struct_declarator
 Enum_specifier :: { C.Abs.Enum_specifier }
 Enum_specifier
   : 'enum' '{' ListEnumerator '}' { C.Abs.EnumDec $3 }
-  | 'enum' Ident '{' ListEnumerator '}' { C.Abs.EnumName $2 $4 }
-  | 'enum' Ident { C.Abs.EnumVar $2 }
+  | 'enum' CIdent '{' ListEnumerator '}' { C.Abs.EnumName $2 $4 }
+  | 'enum' CIdent { C.Abs.EnumVar $2 }
 
 ListEnumerator :: { [C.Abs.Enumerator] }
 ListEnumerator
@@ -311,8 +327,8 @@ ListEnumerator
 
 Enumerator :: { C.Abs.Enumerator }
 Enumerator
-  : Ident { C.Abs.Plain $1 }
-  | Ident '=' Constant_expression { C.Abs.EnumInit $1 $3 }
+  : CIdent { C.Abs.Plain $1 }
+  | CIdent '=' Constant_expression { C.Abs.EnumInit $1 $3 }
 
 Declarator :: { C.Abs.Declarator }
 Declarator
@@ -321,12 +337,12 @@ Declarator
 
 Direct_declarator :: { C.Abs.Direct_declarator }
 Direct_declarator
-  : Ident { C.Abs.Name $1 }
+  : CIdent { C.Abs.Name $1 }
   | '(' Declarator ')' { C.Abs.ParenDecl $2 }
   | Direct_declarator '[' Constant_expression ']' { C.Abs.InnitArray $1 $3 }
   | Direct_declarator '[' ']' { C.Abs.Incomplete $1 }
   | Direct_declarator '(' Parameter_type ')' { C.Abs.NewFuncDec $1 $3 }
-  | Direct_declarator '(' ListIdent ')' { C.Abs.OldFuncDef $1 $3 }
+  | Direct_declarator '(' ListCIdent ')' { C.Abs.OldFuncDef $1 $3 }
   | Direct_declarator '(' ')' { C.Abs.OldFuncDec $1 }
 
 Pointer :: { C.Abs.Pointer }
@@ -357,8 +373,9 @@ Parameter_declaration
   | ListDeclaration_specifier Declarator { C.Abs.TypeAndParam $1 $2 }
   | ListDeclaration_specifier Abstract_declarator { C.Abs.Abstract $1 $2 }
 
-ListIdent :: { [C.Abs.Ident] }
-ListIdent : Ident { (:[]) $1 } | Ident ',' ListIdent { (:) $1 $3 }
+ListCIdent :: { [C.Abs.CIdent] }
+ListCIdent
+  : CIdent { (:[]) $1 } | CIdent ',' ListCIdent { (:) $1 $3 }
 
 Initializer :: { C.Abs.Initializer }
 Initializer
@@ -405,7 +422,7 @@ Stm
 
 Labeled_stm :: { C.Abs.Labeled_stm }
 Labeled_stm
-  : Ident ':' Stm { C.Abs.SlabelOne $1 $3 }
+  : CIdent ':' Stm { C.Abs.SlabelOne $1 $3 }
   | 'case' Constant_expression ':' Stm { C.Abs.SlabelTwo $2 $4 }
   | 'default' ':' Stm { C.Abs.SlabelThree $3 }
 
@@ -435,7 +452,7 @@ Iter_stm
 
 Jump_stm :: { C.Abs.Jump_stm }
 Jump_stm
-  : 'goto' Ident ';' { C.Abs.SjumpOne $2 }
+  : 'goto' CIdent ';' { C.Abs.SjumpOne $2 }
   | 'continue' ';' { C.Abs.SjumpTwo }
   | 'break' ';' { C.Abs.SjumpThree }
   | 'return' ';' { C.Abs.SjumpFour }
@@ -521,15 +538,15 @@ Exp16
   : Exp16 '[' Exp ']' { C.Abs.Earray $1 $3 }
   | Exp16 '(' ')' { C.Abs.Efunk $1 }
   | Exp16 '(' ListExp2 ')' { C.Abs.Efunkpar $1 $3 }
-  | Exp16 '.' Ident { C.Abs.Eselect $1 $3 }
-  | Exp16 '->' Ident { C.Abs.Epoint $1 $3 }
+  | Exp16 '.' CIdent { C.Abs.Eselect $1 $3 }
+  | Exp16 '->' CIdent { C.Abs.Epoint $1 $3 }
   | Exp16 '++' { C.Abs.Epostinc $1 }
   | Exp16 '--' { C.Abs.Epostdec $1 }
   | Exp17 { $1 }
 
 Exp17 :: { C.Abs.Exp }
 Exp17
-  : Ident { C.Abs.Evar $1 }
+  : CIdent { C.Abs.Evar $1 }
   | Constant { C.Abs.Econst $1 }
   | String { C.Abs.Estring $1 }
   | '(' Exp ')' { $2 }

@@ -15,10 +15,6 @@ type Result = Err String
 failure :: Show a => a -> Result
 failure x = Left $ "Undefined case: " ++ show x
 
-transIdent :: C.Abs.Ident -> Result
-transIdent x = case x of
-  C.Abs.Ident string -> failure x
-
 transUnsigned :: C.Abs.Unsigned -> Result
 transUnsigned x = case x of
   C.Abs.Unsigned string -> failure x
@@ -75,6 +71,10 @@ transCLongDouble :: C.Abs.CLongDouble -> Result
 transCLongDouble x = case x of
   C.Abs.CLongDouble string -> failure x
 
+transCIdent :: C.Abs.CIdent -> Result
+transCIdent x = case x of
+  C.Abs.CIdent string -> failure x
+
 transProgram :: C.Abs.Program -> Result
 transProgram x = case x of
   C.Abs.Progr externaldeclarations -> failure x
@@ -121,6 +121,14 @@ transType_specifier x = case x of
   C.Abs.Tstruct structorunionspec -> failure x
   C.Abs.Tenum enumspecifier -> failure x
   C.Abs.Tname -> failure x
+  C.Abs.Trtsc -> failure x
+  C.Abs.Trtes -> failure x
+  C.Abs.Trtid -> failure x
+  C.Abs.Trtctx -> failure x
+  C.Abs.Trttp -> failure x
+  C.Abs.Tszet -> failure x
+  C.Abs.Tevctx -> failure x
+  C.Abs.Trtta -> failure x
 
 transStorage_class_specifier :: C.Abs.Storage_class_specifier -> Result
 transStorage_class_specifier x = case x of
@@ -137,9 +145,9 @@ transType_qualifier x = case x of
 
 transStruct_or_union_spec :: C.Abs.Struct_or_union_spec -> Result
 transStruct_or_union_spec x = case x of
-  C.Abs.Tag structorunion ident structdecs -> failure x
+  C.Abs.Tag structorunion cident structdecs -> failure x
   C.Abs.Unique structorunion structdecs -> failure x
-  C.Abs.TagType structorunion ident -> failure x
+  C.Abs.TagType structorunion cident -> failure x
 
 transStruct_or_union :: C.Abs.Struct_or_union -> Result
 transStruct_or_union x = case x of
@@ -164,13 +172,13 @@ transStruct_declarator x = case x of
 transEnum_specifier :: C.Abs.Enum_specifier -> Result
 transEnum_specifier x = case x of
   C.Abs.EnumDec enumerators -> failure x
-  C.Abs.EnumName ident enumerators -> failure x
-  C.Abs.EnumVar ident -> failure x
+  C.Abs.EnumName cident enumerators -> failure x
+  C.Abs.EnumVar cident -> failure x
 
 transEnumerator :: C.Abs.Enumerator -> Result
 transEnumerator x = case x of
-  C.Abs.Plain ident -> failure x
-  C.Abs.EnumInit ident constantexpression -> failure x
+  C.Abs.Plain cident -> failure x
+  C.Abs.EnumInit cident constantexpression -> failure x
 
 transDeclarator :: C.Abs.Declarator -> Result
 transDeclarator x = case x of
@@ -179,12 +187,12 @@ transDeclarator x = case x of
 
 transDirect_declarator :: C.Abs.Direct_declarator -> Result
 transDirect_declarator x = case x of
-  C.Abs.Name ident -> failure x
+  C.Abs.Name cident -> failure x
   C.Abs.ParenDecl declarator -> failure x
   C.Abs.InnitArray directdeclarator constantexpression -> failure x
   C.Abs.Incomplete directdeclarator -> failure x
   C.Abs.NewFuncDec directdeclarator parametertype -> failure x
-  C.Abs.OldFuncDef directdeclarator idents -> failure x
+  C.Abs.OldFuncDef directdeclarator cidents -> failure x
   C.Abs.OldFuncDec directdeclarator -> failure x
 
 transPointer :: C.Abs.Pointer -> Result
@@ -255,7 +263,7 @@ transStm x = case x of
 
 transLabeled_stm :: C.Abs.Labeled_stm -> Result
 transLabeled_stm x = case x of
-  C.Abs.SlabelOne ident stm -> failure x
+  C.Abs.SlabelOne cident stm -> failure x
   C.Abs.SlabelTwo constantexpression stm -> failure x
   C.Abs.SlabelThree stm -> failure x
 
@@ -286,7 +294,7 @@ transIter_stm x = case x of
 
 transJump_stm :: C.Abs.Jump_stm -> Result
 transJump_stm x = case x of
-  C.Abs.SjumpOne ident -> failure x
+  C.Abs.SjumpOne cident -> failure x
   C.Abs.SjumpTwo -> failure x
   C.Abs.SjumpThree -> failure x
   C.Abs.SjumpFour -> failure x
@@ -324,11 +332,11 @@ transExp x = case x of
   C.Abs.Earray exp1 exp2 -> failure x
   C.Abs.Efunk exp -> failure x
   C.Abs.Efunkpar exp exps -> failure x
-  C.Abs.Eselect exp ident -> failure x
-  C.Abs.Epoint exp ident -> failure x
+  C.Abs.Eselect exp cident -> failure x
+  C.Abs.Epoint exp cident -> failure x
   C.Abs.Epostinc exp -> failure x
   C.Abs.Epostdec exp -> failure x
-  C.Abs.Evar ident -> failure x
+  C.Abs.Evar cident -> failure x
   C.Abs.Econst constant -> failure x
   C.Abs.Estring string -> failure x
 

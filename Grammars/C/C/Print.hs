@@ -138,8 +138,6 @@ instance Print Integer where
 instance Print Double where
   prt _ x = doc (shows x)
 
-instance Print C.Abs.Ident where
-  prt _ (C.Abs.Ident i) = doc $ showString i
 instance Print C.Abs.Unsigned where
   prt _ (C.Abs.Unsigned i) = doc $ showString i
 instance Print C.Abs.Long where
@@ -168,6 +166,8 @@ instance Print C.Abs.CFloat where
   prt _ (C.Abs.CFloat i) = doc $ showString i
 instance Print C.Abs.CLongDouble where
   prt _ (C.Abs.CLongDouble i) = doc $ showString i
+instance Print C.Abs.CIdent where
+  prt _ (C.Abs.CIdent i) = doc $ showString i
 instance Print C.Abs.Program where
   prt i = \case
     C.Abs.Progr externaldeclarations -> prPrec i 0 (concatD [prt 0 externaldeclarations])
@@ -234,6 +234,14 @@ instance Print C.Abs.Type_specifier where
     C.Abs.Tstruct structorunionspec -> prPrec i 0 (concatD [prt 0 structorunionspec])
     C.Abs.Tenum enumspecifier -> prPrec i 0 (concatD [prt 0 enumspecifier])
     C.Abs.Tname -> prPrec i 0 (concatD [doc (showString "Typedef_name")])
+    C.Abs.Trtsc -> prPrec i 0 (concatD [doc (showString "rtems_status_code")])
+    C.Abs.Trtes -> prPrec i 0 (concatD [doc (showString "rtems_event_set")])
+    C.Abs.Trtid -> prPrec i 0 (concatD [doc (showString "rtems_id")])
+    C.Abs.Trtctx -> prPrec i 0 (concatD [doc (showString "Context")])
+    C.Abs.Trttp -> prPrec i 0 (concatD [doc (showString "rtems_task_priority")])
+    C.Abs.Tszet -> prPrec i 0 (concatD [doc (showString "size_t")])
+    C.Abs.Tevctx -> prPrec i 0 (concatD [doc (showString "RtemsModelEventsMgr_Context")])
+    C.Abs.Trtta -> prPrec i 0 (concatD [doc (showString "rtems_task_argument")])
 
 instance Print C.Abs.Storage_class_specifier where
   prt i = \case
@@ -250,9 +258,9 @@ instance Print C.Abs.Type_qualifier where
 
 instance Print C.Abs.Struct_or_union_spec where
   prt i = \case
-    C.Abs.Tag structorunion id_ structdecs -> prPrec i 0 (concatD [prt 0 structorunion, prt 0 id_, doc (showString "{"), prt 0 structdecs, doc (showString "}")])
+    C.Abs.Tag structorunion cident structdecs -> prPrec i 0 (concatD [prt 0 structorunion, prt 0 cident, doc (showString "{"), prt 0 structdecs, doc (showString "}")])
     C.Abs.Unique structorunion structdecs -> prPrec i 0 (concatD [prt 0 structorunion, doc (showString "{"), prt 0 structdecs, doc (showString "}")])
-    C.Abs.TagType structorunion id_ -> prPrec i 0 (concatD [prt 0 structorunion, prt 0 id_])
+    C.Abs.TagType structorunion cident -> prPrec i 0 (concatD [prt 0 structorunion, prt 0 cident])
 
 instance Print C.Abs.Struct_or_union where
   prt i = \case
@@ -292,8 +300,8 @@ instance Print C.Abs.Struct_declarator where
 instance Print C.Abs.Enum_specifier where
   prt i = \case
     C.Abs.EnumDec enumerators -> prPrec i 0 (concatD [doc (showString "enum"), doc (showString "{"), prt 0 enumerators, doc (showString "}")])
-    C.Abs.EnumName id_ enumerators -> prPrec i 0 (concatD [doc (showString "enum"), prt 0 id_, doc (showString "{"), prt 0 enumerators, doc (showString "}")])
-    C.Abs.EnumVar id_ -> prPrec i 0 (concatD [doc (showString "enum"), prt 0 id_])
+    C.Abs.EnumName cident enumerators -> prPrec i 0 (concatD [doc (showString "enum"), prt 0 cident, doc (showString "{"), prt 0 enumerators, doc (showString "}")])
+    C.Abs.EnumVar cident -> prPrec i 0 (concatD [doc (showString "enum"), prt 0 cident])
 
 instance Print [C.Abs.Enumerator] where
   prt _ [] = concatD []
@@ -302,8 +310,8 @@ instance Print [C.Abs.Enumerator] where
 
 instance Print C.Abs.Enumerator where
   prt i = \case
-    C.Abs.Plain id_ -> prPrec i 0 (concatD [prt 0 id_])
-    C.Abs.EnumInit id_ constantexpression -> prPrec i 0 (concatD [prt 0 id_, doc (showString "="), prt 0 constantexpression])
+    C.Abs.Plain cident -> prPrec i 0 (concatD [prt 0 cident])
+    C.Abs.EnumInit cident constantexpression -> prPrec i 0 (concatD [prt 0 cident, doc (showString "="), prt 0 constantexpression])
 
 instance Print C.Abs.Declarator where
   prt i = \case
@@ -312,12 +320,12 @@ instance Print C.Abs.Declarator where
 
 instance Print C.Abs.Direct_declarator where
   prt i = \case
-    C.Abs.Name id_ -> prPrec i 0 (concatD [prt 0 id_])
+    C.Abs.Name cident -> prPrec i 0 (concatD [prt 0 cident])
     C.Abs.ParenDecl declarator -> prPrec i 0 (concatD [doc (showString "("), prt 0 declarator, doc (showString ")")])
     C.Abs.InnitArray directdeclarator constantexpression -> prPrec i 0 (concatD [prt 0 directdeclarator, doc (showString "["), prt 0 constantexpression, doc (showString "]")])
     C.Abs.Incomplete directdeclarator -> prPrec i 0 (concatD [prt 0 directdeclarator, doc (showString "["), doc (showString "]")])
     C.Abs.NewFuncDec directdeclarator parametertype -> prPrec i 0 (concatD [prt 0 directdeclarator, doc (showString "("), prt 0 parametertype, doc (showString ")")])
-    C.Abs.OldFuncDef directdeclarator ids -> prPrec i 0 (concatD [prt 0 directdeclarator, doc (showString "("), prt 0 ids, doc (showString ")")])
+    C.Abs.OldFuncDef directdeclarator cidents -> prPrec i 0 (concatD [prt 0 directdeclarator, doc (showString "("), prt 0 cidents, doc (showString ")")])
     C.Abs.OldFuncDec directdeclarator -> prPrec i 0 (concatD [prt 0 directdeclarator, doc (showString "("), doc (showString ")")])
 
 instance Print C.Abs.Pointer where
@@ -348,7 +356,7 @@ instance Print C.Abs.Parameter_declaration where
     C.Abs.TypeAndParam declarationspecifiers declarator -> prPrec i 0 (concatD [prt 0 declarationspecifiers, prt 0 declarator])
     C.Abs.Abstract declarationspecifiers abstractdeclarator -> prPrec i 0 (concatD [prt 0 declarationspecifiers, prt 0 abstractdeclarator])
 
-instance Print [C.Abs.Ident] where
+instance Print [C.Abs.CIdent] where
   prt _ [] = concatD []
   prt _ [x] = concatD [prt 0 x]
   prt _ (x:xs) = concatD [prt 0 x, doc (showString ","), prt 0 xs]
@@ -398,7 +406,7 @@ instance Print C.Abs.Stm where
 
 instance Print C.Abs.Labeled_stm where
   prt i = \case
-    C.Abs.SlabelOne id_ stm -> prPrec i 0 (concatD [prt 0 id_, doc (showString ":"), prt 0 stm])
+    C.Abs.SlabelOne cident stm -> prPrec i 0 (concatD [prt 0 cident, doc (showString ":"), prt 0 stm])
     C.Abs.SlabelTwo constantexpression stm -> prPrec i 0 (concatD [doc (showString "case"), prt 0 constantexpression, doc (showString ":"), prt 0 stm])
     C.Abs.SlabelThree stm -> prPrec i 0 (concatD [doc (showString "default"), doc (showString ":"), prt 0 stm])
 
@@ -429,7 +437,7 @@ instance Print C.Abs.Iter_stm where
 
 instance Print C.Abs.Jump_stm where
   prt i = \case
-    C.Abs.SjumpOne id_ -> prPrec i 0 (concatD [doc (showString "goto"), prt 0 id_, doc (showString ";")])
+    C.Abs.SjumpOne cident -> prPrec i 0 (concatD [doc (showString "goto"), prt 0 cident, doc (showString ";")])
     C.Abs.SjumpTwo -> prPrec i 0 (concatD [doc (showString "continue"), doc (showString ";")])
     C.Abs.SjumpThree -> prPrec i 0 (concatD [doc (showString "break"), doc (showString ";")])
     C.Abs.SjumpFour -> prPrec i 0 (concatD [doc (showString "return"), doc (showString ";")])
@@ -472,11 +480,11 @@ instance Print C.Abs.Exp where
     C.Abs.Earray exp1 exp2 -> prPrec i 16 (concatD [prt 16 exp1, doc (showString "["), prt 0 exp2, doc (showString "]")])
     C.Abs.Efunk exp -> prPrec i 16 (concatD [prt 16 exp, doc (showString "("), doc (showString ")")])
     C.Abs.Efunkpar exp exps -> prPrec i 16 (concatD [prt 16 exp, doc (showString "("), prt 2 exps, doc (showString ")")])
-    C.Abs.Eselect exp id_ -> prPrec i 16 (concatD [prt 16 exp, doc (showString "."), prt 0 id_])
-    C.Abs.Epoint exp id_ -> prPrec i 16 (concatD [prt 16 exp, doc (showString "->"), prt 0 id_])
+    C.Abs.Eselect exp cident -> prPrec i 16 (concatD [prt 16 exp, doc (showString "."), prt 0 cident])
+    C.Abs.Epoint exp cident -> prPrec i 16 (concatD [prt 16 exp, doc (showString "->"), prt 0 cident])
     C.Abs.Epostinc exp -> prPrec i 16 (concatD [prt 16 exp, doc (showString "++")])
     C.Abs.Epostdec exp -> prPrec i 16 (concatD [prt 16 exp, doc (showString "--")])
-    C.Abs.Evar id_ -> prPrec i 17 (concatD [prt 0 id_])
+    C.Abs.Evar cident -> prPrec i 17 (concatD [prt 0 cident])
     C.Abs.Econst constant -> prPrec i 17 (concatD [prt 0 constant])
     C.Abs.Estring str -> prPrec i 17 (concatD [printString str])
 

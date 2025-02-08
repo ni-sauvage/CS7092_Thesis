@@ -378,7 +378,7 @@ Penabler
 
 Init :: { Pml.Abs.Init }
 Init
-  : 'init' Ipriority '{' Sequence '}' ';' { Pml.Abs.Initialise $2 $4 }
+  : 'init' Ipriority '{' Sequence '}' { Pml.Abs.Initialise $2 $4 }
 
 Ipriority :: { Pml.Abs.Ipriority }
 Ipriority

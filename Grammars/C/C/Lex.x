@@ -104,6 +104,10 @@ $white+ ;
 ($d + \. $d + | $d + \. | \. $d +)([E e]\- ? $d +)? [L l]| $d + [E e]\- ? $d + [L l]
     { tok (eitherResIdent T_CLongDouble) }
 
+-- token CIdent
+(\_ | $l)([\' \_]| ($d | $l)) *
+    { tok (eitherResIdent T_CIdent) }
+
 -- Keywords and Ident
 $l $i*
     { tok (eitherResIdent TV) }
@@ -151,6 +155,7 @@ data Tok
   | T_CDouble !String
   | T_CFloat !String
   | T_CLongDouble !String
+  | T_CIdent !String
   deriving (Eq, Show, Ord)
 
 -- | Smart constructor for 'Tok' for the sake of backwards compatibility.
@@ -227,6 +232,7 @@ tokenText t = case t of
   PT _ (T_CDouble s) -> s
   PT _ (T_CFloat s) -> s
   PT _ (T_CLongDouble s) -> s
+  PT _ (T_CIdent s) -> s
 
 -- | Convert a token to a string.
 prToken :: Token -> String
@@ -253,41 +259,50 @@ eitherResIdent tv s = treeFind resWords
 -- | The keywords and symbols of the language organized as binary search tree.
 resWords :: BTree
 resWords =
-  b "^" 40
-    (b "." 20
-       (b "*" 10
-          (b "&" 5
-             (b "%" 3 (b "!=" 2 (b "!" 1 N N) N) (b "%=" 4 N N))
-             (b "(" 8 (b "&=" 7 (b "&&" 6 N N) N) (b ")" 9 N N)))
-          (b "," 15
-             (b "++" 13 (b "+" 12 (b "*=" 11 N N) N) (b "+=" 14 N N))
-             (b "-=" 18 (b "--" 17 (b "-" 16 N N) N) (b "->" 19 N N))))
-       (b "=" 30
-          (b ";" 25
-             (b "/=" 23 (b "/" 22 (b "..." 21 N N) N) (b ":" 24 N N))
-             (b "<<=" 28 (b "<<" 27 (b "<" 26 N N) N) (b "<=" 29 N N)))
-          (b ">>=" 35
-             (b ">=" 33 (b ">" 32 (b "==" 31 N N) N) (b ">>" 34 N N))
-             (b "[" 38 (b "Typedef_name" 37 (b "?" 36 N N) N) (b "]" 39 N N)))))
-    (b "register" 60
-       (b "double" 50
-          (b "char" 45
-             (b "break" 43 (b "auto" 42 (b "^=" 41 N N) N) (b "case" 44 N N))
-             (b "default" 48
-                (b "continue" 47 (b "const" 46 N N) N) (b "do" 49 N N)))
-          (b "for" 55
-             (b "extern" 53
-                (b "enum" 52 (b "else" 51 N N) N) (b "float" 54 N N))
-             (b "int" 58 (b "if" 57 (b "goto" 56 N N) N) (b "long" 59 N N))))
-       (b "unsigned" 70
-          (b "static" 65
-             (b "signed" 63
-                (b "short" 62 (b "return" 61 N N) N) (b "sizeof" 64 N N))
-             (b "typedef" 68
-                (b "switch" 67 (b "struct" 66 N N) N) (b "union" 69 N N)))
-          (b "|" 75
-             (b "while" 73 (b "volatile" 72 (b "void" 71 N N) N) (b "{" 74 N N))
-             (b "}" 78 (b "||" 77 (b "|=" 76 N N) N) (b "~" 79 N N)))))
+  b "auto" 44
+    (b "/" 22
+       (b "*=" 11
+          (b "&&" 6
+             (b "%" 3 (b "!=" 2 (b "!" 1 N N) N) (b "&" 5 (b "%=" 4 N N) N))
+             (b ")" 9 (b "(" 8 (b "&=" 7 N N) N) (b "*" 10 N N)))
+          (b "--" 17
+             (b "+=" 14
+                (b "++" 13 (b "+" 12 N N) N) (b "-" 16 (b "," 15 N N) N))
+             (b "." 20 (b "->" 19 (b "-=" 18 N N) N) (b "..." 21 N N))))
+       (b ">=" 33
+          (b "<<=" 28
+             (b ";" 25
+                (b ":" 24 (b "/=" 23 N N) N) (b "<<" 27 (b "<" 26 N N) N))
+             (b "==" 31 (b "=" 30 (b "<=" 29 N N) N) (b ">" 32 N N)))
+          (b "Typedef_name" 39
+             (b "?" 36
+                (b ">>=" 35 (b ">>" 34 N N) N)
+                (b "RtemsModelEventsMgr_Context" 38 (b "Context" 37 N N) N))
+             (b "^" 42 (b "]" 41 (b "[" 40 N N) N) (b "^=" 43 N N)))))
+    (b "rtems_status_code" 66
+       (b "extern" 55
+          (b "default" 50
+             (b "char" 47
+                (b "case" 46 (b "break" 45 N N) N)
+                (b "continue" 49 (b "const" 48 N N) N))
+             (b "else" 53 (b "double" 52 (b "do" 51 N N) N) (b "enum" 54 N N)))
+          (b "long" 61
+             (b "goto" 58
+                (b "for" 57 (b "float" 56 N N) N) (b "int" 60 (b "if" 59 N N) N))
+             (b "rtems_event_set" 64
+                (b "return" 63 (b "register" 62 N N) N) (b "rtems_id" 65 N N))))
+       (b "union" 77
+          (b "sizeof" 72
+             (b "short" 69
+                (b "rtems_task_priority" 68 (b "rtems_task_argument" 67 N N) N)
+                (b "size_t" 71 (b "signed" 70 N N) N))
+             (b "switch" 75
+                (b "struct" 74 (b "static" 73 N N) N) (b "typedef" 76 N N)))
+          (b "|" 83
+             (b "volatile" 80
+                (b "void" 79 (b "unsigned" 78 N N) N)
+                (b "{" 82 (b "while" 81 N N) N))
+             (b "}" 86 (b "||" 85 (b "|=" 84 N N) N) (b "~" 87 N N)))))
   where
   b s n = B bs (TS bs n)
     where

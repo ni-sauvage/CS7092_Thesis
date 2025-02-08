@@ -9,7 +9,6 @@ module Obs.Par
   ( happyError
   , myLexer
   , pListObs
-  , pName
   , pArgs
   , pLMsg
   , pTaskname
@@ -18,9 +17,12 @@ module Obs.Par
   , pTypename
   , pState
   , pVarindex
+  , pThreadId
+  , pSizeDcl
   , pObs
   , pScalar
   , pEnd
+  , pPrefix
   ) where
 
 import Prelude
@@ -31,7 +33,6 @@ import Obs.Lex
 }
 
 %name pListObs ListObs
-%name pName Name
 %name pArgs Args
 %name pLMsg LMsg
 %name pTaskname Taskname
@@ -40,102 +41,129 @@ import Obs.Lex
 %name pTypename Typename
 %name pState State
 %name pVarindex Varindex
+%name pThreadId ThreadId
+%name pSizeDcl SizeDcl
 %name pObs Obs
 %name pScalar Scalar
 %name pEnd End
+%name pPrefix Prefix
 -- no lexer declaration
 %monad { Err } { (>>=) } { return }
 %tokentype {Token}
 %token
-  '@@@'       { PT _ (TS _ 1)         }
-  'CALL'      { PT _ (TS _ 2)         }
-  'DCLARRAY'  { PT _ (TS _ 3)         }
-  'DECL'      { PT _ (TS _ 4)         }
-  'DEF'       { PT _ (TS _ 5)         }
-  'END'       { PT _ (TS _ 6)         }
-  'INIT'      { PT _ (TS _ 7)         }
-  'LOG'       { PT _ (TS _ 8)         }
-  'NAME'      { PT _ (TS _ 9)         }
-  'PTR'       { PT _ (TS _ 10)        }
-  'SCALAR'    { PT _ (TS _ 11)        }
-  'SEQ'       { PT _ (TS _ 12)        }
-  'SIGNAL'    { PT _ (TS _ 13)        }
-  'STATE'     { PT _ (TS _ 14)        }
-  'STRUCT'    { PT _ (TS _ 15)        }
-  'TASK'      { PT _ (TS _ 16)        }
-  '_'         { PT _ (TS _ 17)        }
-  L_integ     { PT _ (TI $$)          }
-  L_ObsString { PT _ (T_ObsString $$) }
+  '@@@'      { PT _ (TS _ 1)        }
+  'CALL'     { PT _ (TS _ 2)        }
+  'DCLARRAY' { PT _ (TS _ 3)        }
+  'DECL'     { PT _ (TS _ 4)        }
+  'DEF'      { PT _ (TS _ 5)        }
+  'END'      { PT _ (TS _ 6)        }
+  'INIT'     { PT _ (TS _ 7)        }
+  'LOG'      { PT _ (TS _ 8)        }
+  'NAME'     { PT _ (TS _ 9)        }
+  'NULL'     { PT _ (TS _ 10)       }
+  'PTR'      { PT _ (TS _ 11)       }
+  'SCALAR'   { PT _ (TS _ 12)       }
+  'SEQ'      { PT _ (TS _ 13)       }
+  'SIGNAL'   { PT _ (TS _ 14)       }
+  'STATE'    { PT _ (TS _ 15)       }
+  'STRUCT'   { PT _ (TS _ 16)       }
+  'TASK'     { PT _ (TS _ 17)       }
+  '_'        { PT _ (TS _ 18)       }
+  L_doubl    { PT _ (TD $$)         }
+  L_integ    { PT _ (TI $$)         }
+  L_quoted   { PT _ (TL $$)         }
+  L_ObsIdent { PT _ (T_ObsIdent $$) }
 
 %%
+
+Double  :: { Double }
+Double   : L_doubl  { (read $1) :: Double }
 
 Integer :: { Integer }
 Integer  : L_integ  { (read $1) :: Integer }
 
-ObsString :: { Obs.Abs.ObsString }
-ObsString  : L_ObsString { Obs.Abs.ObsString $1 }
+String  :: { String }
+String   : L_quoted { $1 }
+
+ObsIdent :: { Obs.Abs.ObsIdent }
+ObsIdent  : L_ObsIdent { Obs.Abs.ObsIdent $1 }
 
 ListObs :: { [Obs.Abs.Obs] }
 ListObs : {- empty -} { [] } | Obs ListObs { (:) $1 $2 }
 
-Name :: { Obs.Abs.Name }
-Name : ObsString { Obs.Abs.Mname $1 }
-
 Args :: { Obs.Abs.Args }
 Args
-  : ObsString { Obs.Abs.ArgsOne $1 }
-  | ObsString Args { Obs.Abs.ArgsCons $1 $2 }
+  : {- empty -} { Obs.Abs.ArgsOne }
+  | Integer Args { Obs.Abs.ArgsConsInteger $1 $2 }
+  | Double Args { Obs.Abs.ArgsConsDouble $1 $2 }
+  | String Args { Obs.Abs.ArgsConsString $1 $2 }
 
 LMsg :: { Obs.Abs.LMsg }
 LMsg
-  : ObsString { Obs.Abs.LmsgOne $1 }
-  | ObsString LMsg { Obs.Abs.LmsgCons $1 $2 }
+  : {- empty -} { Obs.Abs.LmsgOne }
+  | String LMsg { Obs.Abs.LmsgConsString $1 $2 }
+  | Integer LMsg { Obs.Abs.LmsgConsInt $1 $2 }
+  | Double LMsg { Obs.Abs.LmsgConsDouble $1 $2 }
 
 Taskname :: { Obs.Abs.Taskname }
-Taskname : ObsString { Obs.Abs.TaskName $1 }
+Taskname : ObsIdent { Obs.Abs.TaskName $1 }
 
 Varname :: { Obs.Abs.Varname }
-Varname : ObsString { Obs.Abs.VarName $1 }
+Varname : ObsIdent { Obs.Abs.VarName $1 }
 
 Varval :: { Obs.Abs.Varval }
-Varval : ObsString { Obs.Abs.VarVal $1 }
+Varval
+  : Integer { Obs.Abs.VarValInt $1 }
+  | Double { Obs.Abs.VarValDouble $1 }
+  | 'NULL' { Obs.Abs.VarValNull }
 
 Typename :: { Obs.Abs.Typename }
-Typename : ObsString { Obs.Abs.TypeName $1 }
+Typename : ObsIdent { Obs.Abs.TypeName $1 }
 
 State :: { Obs.Abs.State }
-State : ObsString { Obs.Abs.State $1 }
+State : ObsIdent { Obs.Abs.State $1 }
 
 Varindex :: { Obs.Abs.Varindex }
 Varindex : Integer { Obs.Abs.VarIndex $1 }
 
+ThreadId :: { Obs.Abs.ThreadId }
+ThreadId : Integer { Obs.Abs.ThreadId $1 }
+
+SizeDcl :: { Obs.Abs.SizeDcl }
+SizeDcl
+  : Varval { Obs.Abs.SizeDclVar $1 }
+  | ObsIdent { Obs.Abs.SizeDclDef $1 }
+
 Obs :: { Obs.Abs.Obs }
 Obs
-  : '@@@' Integer 'NAME' Name { Obs.Abs.ObsName $2 $4 }
-  | '@@@' Integer 'LOG' LMsg { Obs.Abs.ObsLog $2 $4 }
-  | '@@@' Integer 'INIT' { Obs.Abs.ObsInit $2 }
-  | '@@@' Integer 'TASK' Taskname { Obs.Abs.ObsTask $2 $4 }
-  | '@@@' Integer 'SIGNAL' Integer { Obs.Abs.ObsSignal $2 $4 }
-  | '@@@' Integer 'DEF' Varname Varval { Obs.Abs.ObsDef $2 $4 $5 }
-  | '@@@' Integer 'DECL' Typename Varname Varval { Obs.Abs.ObsDeclVal $2 $4 $5 $6 }
-  | '@@@' Integer 'DECL' Typename Varname { Obs.Abs.ObsDecl $2 $4 $5 }
-  | '@@@' Integer 'DCLARRAY' Typename Varname Varval { Obs.Abs.ObsDeclArr $2 $4 $5 $6 }
-  | '@@@' Integer 'CALL' Args { Obs.Abs.ObsCall $2 $4 }
-  | '@@@' Integer 'STATE' Integer State { Obs.Abs.ObsState $2 $4 $5 }
-  | '@@@' Integer 'STRUCT' Varname { Obs.Abs.ObsStruct $2 $4 }
-  | '@@@' Integer 'SEQ' Varname Scalar { Obs.Abs.ObsSeq $2 $4 $5 }
-  | '@@@' Integer 'PTR' Varname Varval { Obs.Abs.ObsPtr $2 $4 $5 }
-  | '@@@' Integer 'SCALAR' Varname Varval { Obs.Abs.ObsScalar $2 $4 $5 }
-  | '@@@' Integer 'SCALAR' Varname Varindex Varval { Obs.Abs.ObsScalarIndex $2 $4 $5 $6 }
-  | '@@@' Integer 'END' Varname { Obs.Abs.ObsEnd $2 $4 }
+  : Prefix ThreadId 'NAME' ObsIdent { Obs.Abs.ObsName $1 $2 $4 }
+  | Prefix ThreadId 'LOG' LMsg { Obs.Abs.ObsLog $1 $2 $4 }
+  | Prefix ThreadId 'INIT' { Obs.Abs.ObsInit $1 $2 }
+  | Prefix ThreadId 'TASK' Taskname { Obs.Abs.ObsTask $1 $2 $4 }
+  | Prefix ThreadId 'SIGNAL' Integer { Obs.Abs.ObsSignal $1 $2 $4 }
+  | Prefix ThreadId 'DEF' Varname Varval { Obs.Abs.ObsDef $1 $2 $4 $5 }
+  | Prefix ThreadId 'DECL' Typename Varname { Obs.Abs.ObsDecl $1 $2 $4 $5 }
+  | Prefix ThreadId 'DECL' Typename Varname Varval { Obs.Abs.ObsDeclVal $1 $2 $4 $5 $6 }
+  | Prefix ThreadId 'DCLARRAY' Typename Varname SizeDcl { Obs.Abs.ObsDeclArr $1 $2 $4 $5 $6 }
+  | Prefix ThreadId 'CALL' ObsIdent Args { Obs.Abs.ObsCall $1 $2 $4 $5 }
+  | Prefix ThreadId 'STATE' Integer State { Obs.Abs.ObsState $1 $2 $4 $5 }
+  | Prefix ThreadId 'STRUCT' Varname { Obs.Abs.ObsStruct $1 $2 $4 }
+  | Prefix ThreadId 'SEQ' Varname Scalar { Obs.Abs.ObsSeq $1 $2 $4 $5 }
+  | Prefix ThreadId 'PTR' Varname Varval { Obs.Abs.ObsPtr $1 $2 $4 $5 }
+  | Prefix ThreadId 'SCALAR' Varname Varval { Obs.Abs.ObsScalar $1 $2 $4 $5 }
+  | Prefix ThreadId 'SCALAR' Varname Varindex Varval { Obs.Abs.ObsScalarIndex $1 $2 $4 $5 $6 }
+  | Prefix ThreadId 'END' Varname { Obs.Abs.ObsEnd $1 $2 $4 }
 
 Scalar :: { Obs.Abs.Scalar }
 Scalar
-  : '@@@' Integer '_' Varval Scalar { Obs.Abs.ObsScalarCons $2 $4 $5 }
-  | End { Obs.Abs.ObsScalarNone $1 }
+  : End { Obs.Abs.ObsScalarNone $1 }
+  | Prefix ThreadId 'SCALAR' '_' Varval Scalar { Obs.Abs.ObsScalarCons $1 $2 $5 $6 }
 
 End :: { Obs.Abs.End }
-End : '@@@' Integer 'END' Varname { Obs.Abs.ObsEndSeq $2 $4 }
+End : Prefix ThreadId 'END' Varname { Obs.Abs.ObsEndSeq $1 $2 $4 }
+
+Prefix :: { Obs.Abs.Prefix }
+Prefix : '@@@' { Obs.Abs.Prefix }
 
 {
 

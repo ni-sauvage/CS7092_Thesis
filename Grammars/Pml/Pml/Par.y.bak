@@ -466,9 +466,9 @@ UStmt
 
 Step :: { Pml.Abs.Step }
 Step
-  : Stmt UStmt { Pml.Abs.StepStmt $1 $2 }
+  : Mtype { Pml.Abs.StepMType $1 }
+  | Stmt UStmt { Pml.Abs.StepStmt $1 $2 }
   | DeclList { Pml.Abs.StepDclList $1 }
-  | Mtype { Pml.Abs.StepMType $1 }
   | 'xr' VarRefList { Pml.Abs.StepXR $2 }
   | 'xs' VarRefList { Pml.Abs.StepXS $2 }
 

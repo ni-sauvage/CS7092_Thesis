@@ -354,9 +354,9 @@ instance Print Pml.Abs.UStmt where
 
 instance Print Pml.Abs.Step where
   prt i = \case
+    Pml.Abs.StepMType mtype -> prPrec i 0 (concatD [prt 0 mtype])
     Pml.Abs.StepStmt stmt ustmt -> prPrec i 0 (concatD [prt 0 stmt, prt 0 ustmt])
     Pml.Abs.StepDclList decllist -> prPrec i 0 (concatD [prt 0 decllist])
-    Pml.Abs.StepMType mtype -> prPrec i 0 (concatD [prt 0 mtype])
     Pml.Abs.StepXR varreflist -> prPrec i 0 (concatD [doc (showString "xr"), prt 0 varreflist])
     Pml.Abs.StepXS varreflist -> prPrec i 0 (concatD [doc (showString "xs"), prt 0 varreflist])
 

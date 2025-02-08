@@ -55,6 +55,14 @@ Tunsigned.    Type_specifier ::= "unsigned";
 Tstruct.      Type_specifier ::= Struct_or_union_spec;
 Tenum.        Type_specifier ::= Enum_specifier;
 Tname.        Type_specifier ::= "Typedef_name";
+Trtsc.        Type_specifier ::= "rtems_status_code";
+Trtes.        Type_specifier ::= "rtems_event_set";
+Trtid.        Type_specifier ::= "rtems_id";
+Trtctx.       Type_specifier ::= "Context";
+Trttp.        Type_specifier ::= "rtems_task_priority";
+Tszet.        Type_specifier ::= "size_t";
+Tevctx.       Type_specifier ::= "RtemsModelEventsMgr_Context";
+Trtta.        Type_specifier ::= "rtems_task_argument";
 
 
 MyType.         Storage_class_specifier ::= "typedef";
@@ -67,9 +75,9 @@ LocalReg.       Storage_class_specifier ::= "register" ;
 Const  . Type_qualifier ::= "const" ;
 NoOptim.  Type_qualifier ::= "volatile";
 
-Tag.      Struct_or_union_spec ::= Struct_or_union Ident "{" [Struct_dec] "}" ;
+Tag.      Struct_or_union_spec ::= Struct_or_union CIdent "{" [Struct_dec] "}" ;
 Unique.   Struct_or_union_spec ::= Struct_or_union "{" [Struct_dec] "}";
-TagType.  Struct_or_union_spec ::= Struct_or_union Ident ;
+TagType.  Struct_or_union_spec ::= Struct_or_union CIdent ;
 
 Struct.   Struct_or_union ::= "struct";
 Union.    Struct_or_union ::= "union";
@@ -94,25 +102,25 @@ DecField.  Struct_declarator ::= Declarator ":" Constant_expression ;
 
 
 EnumDec.   Enum_specifier ::= "enum" "{" [Enumerator] "}" ;
-EnumName.  Enum_specifier ::= "enum" Ident "{" [Enumerator] "}" ;
-EnumVar.   Enum_specifier ::= "enum" Ident ;
+EnumName.  Enum_specifier ::= "enum" CIdent "{" [Enumerator] "}" ;
+EnumVar.   Enum_specifier ::= "enum" CIdent ;
 
 (:[]).     [Enumerator] ::= Enumerator ;
 (:).       [Enumerator] ::= Enumerator "," [Enumerator] ;
 
-Plain.     Enumerator ::= Ident ;
-EnumInit.  Enumerator ::= Ident "=" Constant_expression ;
+Plain.     Enumerator ::= CIdent ;
+EnumInit.  Enumerator ::= CIdent "=" Constant_expression ;
 
 
 BeginPointer.   Declarator ::= Pointer Direct_declarator ;
 NoPointer.      Declarator ::= Direct_declarator ;
 
-Name.        Direct_declarator ::= Ident ;
+Name.        Direct_declarator ::= CIdent ;
 ParenDecl.   Direct_declarator ::= "(" Declarator ")" ;
 InnitArray.  Direct_declarator ::= Direct_declarator "[" Constant_expression "]" ;
 Incomplete.  Direct_declarator ::= Direct_declarator "[" "]" ;
 NewFuncDec.  Direct_declarator ::= Direct_declarator "(" Parameter_type ")" ;
-OldFuncDef.  Direct_declarator ::= Direct_declarator "(" [Ident] ")" ;
+OldFuncDef.  Direct_declarator ::= Direct_declarator "(" [CIdent] ")" ;
 OldFuncDec.  Direct_declarator ::= Direct_declarator "(" ")" ;
 
 Point.          Pointer ::= "*" ;
@@ -136,8 +144,8 @@ TypeAndParam.  Parameter_declaration ::= [Declaration_specifier] Declarator ;
 Abstract.      Parameter_declaration ::= [Declaration_specifier] Abstract_declarator ;
 
 
-(:[]).   [Ident] ::= Ident ;
-(:).     [Ident] ::= Ident "," [Ident] ;
+(:[]).   [CIdent] ::= CIdent ;
+(:).     [CIdent] ::= CIdent "," [CIdent] ;
 
 InitExpr.    Initializer ::= Exp2 ;
 InitListOne. Initializer ::= "{" Initializers "}" ;
@@ -175,7 +183,7 @@ SelS.     Stm ::= Selection_stm ;
 IterS.    Stm ::= Iter_stm ;
 JumpS.    Stm ::= Jump_stm ;
 
-SlabelOne.   Labeled_stm ::= Ident ":" Stm ;
+SlabelOne.   Labeled_stm ::= CIdent ":" Stm ;
 SlabelTwo.   Labeled_stm ::= "case" Constant_expression ":" Stm ;
 SlabelThree. Labeled_stm ::= "default" ":" Stm;
 
@@ -196,7 +204,7 @@ SiterTwo.   Iter_stm ::= "do" Stm "while" "(" Exp ")" ";" ;
 SiterThree. Iter_stm ::= "for" "(" Expression_stm Expression_stm ")" Stm ;
 SiterFour.  Iter_stm ::= "for" "(" Expression_stm Expression_stm Exp ")" Stm;
 
-SjumpOne.   Jump_stm ::= "goto" Ident ";" ;
+SjumpOne.   Jump_stm ::= "goto" CIdent ";" ;
 SjumpTwo.   Jump_stm ::= "continue" ";" ;
 SjumpThree. Jump_stm ::= "break" ";" ;
 SjumpFour.  Jump_stm ::= "return" ";" ;
@@ -269,11 +277,11 @@ Ebytestype.  Exp15 ::= "sizeof" "(" Type_name ")";
 Earray.      Exp16 ::= Exp16 "[" Exp "]" ;
 Efunk.       Exp16 ::= Exp16 "(" ")";
 Efunkpar.    Exp16 ::= Exp16 "(" [Exp2] ")";
-Eselect.     Exp16 ::= Exp16 "." Ident;
-Epoint.      Exp16 ::= Exp16 "->" Ident;
+Eselect.     Exp16 ::= Exp16 "." CIdent;
+Epoint.      Exp16 ::= Exp16 "->" CIdent;
 Epostinc.    Exp16 ::= Exp16 "++";
 Epostdec.    Exp16 ::= Exp16 "--";
-Evar.        Exp17 ::= Ident;
+Evar.        Exp17 ::= CIdent;
 Econst.      Exp17 ::= Constant;
 Estring.     Exp17 ::= String;
 
@@ -344,3 +352,5 @@ AssignOr.     Assignment_op ::= "|=" ;
 comment "/*" "*/" ;
 comment "//";
 comment "#";
+
+token CIdent (letter | '_') (letter | digit | '_' | '\'')*;

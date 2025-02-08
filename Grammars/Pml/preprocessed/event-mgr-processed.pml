@@ -608,4 +608,4 @@ init {
 
 
   printf("Event Manager Model finished !\n")
-};
+}

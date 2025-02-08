@@ -28,12 +28,9 @@ $u = [. \n]          -- universal: any character
 
 -- Symbols and non-identifier-like reserved words
 
-@rsyms = \@ \@ \@ | \_
+@rsyms = \_ | \@ \@ \@
 
 :-
-
--- Line comment "^((?!@@@).)*$"
-"^((?!@@@).)*$" [.]* ;
 
 -- Whitespace (skipped)
 $white+ ;
@@ -42,17 +39,25 @@ $white+ ;
 @rsyms
     { tok (eitherResIdent TV) }
 
--- token ObsString
-([\' \_]| ($d | $l)) +
-    { tok (eitherResIdent T_ObsString) }
+-- token ObsIdent
+(\_ | $l)(\_ | ($d | $l)) *
+    { tok (eitherResIdent T_ObsIdent) }
 
 -- Keywords and Ident
 $l $i*
     { tok (eitherResIdent TV) }
 
+-- String
+\" ([$u # [\" \\ \n]] | (\\ (\" | \\ | \' | n | t | r | f)))* \"
+    { tok (TL . unescapeInitTail) }
+
 -- Integer
 $d+
     { tok TI }
+
+-- Double
+$d+ \. $d+ (e (\-)? $d+)?
+    { tok TD }
 
 {
 -- | Create a token with position.
@@ -67,7 +72,7 @@ data Tok
   | TV !String                    -- ^ Identifier.
   | TD !String                    -- ^ Float literal.
   | TC !String                    -- ^ Character literal.
-  | T_ObsString !String
+  | T_ObsIdent !String
   deriving (Eq, Show, Ord)
 
 -- | Smart constructor for 'Tok' for the sake of backwards compatibility.
@@ -130,7 +135,7 @@ tokenText t = case t of
   PT _ (TD s)   -> s
   PT _ (TC s)   -> s
   Err _         -> "#error"
-  PT _ (T_ObsString s) -> s
+  PT _ (T_ObsIdent s) -> s
 
 -- | Convert a token to a string.
 prToken :: Token -> String
@@ -157,13 +162,13 @@ eitherResIdent tv s = treeFind resWords
 -- | The keywords and symbols of the language organized as binary search tree.
 resWords :: BTree
 resWords =
-  b "NAME" 9
+  b "NULL" 10
     (b "DEF" 5
        (b "DCLARRAY" 3 (b "CALL" 2 (b "@@@" 1 N N) N) (b "DECL" 4 N N))
-       (b "INIT" 7 (b "END" 6 N N) (b "LOG" 8 N N)))
-    (b "STATE" 14
-       (b "SEQ" 12 (b "SCALAR" 11 (b "PTR" 10 N N) N) (b "SIGNAL" 13 N N))
-       (b "TASK" 16 (b "STRUCT" 15 N N) (b "_" 17 N N)))
+       (b "LOG" 8 (b "INIT" 7 (b "END" 6 N N) N) (b "NAME" 9 N N)))
+    (b "STATE" 15
+       (b "SEQ" 13 (b "SCALAR" 12 (b "PTR" 11 N N) N) (b "SIGNAL" 14 N N))
+       (b "TASK" 17 (b "STRUCT" 16 N N) (b "_" 18 N N)))
   where
   b s n = B bs (TS bs n)
     where

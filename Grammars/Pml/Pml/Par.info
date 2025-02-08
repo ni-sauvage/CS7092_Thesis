@@ -41,7 +41,7 @@ state 436 contains 2 shift/reduce conflicts.
 state 481 contains 2 shift/reduce conflicts.
 state 485 contains 1 shift/reduce conflicts.
 state 492 contains 2 shift/reduce conflicts.
-state 511 contains 2 shift/reduce conflicts.
+state 510 contains 2 shift/reduce conflicts.
 
 -----------------------------------------------------------------------------
 Grammar
@@ -182,7 +182,7 @@ Grammar
 	Ppriority -> Priority                              (133)
 	Penabler ->                                        (134)
 	Penabler -> Enabler                                (135)
-	Init -> 'init' Ipriority '{' Sequence '}' ';'      (136)
+	Init -> 'init' Ipriority '{' Sequence '}'          (136)
 	Ipriority ->                                       (137)
 	Ipriority -> Priority                              (138)
 	Never -> 'never' '{' Sequence '}'                  (139)
@@ -6297,7 +6297,7 @@ State 239
 
 State 240
 
-	Init -> 'init' . Ipriority '{' Sequence '}' ';'     (rule 136)
+	Init -> 'init' . Ipriority '{' Sequence '}'         (rule 136)
 
 	'priority'     shift, and enter state 109
 	'{'            reduce using rule 137
@@ -7333,7 +7333,7 @@ State 296
 
 State 297
 
-	Init -> 'init' Ipriority . '{' Sequence '}' ';'     (rule 136)
+	Init -> 'init' Ipriority . '{' Sequence '}'         (rule 136)
 
 	'{'            shift, and enter state 436
 
@@ -12502,7 +12502,7 @@ State 435
 
 State 436
 
-	Init -> 'init' Ipriority '{' . Sequence '}' ';'     (rule 136)
+	Init -> 'init' Ipriority '{' . Sequence '}'         (rule 136)
 
 	'!'            shift, and enter state 86
 	'('            shift, and enter state 87
@@ -12649,7 +12649,7 @@ State 440
 
 State 441
 
-	Init -> 'init' Ipriority '{' Sequence . '}' ';'     (rule 136)
+	Init -> 'init' Ipriority '{' Sequence . '}'         (rule 136)
 
 	'}'            shift, and enter state 488
 
@@ -14102,7 +14102,7 @@ State 474
 	PIdent         goto state 72
 	UnrOp          goto state 79
 	Const          goto state 80
-	AnyExpr        goto state 503
+	AnyExpr        goto state 502
 	VarRef         goto state 82
 	Poll           goto state 83
 	Name           goto state 85
@@ -14196,7 +14196,7 @@ State 475
 	%eof           reduce using rule 261
 
 	Priority       goto state 107
-	RunPrio        goto state 502
+	RunPrio        goto state 501
 
 State 476
 
@@ -14204,7 +14204,7 @@ State 476
 	Expr -> Expr . AndOr Expr                           (rule 267)
 
 	'&&'           shift, and enter state 270
-	')'            shift, and enter state 501
+	')'            shift, and enter state 500
 	'||'           shift, and enter state 284
 
 	AndOr          goto state 355
@@ -14393,7 +14393,7 @@ State 480
 	L_PIdent       shift, and enter state 74
 
 	PIdent         goto state 72
-	Name           goto state 500
+	Name           goto state 499
 
 State 481
 
@@ -14460,7 +14460,7 @@ State 481
 	DeclList       goto state 194
 	Decl           goto state 195
 	DeclVisible    goto state 196
-	Sequence       goto state 499
+	Sequence       goto state 498
 	Step           goto state 207
 	AnyExpr        goto state 81
 	VarRef         goto state 115
@@ -14476,14 +14476,14 @@ State 482
 
 	Poll -> VarRef '?' '?' '[' RecvArgs . ']'           (rule 216)
 
-	']'            shift, and enter state 498
+	']'            shift, and enter state 497
 
 
 State 483
 
 	Receive -> VarRef '?' '?' '<' RecvArgs . '>'        (rule 214)
 
-	'>'            shift, and enter state 497
+	'>'            shift, and enter state 496
 
 
 State 484
@@ -14501,7 +14501,7 @@ State 484
 
 	PIdent         goto state 72
 	Typename       goto state 171
-	ChType         goto state 496
+	ChType         goto state 495
 	Uname          goto state 173
 	Name           goto state 76
 
@@ -14572,7 +14572,7 @@ State 485
 	L_PIdent       reduce using rule 143
 	%eof           reduce using rule 143
 
-	Msep           goto state 495
+	Msep           goto state 494
 
 State 486
 
@@ -14644,14 +14644,32 @@ State 487
 
 	Utype -> 'typedef' Name '{' DeclList '}' . ';'      (rule 141)
 
-	';'            shift, and enter state 494
+	';'            shift, and enter state 493
 
 
 State 488
 
-	Init -> 'init' Ipriority '{' Sequence '}' . ';'     (rule 136)
+	Init -> 'init' Ipriority '{' Sequence '}' .         (rule 136)
 
-	';'            shift, and enter state 493
+	'active'       reduce using rule 136
+	'bit'          reduce using rule 136
+	'bool'         reduce using rule 136
+	'byte'         reduce using rule 136
+	'chan'         reduce using rule 136
+	'hidden'       reduce using rule 136
+	'init'         reduce using rule 136
+	'inline'       reduce using rule 136
+	'int'          reduce using rule 136
+	'mtype'        reduce using rule 136
+	'never'        reduce using rule 136
+	'proctype'     reduce using rule 136
+	'short'        reduce using rule 136
+	'show'         reduce using rule 136
+	'trace'        reduce using rule 136
+	'typedef'      reduce using rule 136
+	'unsigned'     reduce using rule 136
+	L_PIdent       reduce using rule 136
+	%eof           reduce using rule 136
 
 
 State 489
@@ -14676,7 +14694,7 @@ State 491
 	'provided'     reduce using rule 132
 	'{'            reduce using rule 132
 
-	Ppriority      goto state 508
+	Ppriority      goto state 507
 	Priority       goto state 244
 
 State 492
@@ -14744,7 +14762,7 @@ State 492
 	DeclList       goto state 194
 	Decl           goto state 195
 	DeclVisible    goto state 196
-	Sequence       goto state 507
+	Sequence       goto state 506
 	Step           goto state 207
 	AnyExpr        goto state 81
 	VarRef         goto state 115
@@ -14757,31 +14775,6 @@ State 492
 	Name           goto state 121
 
 State 493
-
-	Init -> 'init' Ipriority '{' Sequence '}' ';' .     (rule 136)
-
-	'active'       reduce using rule 136
-	'bit'          reduce using rule 136
-	'bool'         reduce using rule 136
-	'byte'         reduce using rule 136
-	'chan'         reduce using rule 136
-	'hidden'       reduce using rule 136
-	'init'         reduce using rule 136
-	'inline'       reduce using rule 136
-	'int'          reduce using rule 136
-	'mtype'        reduce using rule 136
-	'never'        reduce using rule 136
-	'proctype'     reduce using rule 136
-	'short'        reduce using rule 136
-	'show'         reduce using rule 136
-	'trace'        reduce using rule 136
-	'typedef'      reduce using rule 136
-	'unsigned'     reduce using rule 136
-	L_PIdent       reduce using rule 136
-	%eof           reduce using rule 136
-
-
-State 494
 
 	Utype -> 'typedef' Name '{' DeclList '}' ';' .      (rule 141)
 
@@ -14806,7 +14799,7 @@ State 494
 	%eof           reduce using rule 141
 
 
-State 495
+State 494
 
 	Mtype -> 'mtype' Mequals '{' Mname '}' Msep .       (rule 142)
 
@@ -14872,14 +14865,14 @@ State 495
 	%eof           reduce using rule 142
 
 
-State 496
+State 495
 
 	ChInit -> '[' Const ']' 'of' '{' ChType . '}'       (rule 201)
 
-	'}'            shift, and enter state 506
+	'}'            shift, and enter state 505
 
 
-State 497
+State 496
 
 	Receive -> VarRef '?' '?' '<' RecvArgs '>' .        (rule 214)
 
@@ -14939,7 +14932,7 @@ State 497
 	%eof           reduce using rule 214
 
 
-State 498
+State 497
 
 	Poll -> VarRef '?' '?' '[' RecvArgs ']' .           (rule 216)
 
@@ -15027,14 +15020,14 @@ State 498
 	%eof           reduce using rule 216
 
 
-State 499
+State 498
 
 	Stmt -> 'for' '(' Range ')' '{' Sequence . '}'      (rule 241)
 
-	'}'            shift, and enter state 505
+	'}'            shift, and enter state 504
 
 
-State 500
+State 499
 
 	AnyExpr -> Name '[' AnyExpr ']' '@' Name .          (rule 191)
 
@@ -15122,7 +15115,7 @@ State 500
 	%eof           reduce using rule 191
 
 
-State 501
+State 500
 
 	AnyExpr -> 'set_priority' '(' Expr ',' Expr ')' .    (rule 194)
 
@@ -15210,7 +15203,7 @@ State 501
 	%eof           reduce using rule 194
 
 
-State 502
+State 501
 
 	AnyExpr -> 'run' Name '(' RunArgs ')' RunPrio .     (rule 192)
 
@@ -15298,7 +15291,7 @@ State 502
 	%eof           reduce using rule 192
 
 
-State 503
+State 502
 
 	AnyExpr -> AnyExpr . BinOp AnyExpr                  (rule 180)
 	AnyExpr -> '(' AnyExpr '->' AnyExpr ':' AnyExpr . ')'    (rule 182)
@@ -15307,7 +15300,7 @@ State 503
 	'%'            shift, and enter state 268
 	'&'            shift, and enter state 269
 	'&&'           shift, and enter state 270
-	')'            shift, and enter state 504
+	')'            shift, and enter state 503
 	'*'            shift, and enter state 271
 	'+'            shift, and enter state 272
 	'-'            shift, and enter state 273
@@ -15326,7 +15319,7 @@ State 503
 	AndOr          goto state 265
 	BinOp          goto state 319
 
-State 504
+State 503
 
 	AnyExpr -> '(' AnyExpr '->' AnyExpr ':' AnyExpr ')' .    (rule 182)
 
@@ -15414,7 +15407,7 @@ State 504
 	%eof           reduce using rule 182
 
 
-State 505
+State 504
 
 	Stmt -> 'for' '(' Range ')' '{' Sequence '}' .      (rule 241)
 
@@ -15474,7 +15467,7 @@ State 505
 	%eof           reduce using rule 241
 
 
-State 506
+State 505
 
 	ChInit -> '[' Const ']' 'of' '{' ChType '}' .       (rule 201)
 
@@ -15541,31 +15534,31 @@ State 506
 	%eof           reduce using rule 201
 
 
-State 507
+State 506
 
 	Inline -> 'inline' Name '(' ArgList ')' '{' Sequence . '}'    (rule 127)
 
-	'}'            shift, and enter state 510
+	'}'            shift, and enter state 509
 
 
-State 508
+State 507
 
 	Proctype -> Pactive 'proctype' Name '(' PdeclList ')' Ppriority . Penabler '{' Sequence '}'    (rule 126)
 
 	'provided'     shift, and enter state 209
 	'{'            reduce using rule 134
 
-	Penabler       goto state 509
+	Penabler       goto state 508
 	Enabler        goto state 242
 
-State 509
+State 508
 
 	Proctype -> Pactive 'proctype' Name '(' PdeclList ')' Ppriority Penabler . '{' Sequence '}'    (rule 126)
 
-	'{'            shift, and enter state 511
+	'{'            shift, and enter state 510
 
 
-State 510
+State 509
 
 	Inline -> 'inline' Name '(' ArgList ')' '{' Sequence '}' .    (rule 127)
 
@@ -15590,7 +15583,7 @@ State 510
 	%eof           reduce using rule 127
 
 
-State 511
+State 510
 
 	Proctype -> Pactive 'proctype' Name '(' PdeclList ')' Ppriority Penabler '{' . Sequence '}'    (rule 126)
 
@@ -15655,7 +15648,7 @@ State 511
 	DeclList       goto state 194
 	Decl           goto state 195
 	DeclVisible    goto state 196
-	Sequence       goto state 512
+	Sequence       goto state 511
 	Step           goto state 207
 	AnyExpr        goto state 81
 	VarRef         goto state 115
@@ -15667,14 +15660,14 @@ State 511
 	Expr           goto state 120
 	Name           goto state 121
 
-State 512
+State 511
 
 	Proctype -> Pactive 'proctype' Name '(' PdeclList ')' Ppriority Penabler '{' Sequence . '}'    (rule 126)
 
-	'}'            shift, and enter state 513
+	'}'            shift, and enter state 512
 
 
-State 513
+State 512
 
 	Proctype -> Pactive 'proctype' Name '(' PdeclList ')' Ppriority Penabler '{' Sequence '}' .    (rule 126)
 
@@ -15705,4 +15698,4 @@ Grammar Totals
 Number of rules: 271
 Number of terminals: 94
 Number of non-terminals: 143
-Number of states: 514
+Number of states: 513

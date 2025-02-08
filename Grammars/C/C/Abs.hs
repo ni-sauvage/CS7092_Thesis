@@ -51,6 +51,14 @@ data Type_specifier
     | Tstruct Struct_or_union_spec
     | Tenum Enum_specifier
     | Tname
+    | Trtsc
+    | Trtes
+    | Trtid
+    | Trtctx
+    | Trttp
+    | Tszet
+    | Tevctx
+    | Trtta
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Storage_class_specifier
@@ -61,9 +69,9 @@ data Type_qualifier = Const | NoOptim
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Struct_or_union_spec
-    = Tag Struct_or_union Ident [Struct_dec]
+    = Tag Struct_or_union CIdent [Struct_dec]
     | Unique Struct_or_union [Struct_dec]
-    | TagType Struct_or_union Ident
+    | TagType Struct_or_union CIdent
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Struct_or_union = Struct | Union
@@ -83,11 +91,12 @@ data Struct_declarator
 
 data Enum_specifier
     = EnumDec [Enumerator]
-    | EnumName Ident [Enumerator]
-    | EnumVar Ident
+    | EnumName CIdent [Enumerator]
+    | EnumVar CIdent
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data Enumerator = Plain Ident | EnumInit Ident Constant_expression
+data Enumerator
+    = Plain CIdent | EnumInit CIdent Constant_expression
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Declarator
@@ -96,12 +105,12 @@ data Declarator
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Direct_declarator
-    = Name Ident
+    = Name CIdent
     | ParenDecl Declarator
     | InnitArray Direct_declarator Constant_expression
     | Incomplete Direct_declarator
     | NewFuncDec Direct_declarator Parameter_type
-    | OldFuncDef Direct_declarator [Ident]
+    | OldFuncDef Direct_declarator [CIdent]
     | OldFuncDec Direct_declarator
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
@@ -170,7 +179,7 @@ data Stm
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Labeled_stm
-    = SlabelOne Ident Stm
+    = SlabelOne CIdent Stm
     | SlabelTwo Constant_expression Stm
     | SlabelThree Stm
   deriving (C.Eq, C.Ord, C.Show, C.Read)
@@ -197,7 +206,7 @@ data Iter_stm
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Jump_stm
-    = SjumpOne Ident
+    = SjumpOne CIdent
     | SjumpTwo
     | SjumpThree
     | SjumpFour
@@ -235,11 +244,11 @@ data Exp
     | Earray Exp Exp
     | Efunk Exp
     | Efunkpar Exp [Exp]
-    | Eselect Exp Ident
-    | Epoint Exp Ident
+    | Eselect Exp CIdent
+    | Epoint Exp CIdent
     | Epostinc Exp
     | Epostdec Exp
-    | Evar Ident
+    | Evar CIdent
     | Econst Constant
     | Estring String
   deriving (C.Eq, C.Ord, C.Show, C.Read)
@@ -287,9 +296,6 @@ data Assignment_op
     | AssignOr
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-newtype Ident = Ident String
-  deriving (C.Eq, C.Ord, C.Show, C.Read, Data.String.IsString)
-
 newtype Unsigned = Unsigned String
   deriving (C.Eq, C.Ord, C.Show, C.Read, Data.String.IsString)
 
@@ -330,5 +336,8 @@ newtype CFloat = CFloat String
   deriving (C.Eq, C.Ord, C.Show, C.Read, Data.String.IsString)
 
 newtype CLongDouble = CLongDouble String
+  deriving (C.Eq, C.Ord, C.Show, C.Read, Data.String.IsString)
+
+newtype CIdent = CIdent String
   deriving (C.Eq, C.Ord, C.Show, C.Read, Data.String.IsString)
 
