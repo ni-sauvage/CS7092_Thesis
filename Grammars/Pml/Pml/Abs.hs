@@ -109,7 +109,7 @@ data Trace = Trc Sequence
 data Utype = Utp Name DeclList
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data Mtype = Mtp Mequals Mname Msep
+data Mtype = MtpEq Mequals Mname Msep | MtpNoEq Mname Msep
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Msep = MsepNone | MsepOne

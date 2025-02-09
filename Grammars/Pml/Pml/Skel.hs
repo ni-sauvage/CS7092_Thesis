@@ -151,7 +151,8 @@ transUtype x = case x of
 
 transMtype :: Pml.Abs.Mtype -> Result
 transMtype x = case x of
-  Pml.Abs.Mtp mequals mname msep -> failure x
+  Pml.Abs.MtpEq mequals mname msep -> failure x
+  Pml.Abs.MtpNoEq mname msep -> failure x
 
 transMsep :: Pml.Abs.Msep -> Result
 transMsep x = case x of

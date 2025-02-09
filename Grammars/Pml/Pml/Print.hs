@@ -277,7 +277,8 @@ instance Print Pml.Abs.Utype where
 
 instance Print Pml.Abs.Mtype where
   prt i = \case
-    Pml.Abs.Mtp mequals mname msep -> prPrec i 0 (concatD [doc (showString "mtype"), prt 0 mequals, doc (showString "{"), prt 0 mname, doc (showString "}"), prt 0 msep])
+    Pml.Abs.MtpEq mequals mname msep -> prPrec i 0 (concatD [doc (showString "mtype"), prt 0 mequals, doc (showString "{"), prt 0 mname, doc (showString "}"), prt 0 msep])
+    Pml.Abs.MtpNoEq mname msep -> prPrec i 0 (concatD [doc (showString "mtype"), prt 0 mname, prt 0 msep])
 
 instance Print Pml.Abs.Msep where
   prt i = \case

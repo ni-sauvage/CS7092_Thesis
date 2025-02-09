@@ -101,10 +101,11 @@ The reserved words used in C are the following:
   | ``else`` | ``enum`` | ``extern`` | ``float``
   | ``for`` | ``goto`` | ``if`` | ``int``
   | ``long`` | ``register`` | ``return`` | ``rtems_event_set``
-  | ``rtems_id`` | ``rtems_status_code`` | ``rtems_task_priority`` | ``short``
-  | ``signed`` | ``size_t`` | ``sizeof`` | ``static``
-  | ``struct`` | ``switch`` | ``typedef`` | ``union``
-  | ``unsigned`` | ``void`` | ``volatile`` | ``while``
+  | ``rtems_id`` | ``rtems_status_code`` | ``rtems_task_argument`` | ``rtems_task_priority``
+  | ``short`` | ``signed`` | ``size_t`` | ``sizeof``
+  | ``static`` | ``struct`` | ``switch`` | ``typedef``
+  | ``union`` | ``unsigned`` | ``void`` | ``volatile``
+  | ``while`` |  |  |
 
 The symbols used in C are the following:
   | ; | , | = | {
@@ -170,6 +171,7 @@ All other symbols are terminals.
   |  |  **|**  | ``rtems_task_priority``
   |  |  **|**  | ``size_t``
   |  |  **|**  | ``RtemsModelEventsMgr_Context``
+  |  |  **|**  | ``rtems_task_argument``
   | //Storage_class_specifier// | -> | ``typedef``
   |  |  **|**  | ``extern``
   |  |  **|**  | ``static``

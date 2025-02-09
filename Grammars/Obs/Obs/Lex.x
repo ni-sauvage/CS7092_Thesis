@@ -28,7 +28,7 @@ $u = [. \n]          -- universal: any character
 
 -- Symbols and non-identifier-like reserved words
 
-@rsyms = \_ | \@ \@ \@
+@rsyms = \@ \@ \@ | \_
 
 :-
 
@@ -43,13 +43,13 @@ $white+ ;
 (\_ | $l)(\_ | ($d | $l)) *
     { tok (eitherResIdent T_ObsIdent) }
 
+-- token ObsStr
+([\, \. \: \_]| $l)+
+    { tok (eitherResIdent T_ObsStr) }
+
 -- Keywords and Ident
 $l $i*
     { tok (eitherResIdent TV) }
-
--- String
-\" ([$u # [\" \\ \n]] | (\\ (\" | \\ | \' | n | t | r | f)))* \"
-    { tok (TL . unescapeInitTail) }
 
 -- Integer
 $d+
@@ -73,6 +73,7 @@ data Tok
   | TD !String                    -- ^ Float literal.
   | TC !String                    -- ^ Character literal.
   | T_ObsIdent !String
+  | T_ObsStr !String
   deriving (Eq, Show, Ord)
 
 -- | Smart constructor for 'Tok' for the sake of backwards compatibility.
@@ -136,6 +137,7 @@ tokenText t = case t of
   PT _ (TC s)   -> s
   Err _         -> "#error"
   PT _ (T_ObsIdent s) -> s
+  PT _ (T_ObsStr s) -> s
 
 -- | Convert a token to a string.
 prToken :: Token -> String

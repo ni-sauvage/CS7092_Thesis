@@ -65,55 +65,56 @@ import C.Lex
   '?'                           { PT _ (TS _ 36)            }
   'Context'                     { PT _ (TS _ 37)            }
   'RtemsModelEventsMgr_Context' { PT _ (TS _ 38)            }
-  'Typedef_name'                { PT _ (TS _ 39)            }
-  '['                           { PT _ (TS _ 40)            }
-  ']'                           { PT _ (TS _ 41)            }
-  '^'                           { PT _ (TS _ 42)            }
-  '^='                          { PT _ (TS _ 43)            }
-  'auto'                        { PT _ (TS _ 44)            }
-  'break'                       { PT _ (TS _ 45)            }
-  'case'                        { PT _ (TS _ 46)            }
-  'char'                        { PT _ (TS _ 47)            }
-  'const'                       { PT _ (TS _ 48)            }
-  'continue'                    { PT _ (TS _ 49)            }
-  'default'                     { PT _ (TS _ 50)            }
-  'do'                          { PT _ (TS _ 51)            }
-  'double'                      { PT _ (TS _ 52)            }
-  'else'                        { PT _ (TS _ 53)            }
-  'enum'                        { PT _ (TS _ 54)            }
-  'extern'                      { PT _ (TS _ 55)            }
-  'float'                       { PT _ (TS _ 56)            }
-  'for'                         { PT _ (TS _ 57)            }
-  'goto'                        { PT _ (TS _ 58)            }
-  'if'                          { PT _ (TS _ 59)            }
-  'int'                         { PT _ (TS _ 60)            }
-  'long'                        { PT _ (TS _ 61)            }
-  'register'                    { PT _ (TS _ 62)            }
-  'return'                      { PT _ (TS _ 63)            }
-  'rtems_event_set'             { PT _ (TS _ 64)            }
-  'rtems_id'                    { PT _ (TS _ 65)            }
-  'rtems_status_code'           { PT _ (TS _ 66)            }
-  'rtems_task_argument'         { PT _ (TS _ 67)            }
-  'rtems_task_priority'         { PT _ (TS _ 68)            }
-  'short'                       { PT _ (TS _ 69)            }
-  'signed'                      { PT _ (TS _ 70)            }
-  'size_t'                      { PT _ (TS _ 71)            }
-  'sizeof'                      { PT _ (TS _ 72)            }
-  'static'                      { PT _ (TS _ 73)            }
-  'struct'                      { PT _ (TS _ 74)            }
-  'switch'                      { PT _ (TS _ 75)            }
-  'typedef'                     { PT _ (TS _ 76)            }
-  'union'                       { PT _ (TS _ 77)            }
-  'unsigned'                    { PT _ (TS _ 78)            }
-  'void'                        { PT _ (TS _ 79)            }
-  'volatile'                    { PT _ (TS _ 80)            }
-  'while'                       { PT _ (TS _ 81)            }
-  '{'                           { PT _ (TS _ 82)            }
-  '|'                           { PT _ (TS _ 83)            }
-  '|='                          { PT _ (TS _ 84)            }
-  '||'                          { PT _ (TS _ 85)            }
-  '}'                           { PT _ (TS _ 86)            }
-  '~'                           { PT _ (TS _ 87)            }
+  'RtemsModelProtoSem_Context'  { PT _ (TS _ 39)            }
+  'Typedef_name'                { PT _ (TS _ 40)            }
+  '['                           { PT _ (TS _ 41)            }
+  ']'                           { PT _ (TS _ 42)            }
+  '^'                           { PT _ (TS _ 43)            }
+  '^='                          { PT _ (TS _ 44)            }
+  'auto'                        { PT _ (TS _ 45)            }
+  'break'                       { PT _ (TS _ 46)            }
+  'case'                        { PT _ (TS _ 47)            }
+  'char'                        { PT _ (TS _ 48)            }
+  'const'                       { PT _ (TS _ 49)            }
+  'continue'                    { PT _ (TS _ 50)            }
+  'default'                     { PT _ (TS _ 51)            }
+  'do'                          { PT _ (TS _ 52)            }
+  'double'                      { PT _ (TS _ 53)            }
+  'else'                        { PT _ (TS _ 54)            }
+  'enum'                        { PT _ (TS _ 55)            }
+  'extern'                      { PT _ (TS _ 56)            }
+  'float'                       { PT _ (TS _ 57)            }
+  'for'                         { PT _ (TS _ 58)            }
+  'goto'                        { PT _ (TS _ 59)            }
+  'if'                          { PT _ (TS _ 60)            }
+  'int'                         { PT _ (TS _ 61)            }
+  'long'                        { PT _ (TS _ 62)            }
+  'register'                    { PT _ (TS _ 63)            }
+  'return'                      { PT _ (TS _ 64)            }
+  'rtems_event_set'             { PT _ (TS _ 65)            }
+  'rtems_id'                    { PT _ (TS _ 66)            }
+  'rtems_status_code'           { PT _ (TS _ 67)            }
+  'rtems_task_argument'         { PT _ (TS _ 68)            }
+  'rtems_task_priority'         { PT _ (TS _ 69)            }
+  'short'                       { PT _ (TS _ 70)            }
+  'signed'                      { PT _ (TS _ 71)            }
+  'size_t'                      { PT _ (TS _ 72)            }
+  'sizeof'                      { PT _ (TS _ 73)            }
+  'static'                      { PT _ (TS _ 74)            }
+  'struct'                      { PT _ (TS _ 75)            }
+  'switch'                      { PT _ (TS _ 76)            }
+  'typedef'                     { PT _ (TS _ 77)            }
+  'union'                       { PT _ (TS _ 78)            }
+  'unsigned'                    { PT _ (TS _ 79)            }
+  'void'                        { PT _ (TS _ 80)            }
+  'volatile'                    { PT _ (TS _ 81)            }
+  'while'                       { PT _ (TS _ 82)            }
+  '{'                           { PT _ (TS _ 83)            }
+  '|'                           { PT _ (TS _ 84)            }
+  '|='                          { PT _ (TS _ 85)            }
+  '||'                          { PT _ (TS _ 86)            }
+  '}'                           { PT _ (TS _ 87)            }
+  '~'                           { PT _ (TS _ 88)            }
   L_charac                      { PT _ (TC $$)              }
   L_doubl                       { PT _ (TD $$)              }
   L_integ                       { PT _ (TI $$)              }
@@ -262,6 +263,7 @@ Type_specifier
   | 'rtems_task_priority' { C.Abs.Trttp }
   | 'size_t' { C.Abs.Tszet }
   | 'RtemsModelEventsMgr_Context' { C.Abs.Tevctx }
+  | 'RtemsModelProtoSem_Context' { C.Abs.Tpsctx }
   | 'rtems_task_argument' { C.Abs.Trtta }
 
 Storage_class_specifier :: { C.Abs.Storage_class_specifier }

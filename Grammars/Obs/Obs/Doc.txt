@@ -20,15 +20,14 @@ followed by an unsigned or negative exponent.
 Integer literals //Integer// are nonempty sequences of digits.
 
 
-String literals //String// have the form
-``"``//x//``"``}, where //x// is any sequence of any characters
-except ``"`` unless preceded by ``\``.
-
 
 
 
 ObsIdent literals are recognized by the regular expression
 `````('_' | letter) ('_' | digit | letter)*`````
+
+ObsStr literals are recognized by the regular expression
+`````([",.:_"] | letter)+`````
 
 
 ===Reserved words and symbols===
@@ -41,7 +40,7 @@ The reserved words used in Obs are the following:
   | ``SIGNAL`` | ``STATE`` | ``STRUCT`` | ``TASK``
 
 The symbols used in Obs are the following:
-  | _ | @@@ |  |
+  | @@@ | _ |  |
 
 ===Comments===
 There are no single-line comments in the grammar.There are no multiple-line comments in the grammar.
@@ -52,48 +51,46 @@ The symbols -> (production),  **|**  (union)
 and **eps** (empty rule) belong to the BNF notation.
 All other symbols are terminals.
 
-  | //[Obs]// | -> | **eps**
-  |  |  **|**  | //Obs// //[Obs]//
-  | //Args// | -> | **eps**
+  | //ObsList// | -> | ``@@@`` //Obs// //ObsList//
+  |  |  **|**  | ``@@@`` //Obs//
+  | //Obs// | -> | //ThreadId// ``NAME`` //ObsIdent//
+  |  |  **|**  | //ThreadId// ``LOG`` //LMsg//
+  |  |  **|**  | //ThreadId// ``INIT``
+  |  |  **|**  | //ThreadId// ``TASK`` //Taskname//
+  |  |  **|**  | //ThreadId// ``SIGNAL`` //Integer//
+  |  |  **|**  | //ThreadId// ``DEF`` //Varname// //Varval//
+  |  |  **|**  | //ThreadId// ``DECL`` //Typename// //Varname//
+  |  |  **|**  | //ThreadId// ``DECL`` //Typename// //Varname// //Varval//
+  |  |  **|**  | //ThreadId// ``DCLARRAY`` //Typename// //Varname// //SizeDcl//
+  |  |  **|**  | //ThreadId// ``CALL`` //ObsIdent// //Args//
+  |  |  **|**  | //ThreadId// ``STATE`` //Integer// //State//
+  |  |  **|**  | //ThreadId// ``STRUCT`` //Varname//
+  |  |  **|**  | //ThreadId// ``SEQ`` //Varname// //Scalar//
+  |  |  **|**  | //ThreadId// ``PTR`` //Varname// //Varval//
+  |  |  **|**  | //ThreadId// ``SCALAR`` //Varname// //Varval//
+  |  |  **|**  | //ThreadId// ``SCALAR`` //Varname// //Varindex// //Varval//
+  |  |  **|**  | //ThreadId// ``END`` //Varname//
+  | //Scalar// | -> | //End//
+  |  |  **|**  | ``@@@`` //ThreadId// ``SCALAR`` ``_`` //Varval// //Scalar//
+  | //End// | -> | ``@@@`` //ThreadId// ``END`` //Varname//
+  | //Args// | -> | //ObsStr// //Args//
   |  |  **|**  | //Integer// //Args//
   |  |  **|**  | //Double// //Args//
-  |  |  **|**  | //String// //Args//
-  | //LMsg// | -> | **eps**
-  |  |  **|**  | //String// //LMsg//
-  |  |  **|**  | //Integer// //LMsg//
-  |  |  **|**  | //Double// //LMsg//
+  |  |  **|**  | **eps**
+  | //LMsg// | -> | //ObsStr// //LMsg//
+  |  |  **|**  | **eps**
   | //Taskname// | -> | //ObsIdent//
   | //Varname// | -> | //ObsIdent//
   | //Varval// | -> | //Integer//
   |  |  **|**  | //Double//
   |  |  **|**  | ``NULL``
+  |  |  **|**  | //ObsStr//
   | //Typename// | -> | //ObsIdent//
   | //State// | -> | //ObsIdent//
   | //Varindex// | -> | //Integer//
   | //ThreadId// | -> | //Integer//
   | //SizeDcl// | -> | //Varval//
   |  |  **|**  | //ObsIdent//
-  | //Obs// | -> | //Prefix// //ThreadId// ``NAME`` //ObsIdent//
-  |  |  **|**  | //Prefix// //ThreadId// ``LOG`` //LMsg//
-  |  |  **|**  | //Prefix// //ThreadId// ``INIT``
-  |  |  **|**  | //Prefix// //ThreadId// ``TASK`` //Taskname//
-  |  |  **|**  | //Prefix// //ThreadId// ``SIGNAL`` //Integer//
-  |  |  **|**  | //Prefix// //ThreadId// ``DEF`` //Varname// //Varval//
-  |  |  **|**  | //Prefix// //ThreadId// ``DECL`` //Typename// //Varname//
-  |  |  **|**  | //Prefix// //ThreadId// ``DECL`` //Typename// //Varname// //Varval//
-  |  |  **|**  | //Prefix// //ThreadId// ``DCLARRAY`` //Typename// //Varname// //SizeDcl//
-  |  |  **|**  | //Prefix// //ThreadId// ``CALL`` //ObsIdent// //Args//
-  |  |  **|**  | //Prefix// //ThreadId// ``STATE`` //Integer// //State//
-  |  |  **|**  | //Prefix// //ThreadId// ``STRUCT`` //Varname//
-  |  |  **|**  | //Prefix// //ThreadId// ``SEQ`` //Varname// //Scalar//
-  |  |  **|**  | //Prefix// //ThreadId// ``PTR`` //Varname// //Varval//
-  |  |  **|**  | //Prefix// //ThreadId// ``SCALAR`` //Varname// //Varval//
-  |  |  **|**  | //Prefix// //ThreadId// ``SCALAR`` //Varname// //Varindex// //Varval//
-  |  |  **|**  | //Prefix// //ThreadId// ``END`` //Varname//
-  | //Scalar// | -> | //End//
-  |  |  **|**  | //Prefix// //ThreadId// ``SCALAR`` ``_`` //Varval// //Scalar//
-  | //End// | -> | //Prefix// //ThreadId// ``END`` //Varname//
-  | //Prefix// | -> | ``@@@``
 
 
 

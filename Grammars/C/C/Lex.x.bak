@@ -291,16 +291,18 @@ resWords =
                 (b "for" 57 (b "float" 56 N N) N) (b "int" 60 (b "if" 59 N N) N))
              (b "rtems_event_set" 64
                 (b "return" 63 (b "register" 62 N N) N) (b "rtems_id" 65 N N))))
-       (b "unsigned" 77
-          (b "static" 72
-             (b "signed" 69
-                (b "short" 68 (b "rtems_task_priority" 67 N N) N)
-                (b "sizeof" 71 (b "size_t" 70 N N) N))
-             (b "typedef" 75
-                (b "switch" 74 (b "struct" 73 N N) N) (b "union" 76 N N)))
-          (b "|" 82
-             (b "while" 80 (b "volatile" 79 (b "void" 78 N N) N) (b "{" 81 N N))
-             (b "}" 85 (b "||" 84 (b "|=" 83 N N) N) (b "~" 86 N N)))))
+       (b "union" 77
+          (b "sizeof" 72
+             (b "short" 69
+                (b "rtems_task_priority" 68 (b "rtems_task_argument" 67 N N) N)
+                (b "size_t" 71 (b "signed" 70 N N) N))
+             (b "switch" 75
+                (b "struct" 74 (b "static" 73 N N) N) (b "typedef" 76 N N)))
+          (b "|" 83
+             (b "volatile" 80
+                (b "void" 79 (b "unsigned" 78 N N) N)
+                (b "{" 82 (b "while" 81 N N) N))
+             (b "}" 86 (b "||" 85 (b "|=" 84 N N) N) (b "~" 87 N N)))))
   where
   b s n = B bs (TS bs n)
     where

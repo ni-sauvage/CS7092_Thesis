@@ -1,19 +1,44 @@
-separator Obs "\n";
+ObsListCons. ObsList ::= "@@@" Obs ObsList;
+ObsListOne. ObsList ::= "@@@" Obs;
 
-ArgsOne. Args ::= ;
+ObsName. Obs ::= ThreadId "NAME" ObsIdent;
+ObsLog. Obs ::= ThreadId "LOG" LMsg; -- TODO: this is breaking
+ObsInit. Obs ::= ThreadId "INIT";
+ObsTask. Obs ::= ThreadId "TASK" Taskname;
+ObsSignal. Obs ::= ThreadId "SIGNAL" Integer;
+ObsDef. Obs ::= ThreadId "DEF" Varname Varval;
+ObsDecl. Obs ::= ThreadId "DECL" Typename Varname;
+ObsDeclVal. Obs ::= ThreadId "DECL" Typename Varname Varval;
+ObsDeclArr. Obs ::= ThreadId "DCLARRAY" Typename Varname SizeDcl;
+ObsCall. Obs ::= ThreadId "CALL" ObsIdent Args;
+ObsState. Obs ::= ThreadId "STATE" Integer State;
+ObsStruct. Obs ::= ThreadId "STRUCT" Varname;
+ObsSeq. Obs ::= ThreadId "SEQ" Varname Scalar;
+ObsPtr. Obs ::= ThreadId "PTR" Varname Varval;
+ObsScalar. Obs ::= ThreadId "SCALAR" Varname Varval;
+ObsScalarIndex. Obs ::= ThreadId "SCALAR" Varname Varindex Varval;
+ObsEnd. Obs ::= ThreadId "END" Varname;
+
+ObsScalarNone. Scalar ::= End;
+ObsScalarCons. Scalar ::= "@@@" ThreadId "SCALAR" "_" Varval Scalar;
+
+ObsEndSeq. End ::= "@@@" ThreadId "END" Varname;
+
+ArgsConsString. Args ::= ObsStr Args;
 ArgsConsInteger. Args ::= Integer Args;
 ArgsConsDouble. Args ::= Double Args;
-ArgsConsString. Args ::= String Args;
-LmsgOne. LMsg ::= ;
-LmsgConsString. LMsg ::= String LMsg;
+ArgsOne. Args ::= ;
+LmsgConsString. LMsg ::= ObsStr LMsg;
 LmsgConsInt. LMsg ::= Integer LMsg;
 LmsgConsDouble. LMsg ::= Double LMsg;
+LmsgOne. LMsg ::= ;
 
 TaskName. Taskname ::= ObsIdent;
 VarName. Varname ::= ObsIdent;
 VarValInt. Varval ::= Integer;
 VarValDouble. Varval ::= Double;
 VarValNull. Varval ::= "NULL";
+VarValStr. Varval ::= ObsStr;
 TypeName. Typename ::= ObsIdent;
 State. State ::= ObsIdent;
 VarIndex. Varindex ::= Integer;
@@ -21,28 +46,5 @@ ThreadId. ThreadId ::= Integer;
 SizeDclVar. SizeDcl ::= Varval;
 SizeDclDef. SizeDcl ::= ObsIdent;
 
-ObsName. Obs ::= Prefix ThreadId "NAME" ObsIdent;
-ObsLog. Obs ::= Prefix ThreadId "LOG" LMsg;
-ObsInit. Obs ::= Prefix ThreadId "INIT";
-ObsTask. Obs ::= Prefix ThreadId "TASK" Taskname;
-ObsSignal. Obs ::= Prefix ThreadId "SIGNAL" Integer;
-ObsDef. Obs ::= Prefix ThreadId "DEF" Varname Varval;
-ObsDecl. Obs ::= Prefix ThreadId "DECL" Typename Varname;
-ObsDeclVal. Obs ::= Prefix ThreadId "DECL" Typename Varname Varval;
-ObsDeclArr. Obs ::= Prefix ThreadId "DCLARRAY" Typename Varname SizeDcl;
-ObsCall. Obs ::= Prefix ThreadId "CALL" ObsIdent Args;
-ObsState. Obs ::= Prefix ThreadId "STATE" Integer State;
-ObsStruct. Obs ::= Prefix ThreadId "STRUCT" Varname;
-ObsSeq. Obs ::= Prefix ThreadId "SEQ" Varname Scalar;
-ObsPtr. Obs ::= Prefix ThreadId "PTR" Varname Varval;
-ObsScalar. Obs ::= Prefix ThreadId "SCALAR" Varname Varval;
-ObsScalarIndex. Obs ::= Prefix ThreadId "SCALAR" Varname Varindex Varval;
-ObsEnd. Obs ::= Prefix ThreadId "END" Varname;
-
-ObsScalarNone. Scalar ::= End;
-ObsScalarCons. Scalar ::= Prefix ThreadId "SCALAR" "_" Varval Scalar;
-
-ObsEndSeq. End ::= Prefix ThreadId "END" Varname;
-
 token ObsIdent (letter | '_' ) (digit | letter | '_')*;
-Prefix. Prefix ::= "@@@";
+token ObsStr (letter | '_' | '.' | ',' |':')+; 

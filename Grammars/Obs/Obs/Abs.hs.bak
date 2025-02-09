@@ -10,18 +10,48 @@ import Prelude (Double, Integer, String)
 import qualified Prelude as C (Eq, Ord, Show, Read)
 import qualified Data.String
 
+data ObsList = ObsListCons Obs ObsList | ObsListOne Obs
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
+data Obs
+    = ObsName ThreadId ObsIdent
+    | ObsLog ThreadId LMsg
+    | ObsInit ThreadId
+    | ObsTask ThreadId Taskname
+    | ObsSignal ThreadId Integer
+    | ObsDef ThreadId Varname Varval
+    | ObsDecl ThreadId Typename Varname
+    | ObsDeclVal ThreadId Typename Varname Varval
+    | ObsDeclArr ThreadId Typename Varname SizeDcl
+    | ObsCall ThreadId ObsIdent Args
+    | ObsState ThreadId Integer State
+    | ObsStruct ThreadId Varname
+    | ObsSeq ThreadId Varname Scalar
+    | ObsPtr ThreadId Varname Varval
+    | ObsScalar ThreadId Varname Varval
+    | ObsScalarIndex ThreadId Varname Varindex Varval
+    | ObsEnd ThreadId Varname
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
+data Scalar
+    = ObsScalarNone End | ObsScalarCons ThreadId Varval Scalar
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
+data End = ObsEndSeq ThreadId Varname
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
 data Args
-    = ArgsOne
+    = ArgsConsString ObsStr Args
     | ArgsConsInteger Integer Args
     | ArgsConsDouble Double Args
-    | ArgsConsString String Args
+    | ArgsOne
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data LMsg
-    = LmsgOne
-    | LmsgConsString String LMsg
+    = LmsgConsString ObsStr LMsg
     | LmsgConsInt Integer LMsg
     | LmsgConsDouble Double LMsg
+    | LmsgOne
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Taskname = TaskName ObsIdent
@@ -30,7 +60,11 @@ data Taskname = TaskName ObsIdent
 data Varname = VarName ObsIdent
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data Varval = VarValInt Integer | VarValDouble Double | VarValNull
+data Varval
+    = VarValInt Integer
+    | VarValDouble Double
+    | VarValNull
+    | VarValStr ObsStr
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Typename = TypeName ObsIdent
@@ -48,36 +82,9 @@ data ThreadId = ThreadId Integer
 data SizeDcl = SizeDclVar Varval | SizeDclDef ObsIdent
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data Obs
-    = ObsName Prefix ThreadId ObsIdent
-    | ObsLog Prefix ThreadId LMsg
-    | ObsInit Prefix ThreadId
-    | ObsTask Prefix ThreadId Taskname
-    | ObsSignal Prefix ThreadId Integer
-    | ObsDef Prefix ThreadId Varname Varval
-    | ObsDecl Prefix ThreadId Typename Varname
-    | ObsDeclVal Prefix ThreadId Typename Varname Varval
-    | ObsDeclArr Prefix ThreadId Typename Varname SizeDcl
-    | ObsCall Prefix ThreadId Args
-    | ObsState Prefix ThreadId Integer State
-    | ObsStruct Prefix ThreadId Varname
-    | ObsSeq Prefix ThreadId Varname Scalar
-    | ObsPtr Prefix ThreadId Varname Varval
-    | ObsScalar Prefix ThreadId Varname Varval
-    | ObsScalarIndex Prefix ThreadId Varname Varindex Varval
-    | ObsEnd Prefix ThreadId Varname
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
-data Scalar
-    = ObsScalarNone End | ObsScalarCons Prefix ThreadId Varval Scalar
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
-data End = ObsEndSeq Prefix ThreadId Varname
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
-data Prefix = Prefix
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
 newtype ObsIdent = ObsIdent String
+  deriving (C.Eq, C.Ord, C.Show, C.Read, Data.String.IsString)
+
+newtype ObsStr = ObsStr String
   deriving (C.Eq, C.Ord, C.Show, C.Read, Data.String.IsString)
 

@@ -58,6 +58,7 @@ data Type_specifier
     | Trttp
     | Tszet
     | Tevctx
+    | Tpsctx
     | Trtta
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 

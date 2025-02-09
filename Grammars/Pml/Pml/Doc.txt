@@ -134,6 +134,7 @@ All other symbols are terminals.
   | //Trace// | -> | ``trace`` ``{`` //Sequence// ``}``
   | //Utype// | -> | ``typedef`` //Name// ``{`` //DeclList// ``}`` ``;``
   | //Mtype// | -> | ``mtype`` //Mequals// ``{`` //Mname// ``}`` //Msep//
+  |  |  **|**  | ``mtype`` //Mname// //Msep//
   | //Msep// | -> | **eps**
   |  |  **|**  | ``;``
   | //Mequals// | -> | **eps**

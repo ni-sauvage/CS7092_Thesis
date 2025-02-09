@@ -167,9 +167,9 @@ data UStmt = UStmtNone | UStmtOne Stmt
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Step
-    = StepStmt Stmt UStmt
+    = StepMType Mtype
+    | StepStmt Stmt UStmt
     | StepDclList DeclList
-    | StepMType Mtype
     | StepXR VarRefList
     | StepXS VarRefList
   deriving (C.Eq, C.Ord, C.Show, C.Read)

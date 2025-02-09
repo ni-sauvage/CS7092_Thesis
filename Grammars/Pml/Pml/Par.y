@@ -395,7 +395,9 @@ Utype :: { Pml.Abs.Utype }
 Utype : 'typedef' Name '{' DeclList '}' ';' { Pml.Abs.Utp $2 $4 }
 
 Mtype :: { Pml.Abs.Mtype }
-Mtype : 'mtype' Mequals '{' Mname '}' Msep { Pml.Abs.Mtp $2 $4 $6 }
+Mtype
+  : 'mtype' Mequals '{' Mname '}' Msep { Pml.Abs.MtpEq $2 $4 $6 }
+  | 'mtype' Mname Msep { Pml.Abs.MtpNoEq $2 $3 }
 
 Msep :: { Pml.Abs.Msep }
 Msep : {- empty -} { Pml.Abs.MsepNone } | ';' { Pml.Abs.MsepOne }

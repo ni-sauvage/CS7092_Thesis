@@ -259,50 +259,51 @@ eitherResIdent tv s = treeFind resWords
 -- | The keywords and symbols of the language organized as binary search tree.
 resWords :: BTree
 resWords =
-  b "auto" 44
-    (b "/" 22
-       (b "*=" 11
+  b "auto" 45
+    (b "/=" 23
+       (b "+" 12
           (b "&&" 6
              (b "%" 3 (b "!=" 2 (b "!" 1 N N) N) (b "&" 5 (b "%=" 4 N N) N))
-             (b ")" 9 (b "(" 8 (b "&=" 7 N N) N) (b "*" 10 N N)))
-          (b "--" 17
-             (b "+=" 14
-                (b "++" 13 (b "+" 12 N N) N) (b "-" 16 (b "," 15 N N) N))
-             (b "." 20 (b "->" 19 (b "-=" 18 N N) N) (b "..." 21 N N))))
-       (b ">=" 33
-          (b "<<=" 28
-             (b ";" 25
-                (b ":" 24 (b "/=" 23 N N) N) (b "<<" 27 (b "<" 26 N N) N))
-             (b "==" 31 (b "=" 30 (b "<=" 29 N N) N) (b ">" 32 N N)))
-          (b "Typedef_name" 39
-             (b "?" 36
-                (b ">>=" 35 (b ">>" 34 N N) N)
-                (b "RtemsModelEventsMgr_Context" 38 (b "Context" 37 N N) N))
-             (b "^" 42 (b "]" 41 (b "[" 40 N N) N) (b "^=" 43 N N)))))
-    (b "rtems_status_code" 66
-       (b "extern" 55
-          (b "default" 50
-             (b "char" 47
-                (b "case" 46 (b "break" 45 N N) N)
-                (b "continue" 49 (b "const" 48 N N) N))
-             (b "else" 53 (b "double" 52 (b "do" 51 N N) N) (b "enum" 54 N N)))
-          (b "long" 61
-             (b "goto" 58
-                (b "for" 57 (b "float" 56 N N) N) (b "int" 60 (b "if" 59 N N) N))
-             (b "rtems_event_set" 64
-                (b "return" 63 (b "register" 62 N N) N) (b "rtems_id" 65 N N))))
-       (b "union" 77
-          (b "sizeof" 72
-             (b "short" 69
-                (b "rtems_task_priority" 68 (b "rtems_task_argument" 67 N N) N)
-                (b "size_t" 71 (b "signed" 70 N N) N))
-             (b "switch" 75
-                (b "struct" 74 (b "static" 73 N N) N) (b "typedef" 76 N N)))
-          (b "|" 83
-             (b "volatile" 80
-                (b "void" 79 (b "unsigned" 78 N N) N)
-                (b "{" 82 (b "while" 81 N N) N))
-             (b "}" 86 (b "||" 85 (b "|=" 84 N N) N) (b "~" 87 N N)))))
+             (b ")" 9 (b "(" 8 (b "&=" 7 N N) N) (b "*=" 11 (b "*" 10 N N) N)))
+          (b "-=" 18
+             (b "," 15
+                (b "+=" 14 (b "++" 13 N N) N) (b "--" 17 (b "-" 16 N N) N))
+             (b "..." 21 (b "." 20 (b "->" 19 N N) N) (b "/" 22 N N))))
+       (b ">>" 34
+          (b "<=" 29
+             (b "<" 26
+                (b ";" 25 (b ":" 24 N N) N) (b "<<=" 28 (b "<<" 27 N N) N))
+             (b ">" 32 (b "==" 31 (b "=" 30 N N) N) (b ">=" 33 N N)))
+          (b "Typedef_name" 40
+             (b "Context" 37
+                (b "?" 36 (b ">>=" 35 N N) N)
+                (b "RtemsModelProtoSem_Context" 39
+                   (b "RtemsModelEventsMgr_Context" 38 N N) N))
+             (b "^" 43 (b "]" 42 (b "[" 41 N N) N) (b "^=" 44 N N)))))
+    (b "rtems_status_code" 67
+       (b "extern" 56
+          (b "default" 51
+             (b "char" 48
+                (b "case" 47 (b "break" 46 N N) N)
+                (b "continue" 50 (b "const" 49 N N) N))
+             (b "else" 54 (b "double" 53 (b "do" 52 N N) N) (b "enum" 55 N N)))
+          (b "long" 62
+             (b "goto" 59
+                (b "for" 58 (b "float" 57 N N) N) (b "int" 61 (b "if" 60 N N) N))
+             (b "rtems_event_set" 65
+                (b "return" 64 (b "register" 63 N N) N) (b "rtems_id" 66 N N))))
+       (b "union" 78
+          (b "sizeof" 73
+             (b "short" 70
+                (b "rtems_task_priority" 69 (b "rtems_task_argument" 68 N N) N)
+                (b "size_t" 72 (b "signed" 71 N N) N))
+             (b "switch" 76
+                (b "struct" 75 (b "static" 74 N N) N) (b "typedef" 77 N N)))
+          (b "|" 84
+             (b "volatile" 81
+                (b "void" 80 (b "unsigned" 79 N N) N)
+                (b "{" 83 (b "while" 82 N N) N))
+             (b "}" 87 (b "||" 86 (b "|=" 85 N N) N) (b "~" 88 N N)))))
   where
   b s n = B bs (TS bs n)
     where

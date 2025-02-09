@@ -128,6 +128,7 @@ transType_specifier x = case x of
   C.Abs.Trttp -> failure x
   C.Abs.Tszet -> failure x
   C.Abs.Tevctx -> failure x
+  C.Abs.Trtta -> failure x
 
 transStorage_class_specifier :: C.Abs.Storage_class_specifier -> Result
 transStorage_class_specifier x = case x of

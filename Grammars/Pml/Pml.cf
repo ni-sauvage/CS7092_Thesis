@@ -47,7 +47,8 @@ Trc. Trace ::= "trace" "{" Sequence "}";
 
 Utp. Utype ::= "typedef" Name "{" DeclList "}" ";";
 
-Mtp. Mtype ::= "mtype" Mequals "{" Mname "}" Msep;
+MtpEq. Mtype ::= "mtype" Mequals "{" Mname "}" Msep;
+MtpNoEq. Mtype ::= "mtype" Mname Msep;
 MsepNone. Msep ::= "";
 MsepOne. Msep ::= ";";
 Meq. Mequals ::= "";

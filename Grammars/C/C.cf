@@ -62,6 +62,7 @@ Trtctx.       Type_specifier ::= "Context";
 Trttp.        Type_specifier ::= "rtems_task_priority";
 Tszet.        Type_specifier ::= "size_t";
 Tevctx.       Type_specifier ::= "RtemsModelEventsMgr_Context";
+Tpsctx.       Type_specifier ::= "RtemsModelProtoSem_Context";
 Trtta.        Type_specifier ::= "rtems_task_argument";
 
 

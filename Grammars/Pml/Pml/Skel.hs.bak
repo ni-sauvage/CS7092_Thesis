@@ -228,9 +228,9 @@ transUStmt x = case x of
 
 transStep :: Pml.Abs.Step -> Result
 transStep x = case x of
+  Pml.Abs.StepMType mtype -> failure x
   Pml.Abs.StepStmt stmt ustmt -> failure x
   Pml.Abs.StepDclList decllist -> failure x
-  Pml.Abs.StepMType mtype -> failure x
   Pml.Abs.StepXR varreflist -> failure x
   Pml.Abs.StepXS varreflist -> failure x
 

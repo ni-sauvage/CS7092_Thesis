@@ -256,7 +256,7 @@ instance Print Pml.Abs.Penabler where
 
 instance Print Pml.Abs.Init where
   prt i = \case
-    Pml.Abs.Initialise ipriority sequence -> prPrec i 0 (concatD [doc (showString "init"), prt 0 ipriority, doc (showString "{"), prt 0 sequence, doc (showString "}"), doc (showString ";")])
+    Pml.Abs.Initialise ipriority sequence -> prPrec i 0 (concatD [doc (showString "init"), prt 0 ipriority, doc (showString "{"), prt 0 sequence, doc (showString "}")])
 
 instance Print Pml.Abs.Ipriority where
   prt i = \case

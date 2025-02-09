@@ -241,6 +241,7 @@ instance Print C.Abs.Type_specifier where
     C.Abs.Trttp -> prPrec i 0 (concatD [doc (showString "rtems_task_priority")])
     C.Abs.Tszet -> prPrec i 0 (concatD [doc (showString "size_t")])
     C.Abs.Tevctx -> prPrec i 0 (concatD [doc (showString "RtemsModelEventsMgr_Context")])
+    C.Abs.Tpsctx -> prPrec i 0 (concatD [doc (showString "RtemsModelProtoSem_Context")])
     C.Abs.Trtta -> prPrec i 0 (concatD [doc (showString "rtems_task_argument")])
 
 instance Print C.Abs.Storage_class_specifier where
