@@ -431,13 +431,23 @@ Labeled_stm
 Compound_stm :: { C.Abs.Compound_stm }
 Compound_stm
   : '{' '}' { C.Abs.ScompOne }
-  | '{' ListStm '}' { C.Abs.ScompTwo $2 }
-  | '{' ListDec '}' { C.Abs.ScompThree $2 }
-  | '{' ListDec ListStm '}' { C.Abs.ScompFour $2 $3 }
+  | '{' DecStmList '}' { C.Abs.ScompFour $2 }
+
+DecStm :: { C.Abs.DecStm }
+DecStm
+  : Dec { C.Abs.SstmOrDclOne $1 } | Stm { C.Abs.SstmOrDclTwo $1 }
+
+DecStmList :: { C.Abs.DecStmList }
+DecStmList
+  : {- empty -} { C.Abs.SDecStmListNone }
+  | DecStm DecStmList { C.Abs.SDecStmListOne $1 $2 }
 
 Expression_stm :: { C.Abs.Expression_stm }
 Expression_stm
   : ';' { C.Abs.SexprOne } | Exp ';' { C.Abs.SexprTwo $1 }
+
+DeclExpr :: { C.Abs.DeclExpr }
+DeclExpr : Exp { C.Abs.SdExprOne $1 } | Dec { C.Abs.SdExprTwo $1 }
 
 Selection_stm :: { C.Abs.Selection_stm }
 Selection_stm
@@ -449,8 +459,8 @@ Iter_stm :: { C.Abs.Iter_stm }
 Iter_stm
   : 'while' '(' Exp ')' Stm { C.Abs.SiterOne $3 $5 }
   | 'do' Stm 'while' '(' Exp ')' ';' { C.Abs.SiterTwo $2 $5 }
-  | 'for' '(' Expression_stm Expression_stm ')' Stm { C.Abs.SiterThree $3 $4 $6 }
-  | 'for' '(' Expression_stm Expression_stm Exp ')' Stm { C.Abs.SiterFour $3 $4 $5 $7 }
+  | 'for' '(' DeclExpr Expression_stm ')' Stm { C.Abs.SiterThree $3 $4 $6 }
+  | 'for' '(' DeclExpr Expression_stm Exp ')' Stm { C.Abs.SiterFour $3 $4 $5 $7 }
 
 Jump_stm :: { C.Abs.Jump_stm }
 Jump_stm

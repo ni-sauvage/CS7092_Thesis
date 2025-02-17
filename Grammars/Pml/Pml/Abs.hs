@@ -30,29 +30,6 @@ data Typename
     | TypenameUname Uname
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data AndOr = AndOr1 | AndOr2
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
-data BinOp
-    = BinOp1
-    | BinOp2
-    | BinOp3
-    | BinOp4
-    | BinOp5
-    | BinOp6
-    | BinOp7
-    | BinOp8
-    | BinOp9
-    | BinOp10
-    | BinOp11
-    | BinOp12
-    | BinOp13
-    | BinOp14
-    | BinOp15
-    | BinOp16
-    | BinOpAndOr AndOr
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
 data UnrOp = UnrOp1 | UnrOp2 | UnrOp3
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
@@ -179,10 +156,26 @@ data VarRefList
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data AnyExpr
-    = AnyExprParen AnyExpr
-    | AnyExprBinOp AnyExpr BinOp AnyExpr
+    = AnyExprCond AnyExpr AnyExpr AnyExpr
+    | AnyExprlor AnyExpr AnyExpr
+    | AnyExprland AnyExpr AnyExpr
+    | AnyExprbitor AnyExpr AnyExpr
+    | AnyExprbitexor AnyExpr AnyExpr
+    | AnyExprbitand AnyExpr AnyExpr
+    | AnyExpreq AnyExpr AnyExpr
+    | AnyExprneq AnyExpr AnyExpr
+    | AnyExprlthen AnyExpr AnyExpr
+    | AnyExprgrthen AnyExpr AnyExpr
+    | AnyExprle AnyExpr AnyExpr
+    | AnyExprge AnyExpr AnyExpr
+    | AnyExprleft AnyExpr AnyExpr
+    | AnyExprright AnyExpr AnyExpr
+    | AnyExprplus AnyExpr AnyExpr
+    | AnyExprminus AnyExpr AnyExpr
+    | AnyExprtimes AnyExpr AnyExpr
+    | AnyExprdiv AnyExpr AnyExpr
+    | AnyExprmod AnyExpr AnyExpr
     | AnyExprUnrOp UnrOp AnyExpr
-    | AnyExprCond AnyExpr AnyExpr AnyExpr
     | AnyExprLen VarRef
     | AnyExprPoll Poll
     | AnyExprVarRef VarRef
@@ -313,10 +306,7 @@ data RunArgs = RunArgsNone | RunArgsOne ArgList
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Expr
-    = ExprAny AnyExpr
-    | ExprParen Expr
-    | ExprAndOr Expr AndOr Expr
-    | ExprChanPoll ChanPoll VarRef
+    = ExprAny AnyExpr | ExprParen Expr | ExprChanPoll ChanPoll VarRef
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Uname = Uname Name

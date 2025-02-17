@@ -1,0 +1,2 @@
+!forall A | A==> exists B | (B ^ B) == D
+C & B | D == E

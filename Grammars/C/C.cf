@@ -189,12 +189,19 @@ SlabelTwo.   Labeled_stm ::= "case" Constant_expression ":" Stm ;
 SlabelThree. Labeled_stm ::= "default" ":" Stm;
 
 ScompOne.   Compound_stm ::= "{" "}" ;
-ScompTwo.   Compound_stm ::= "{" [Stm] "}" ;
-ScompThree. Compound_stm ::= "{" [Dec] "}" ;
-ScompFour.  Compound_stm ::= "{" [Dec] [Stm] "}" ;
+ScompFour.  Compound_stm ::= "{" DecStmList "}" ;
+
+SstmOrDclOne. DecStm ::=  Dec;
+SstmOrDclTwo. DecStm ::=  Stm;
+
+SDecStmListNone. DecStmList ::= ;
+SDecStmListOne. DecStmList ::= DecStm DecStmList;
 
 SexprOne.   Expression_stm ::= ";" ;
 SexprTwo.   Expression_stm ::= Exp ";" ;
+
+SdExprOne. DeclExpr ::= Exp;
+SdExprTwo. DeclExpr ::= Dec;
 
 SselOne.    Selection_stm ::= "if" "(" Exp ")" Stm ;
 SselTwo.    Selection_stm ::= "if" "(" Exp ")" Stm "else" Stm ;
@@ -202,8 +209,8 @@ SselThree.  Selection_stm ::= "switch" "(" Exp ")" Stm ;
 
 SiterOne.   Iter_stm ::= "while" "(" Exp ")" Stm;
 SiterTwo.   Iter_stm ::= "do" Stm "while" "(" Exp ")" ";" ;
-SiterThree. Iter_stm ::= "for" "(" Expression_stm Expression_stm ")" Stm ;
-SiterFour.  Iter_stm ::= "for" "(" Expression_stm Expression_stm Exp ")" Stm;
+SiterThree. Iter_stm ::= "for" "(" DeclExpr Expression_stm ")" Stm ;
+SiterFour.  Iter_stm ::= "for" "(" DeclExpr Expression_stm Exp ")" Stm;
 
 SjumpOne.   Jump_stm ::= "goto" CIdent ";" ;
 SjumpTwo.   Jump_stm ::= "continue" ";" ;

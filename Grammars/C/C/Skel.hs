@@ -271,14 +271,27 @@ transLabeled_stm x = case x of
 transCompound_stm :: C.Abs.Compound_stm -> Result
 transCompound_stm x = case x of
   C.Abs.ScompOne -> failure x
-  C.Abs.ScompTwo stms -> failure x
-  C.Abs.ScompThree decs -> failure x
-  C.Abs.ScompFour decs stms -> failure x
+  C.Abs.ScompFour decstmlist -> failure x
+
+transDecStm :: C.Abs.DecStm -> Result
+transDecStm x = case x of
+  C.Abs.SstmOrDclOne dec -> failure x
+  C.Abs.SstmOrDclTwo stm -> failure x
+
+transDecStmList :: C.Abs.DecStmList -> Result
+transDecStmList x = case x of
+  C.Abs.SDecStmListNone -> failure x
+  C.Abs.SDecStmListOne decstm decstmlist -> failure x
 
 transExpression_stm :: C.Abs.Expression_stm -> Result
 transExpression_stm x = case x of
   C.Abs.SexprOne -> failure x
   C.Abs.SexprTwo exp -> failure x
+
+transDeclExpr :: C.Abs.DeclExpr -> Result
+transDeclExpr x = case x of
+  C.Abs.SdExprOne exp -> failure x
+  C.Abs.SdExprTwo dec -> failure x
 
 transSelection_stm :: C.Abs.Selection_stm -> Result
 transSelection_stm x = case x of
@@ -290,8 +303,8 @@ transIter_stm :: C.Abs.Iter_stm -> Result
 transIter_stm x = case x of
   C.Abs.SiterOne exp stm -> failure x
   C.Abs.SiterTwo stm exp -> failure x
-  C.Abs.SiterThree expressionstm1 expressionstm2 stm -> failure x
-  C.Abs.SiterFour expressionstm1 expressionstm2 exp stm -> failure x
+  C.Abs.SiterThree declexpr expressionstm stm -> failure x
+  C.Abs.SiterFour declexpr expressionstm exp stm -> failure x
 
 transJump_stm :: C.Abs.Jump_stm -> Result
 transJump_stm x = case x of

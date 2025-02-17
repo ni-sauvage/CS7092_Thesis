@@ -13,8 +13,6 @@ module Pml.Par
   , pChanPoll
   , pSeparator
   , pTypename
-  , pAndOr
-  , pBinOp
   , pUnrOp
   , pConst
   , pPrintType
@@ -49,6 +47,15 @@ module Pml.Par
   , pStep
   , pVarRefList
   , pAnyExpr
+  , pAnyExpr2
+  , pAnyExpr3
+  , pAnyExpr4
+  , pAnyExpr5
+  , pAnyExpr6
+  , pAnyExpr7
+  , pAnyExpr8
+  , pAnyExpr9
+  , pAnyExpr1
   , pIvar
   , pIvarConst
   , pIvarAssign
@@ -92,8 +99,6 @@ import Pml.Lex
 %name pChanPoll ChanPoll
 %name pSeparator Separator
 %name pTypename Typename
-%name pAndOr AndOr
-%name pBinOp BinOp
 %name pUnrOp UnrOp
 %name pConst Const
 %name pPrintType PrintType
@@ -128,6 +133,15 @@ import Pml.Lex
 %name pStep Step
 %name pVarRefList VarRefList
 %name pAnyExpr AnyExpr
+%name pAnyExpr2 AnyExpr2
+%name pAnyExpr3 AnyExpr3
+%name pAnyExpr4 AnyExpr4
+%name pAnyExpr5 AnyExpr5
+%name pAnyExpr6 AnyExpr6
+%name pAnyExpr7 AnyExpr7
+%name pAnyExpr8 AnyExpr8
+%name pAnyExpr9 AnyExpr9
+%name pAnyExpr1 AnyExpr1
 %name pIvar Ivar
 %name pIvarConst IvarConst
 %name pIvarAssign IvarAssign
@@ -170,88 +184,90 @@ import Pml.Lex
   ')'            { PT _ (TS _ 7)      }
   '*'            { PT _ (TS _ 8)      }
   '+'            { PT _ (TS _ 9)      }
-  ','            { PT _ (TS _ 10)     }
-  '-'            { PT _ (TS _ 11)     }
-  '->'           { PT _ (TS _ 12)     }
-  '.'            { PT _ (TS _ 13)     }
-  '..'           { PT _ (TS _ 14)     }
-  '/'            { PT _ (TS _ 15)     }
-  ':'            { PT _ (TS _ 16)     }
-  '::'           { PT _ (TS _ 17)     }
-  ';'            { PT _ (TS _ 18)     }
-  '<'            { PT _ (TS _ 19)     }
-  '<<'           { PT _ (TS _ 20)     }
-  '<='           { PT _ (TS _ 21)     }
-  '='            { PT _ (TS _ 22)     }
-  '=='           { PT _ (TS _ 23)     }
-  '>'            { PT _ (TS _ 24)     }
-  '>='           { PT _ (TS _ 25)     }
-  '>>'           { PT _ (TS _ 26)     }
-  '?'            { PT _ (TS _ 27)     }
-  '@'            { PT _ (TS _ 28)     }
-  '['            { PT _ (TS _ 29)     }
-  ']'            { PT _ (TS _ 30)     }
-  '^'            { PT _ (TS _ 31)     }
-  'active'       { PT _ (TS _ 32)     }
-  'assert'       { PT _ (TS _ 33)     }
-  'atomic'       { PT _ (TS _ 34)     }
-  'bit'          { PT _ (TS _ 35)     }
-  'bool'         { PT _ (TS _ 36)     }
-  'break'        { PT _ (TS _ 37)     }
-  'byte'         { PT _ (TS _ 38)     }
-  'chan'         { PT _ (TS _ 39)     }
-  'd_step'       { PT _ (TS _ 40)     }
-  'do'           { PT _ (TS _ 41)     }
-  'else'         { PT _ (TS _ 42)     }
-  'empty'        { PT _ (TS _ 43)     }
-  'enabled'      { PT _ (TS _ 44)     }
-  'eval'         { PT _ (TS _ 45)     }
-  'false'        { PT _ (TS _ 46)     }
-  'fi'           { PT _ (TS _ 47)     }
-  'for'          { PT _ (TS _ 48)     }
-  'full'         { PT _ (TS _ 49)     }
-  'get_priority' { PT _ (TS _ 50)     }
-  'goto'         { PT _ (TS _ 51)     }
-  'hidden'       { PT _ (TS _ 52)     }
-  'if'           { PT _ (TS _ 53)     }
-  'in'           { PT _ (TS _ 54)     }
-  'init'         { PT _ (TS _ 55)     }
-  'inline'       { PT _ (TS _ 56)     }
-  'int'          { PT _ (TS _ 57)     }
-  'len'          { PT _ (TS _ 58)     }
-  'mtype'        { PT _ (TS _ 59)     }
-  'nempty'       { PT _ (TS _ 60)     }
-  'never'        { PT _ (TS _ 61)     }
-  'nfull'        { PT _ (TS _ 62)     }
-  'np_'          { PT _ (TS _ 63)     }
-  'od'           { PT _ (TS _ 64)     }
-  'of'           { PT _ (TS _ 65)     }
-  'pc_value'     { PT _ (TS _ 66)     }
-  'print'        { PT _ (TS _ 67)     }
-  'printf'       { PT _ (TS _ 68)     }
-  'printm'       { PT _ (TS _ 69)     }
-  'priority'     { PT _ (TS _ 70)     }
-  'proctype'     { PT _ (TS _ 71)     }
-  'provided'     { PT _ (TS _ 72)     }
-  'run'          { PT _ (TS _ 73)     }
-  'select'       { PT _ (TS _ 74)     }
-  'set_priority' { PT _ (TS _ 75)     }
-  'short'        { PT _ (TS _ 76)     }
-  'show'         { PT _ (TS _ 77)     }
-  'skip'         { PT _ (TS _ 78)     }
-  'timeout'      { PT _ (TS _ 79)     }
-  'trace'        { PT _ (TS _ 80)     }
-  'true'         { PT _ (TS _ 81)     }
-  'typedef'      { PT _ (TS _ 82)     }
-  'unless'       { PT _ (TS _ 83)     }
-  'unsigned'     { PT _ (TS _ 84)     }
-  'xr'           { PT _ (TS _ 85)     }
-  'xs'           { PT _ (TS _ 86)     }
-  '{'            { PT _ (TS _ 87)     }
-  '|'            { PT _ (TS _ 88)     }
-  '||'           { PT _ (TS _ 89)     }
-  '}'            { PT _ (TS _ 90)     }
-  '~'            { PT _ (TS _ 91)     }
+  '++'           { PT _ (TS _ 10)     }
+  ','            { PT _ (TS _ 11)     }
+  '-'            { PT _ (TS _ 12)     }
+  '--'           { PT _ (TS _ 13)     }
+  '->'           { PT _ (TS _ 14)     }
+  '.'            { PT _ (TS _ 15)     }
+  '..'           { PT _ (TS _ 16)     }
+  '/'            { PT _ (TS _ 17)     }
+  ':'            { PT _ (TS _ 18)     }
+  '::'           { PT _ (TS _ 19)     }
+  ';'            { PT _ (TS _ 20)     }
+  '<'            { PT _ (TS _ 21)     }
+  '<<'           { PT _ (TS _ 22)     }
+  '<='           { PT _ (TS _ 23)     }
+  '='            { PT _ (TS _ 24)     }
+  '=='           { PT _ (TS _ 25)     }
+  '>'            { PT _ (TS _ 26)     }
+  '>='           { PT _ (TS _ 27)     }
+  '>>'           { PT _ (TS _ 28)     }
+  '?'            { PT _ (TS _ 29)     }
+  '@'            { PT _ (TS _ 30)     }
+  '['            { PT _ (TS _ 31)     }
+  ']'            { PT _ (TS _ 32)     }
+  '^'            { PT _ (TS _ 33)     }
+  'active'       { PT _ (TS _ 34)     }
+  'assert'       { PT _ (TS _ 35)     }
+  'atomic'       { PT _ (TS _ 36)     }
+  'bit'          { PT _ (TS _ 37)     }
+  'bool'         { PT _ (TS _ 38)     }
+  'break'        { PT _ (TS _ 39)     }
+  'byte'         { PT _ (TS _ 40)     }
+  'chan'         { PT _ (TS _ 41)     }
+  'd_step'       { PT _ (TS _ 42)     }
+  'do'           { PT _ (TS _ 43)     }
+  'else'         { PT _ (TS _ 44)     }
+  'empty'        { PT _ (TS _ 45)     }
+  'enabled'      { PT _ (TS _ 46)     }
+  'eval'         { PT _ (TS _ 47)     }
+  'false'        { PT _ (TS _ 48)     }
+  'fi'           { PT _ (TS _ 49)     }
+  'for'          { PT _ (TS _ 50)     }
+  'full'         { PT _ (TS _ 51)     }
+  'get_priority' { PT _ (TS _ 52)     }
+  'goto'         { PT _ (TS _ 53)     }
+  'hidden'       { PT _ (TS _ 54)     }
+  'if'           { PT _ (TS _ 55)     }
+  'in'           { PT _ (TS _ 56)     }
+  'init'         { PT _ (TS _ 57)     }
+  'inline'       { PT _ (TS _ 58)     }
+  'int'          { PT _ (TS _ 59)     }
+  'len'          { PT _ (TS _ 60)     }
+  'mtype'        { PT _ (TS _ 61)     }
+  'nempty'       { PT _ (TS _ 62)     }
+  'never'        { PT _ (TS _ 63)     }
+  'nfull'        { PT _ (TS _ 64)     }
+  'np_'          { PT _ (TS _ 65)     }
+  'od'           { PT _ (TS _ 66)     }
+  'of'           { PT _ (TS _ 67)     }
+  'pc_value'     { PT _ (TS _ 68)     }
+  'print'        { PT _ (TS _ 69)     }
+  'printf'       { PT _ (TS _ 70)     }
+  'printm'       { PT _ (TS _ 71)     }
+  'priority'     { PT _ (TS _ 72)     }
+  'proctype'     { PT _ (TS _ 73)     }
+  'provided'     { PT _ (TS _ 74)     }
+  'run'          { PT _ (TS _ 75)     }
+  'select'       { PT _ (TS _ 76)     }
+  'set_priority' { PT _ (TS _ 77)     }
+  'short'        { PT _ (TS _ 78)     }
+  'show'         { PT _ (TS _ 79)     }
+  'skip'         { PT _ (TS _ 80)     }
+  'timeout'      { PT _ (TS _ 81)     }
+  'trace'        { PT _ (TS _ 82)     }
+  'true'         { PT _ (TS _ 83)     }
+  'typedef'      { PT _ (TS _ 84)     }
+  'unless'       { PT _ (TS _ 85)     }
+  'unsigned'     { PT _ (TS _ 86)     }
+  'xr'           { PT _ (TS _ 87)     }
+  'xs'           { PT _ (TS _ 88)     }
+  '{'            { PT _ (TS _ 89)     }
+  '|'            { PT _ (TS _ 90)     }
+  '||'           { PT _ (TS _ 91)     }
+  '}'            { PT _ (TS _ 92)     }
+  '~'            { PT _ (TS _ 93)     }
   L_integ        { PT _ (TI $$)       }
   L_quoted       { PT _ (TL $$)       }
   L_PIdent       { PT _ (T_PIdent $$) }
@@ -295,34 +311,13 @@ Typename
   | 'chan' { Pml.Abs.Typename_chan }
   | Uname { Pml.Abs.TypenameUname $1 }
 
-AndOr :: { Pml.Abs.AndOr }
-AndOr : '&&' { Pml.Abs.AndOr1 } | '||' { Pml.Abs.AndOr2 }
-
-BinOp :: { Pml.Abs.BinOp }
-BinOp
-  : '+' { Pml.Abs.BinOp1 }
-  | '-' { Pml.Abs.BinOp2 }
-  | '*' { Pml.Abs.BinOp3 }
-  | '/' { Pml.Abs.BinOp4 }
-  | '%' { Pml.Abs.BinOp5 }
-  | '&' { Pml.Abs.BinOp6 }
-  | '^' { Pml.Abs.BinOp7 }
-  | '|' { Pml.Abs.BinOp8 }
-  | '>' { Pml.Abs.BinOp9 }
-  | '<' { Pml.Abs.BinOp10 }
-  | '>=' { Pml.Abs.BinOp11 }
-  | '<=' { Pml.Abs.BinOp12 }
-  | '==' { Pml.Abs.BinOp13 }
-  | '!=' { Pml.Abs.BinOp14 }
-  | '<<' { Pml.Abs.BinOp15 }
-  | '>>' { Pml.Abs.BinOp16 }
-  | AndOr { Pml.Abs.BinOpAndOr $1 }
-
 UnrOp :: { Pml.Abs.UnrOp }
 UnrOp
   : '~' { Pml.Abs.UnrOp1 }
   | '-' { Pml.Abs.UnrOp2 }
   | '!' { Pml.Abs.UnrOp3 }
+  | '++' { Pml.Abs.UnrOp4 }
+  | '--' { Pml.Abs.UnrOp5 }
 
 Const :: { Pml.Abs.Const }
 Const
@@ -395,7 +390,9 @@ Utype :: { Pml.Abs.Utype }
 Utype : 'typedef' Name '{' DeclList '}' ';' { Pml.Abs.Utp $2 $4 }
 
 Mtype :: { Pml.Abs.Mtype }
-Mtype : 'mtype' Mequals '{' Mname '}' Msep { Pml.Abs.Mtp $2 $4 $6 }
+Mtype
+  : 'mtype' Mequals '{' Mname '}' Msep { Pml.Abs.MtpEq $2 $4 $6 }
+  | 'mtype' Mname Msep { Pml.Abs.MtpNoEq $2 $3 }
 
 Msep :: { Pml.Abs.Msep }
 Msep : {- empty -} { Pml.Abs.MsepNone } | ';' { Pml.Abs.MsepOne }
@@ -479,11 +476,59 @@ VarRefList
 
 AnyExpr :: { Pml.Abs.AnyExpr }
 AnyExpr
-  : '(' AnyExpr ')' { Pml.Abs.AnyExprParen $2 }
-  | AnyExpr BinOp AnyExpr { Pml.Abs.AnyExprBinOp $1 $2 $3 }
-  | UnrOp AnyExpr { Pml.Abs.AnyExprUnrOp $1 $2 }
-  | '(' AnyExpr '->' AnyExpr ':' AnyExpr ')' { Pml.Abs.AnyExprCond $2 $4 $6 }
-  | 'len' '(' VarRef ')' { Pml.Abs.AnyExprLen $3 }
+  : '(' AnyExpr2 '->' AnyExpr2 ':' AnyExpr2 ')' { Pml.Abs.AnyExprCond $2 $4 $6 }
+  | AnyExpr1 { $1 }
+
+AnyExpr2 :: { Pml.Abs.AnyExpr }
+AnyExpr2
+  : AnyExpr2 '||' AnyExpr3 { Pml.Abs.AnyExprlor $1 $3 }
+  | AnyExpr2 '&&' AnyExpr3 { Pml.Abs.AnyExprland $1 $3 }
+  | AnyExpr3 { $1 }
+
+AnyExpr3 :: { Pml.Abs.AnyExpr }
+AnyExpr3
+  : AnyExpr3 '|' AnyExpr4 { Pml.Abs.AnyExprbitor $1 $3 }
+  | AnyExpr3 '^' AnyExpr4 { Pml.Abs.AnyExprbitexor $1 $3 }
+  | AnyExpr3 '&' AnyExpr4 { Pml.Abs.AnyExprbitand $1 $3 }
+  | AnyExpr4 { $1 }
+
+AnyExpr4 :: { Pml.Abs.AnyExpr }
+AnyExpr4
+  : AnyExpr4 '==' AnyExpr5 { Pml.Abs.AnyExpreq $1 $3 }
+  | AnyExpr4 '!=' AnyExpr5 { Pml.Abs.AnyExprneq $1 $3 }
+  | AnyExpr5 { $1 }
+
+AnyExpr5 :: { Pml.Abs.AnyExpr }
+AnyExpr5
+  : AnyExpr5 '<' AnyExpr6 { Pml.Abs.AnyExprlthen $1 $3 }
+  | AnyExpr5 '>' AnyExpr6 { Pml.Abs.AnyExprgrthen $1 $3 }
+  | AnyExpr5 '<=' AnyExpr6 { Pml.Abs.AnyExprle $1 $3 }
+  | AnyExpr5 '>=' AnyExpr6 { Pml.Abs.AnyExprge $1 $3 }
+  | AnyExpr6 { $1 }
+
+AnyExpr6 :: { Pml.Abs.AnyExpr }
+AnyExpr6
+  : AnyExpr6 '<<' AnyExpr7 { Pml.Abs.AnyExprleft $1 $3 }
+  | AnyExpr6 '>>' AnyExpr7 { Pml.Abs.AnyExprright $1 $3 }
+  | AnyExpr7 { $1 }
+
+AnyExpr7 :: { Pml.Abs.AnyExpr }
+AnyExpr7
+  : AnyExpr7 '+' AnyExpr8 { Pml.Abs.AnyExprplus $1 $3 }
+  | AnyExpr7 '-' AnyExpr8 { Pml.Abs.AnyExprminus $1 $3 }
+  | AnyExpr8 { $1 }
+
+AnyExpr8 :: { Pml.Abs.AnyExpr }
+AnyExpr8
+  : AnyExpr8 '*' AnyExpr9 { Pml.Abs.AnyExprtimes $1 $3 }
+  | AnyExpr8 '/' AnyExpr9 { Pml.Abs.AnyExprdiv $1 $3 }
+  | AnyExpr8 '%' AnyExpr9 { Pml.Abs.AnyExprmod $1 $3 }
+  | UnrOp AnyExpr9 { Pml.Abs.AnyExprUnrOp $1 $2 }
+  | AnyExpr9 { $1 }
+
+AnyExpr9 :: { Pml.Abs.AnyExpr }
+AnyExpr9
+  : 'len' '(' VarRef ')' { Pml.Abs.AnyExprLen $3 }
   | Poll { Pml.Abs.AnyExprPoll $1 }
   | VarRef { Pml.Abs.AnyExprVarRef $1 }
   | Const { Pml.Abs.AnyExprConst $1 }
@@ -495,6 +540,10 @@ AnyExpr
   | 'run' Name '(' RunArgs ')' RunPrio { Pml.Abs.AnyExprRun $2 $4 $6 }
   | 'get_priority' '(' Expr ')' { Pml.Abs.AnyExprGetPrio $3 }
   | 'set_priority' '(' Expr ',' Expr ')' { Pml.Abs.AnyExprSetPrio $3 $5 }
+  | '(' AnyExpr ')' { $2 }
+
+AnyExpr1 :: { Pml.Abs.AnyExpr }
+AnyExpr1 : AnyExpr2 { $1 }
 
 Ivar :: { Pml.Abs.Ivar }
 Ivar : Name IvarConst IvarAssign { Pml.Abs.Ivar $1 $2 $3 }
@@ -582,10 +631,7 @@ RecvArg
   | UnaryMinus Const { Pml.Abs.RecvArgConst $1 $2 }
 
 Assign :: { Pml.Abs.Assign }
-Assign
-  : VarRef '=' AnyExpr { Pml.Abs.AssignStd $1 $3 }
-  | VarRef '+' '+' { Pml.Abs.AssignInc $1 }
-  | VarRef '-' '-' { Pml.Abs.AssignDec $1 }
+Assign : VarRef '=' AnyExpr { Pml.Abs.AssignStd $1 $3 }
 
 Pargs :: { Pml.Abs.Pargs }
 Pargs
@@ -644,7 +690,6 @@ Expr :: { Pml.Abs.Expr }
 Expr
   : AnyExpr { Pml.Abs.ExprAny $1 }
   | '(' Expr ')' { Pml.Abs.ExprParen $2 }
-  | Expr AndOr Expr { Pml.Abs.ExprAndOr $1 $2 $3 }
   | ChanPoll '(' VarRef ')' { Pml.Abs.ExprChanPoll $1 $3 }
 
 Uname :: { Pml.Abs.Uname }

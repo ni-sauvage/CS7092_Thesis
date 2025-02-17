@@ -95,17 +95,17 @@ CIdent literals are recognized by the regular expression
 The set of reserved words is the set of terminals appearing in the grammar. Those reserved words that consist of non-letter characters are called symbols, and they are treated in a different way from those that are similar to identifiers. The lexer follows rules familiar from languages like Haskell, C, and Java, including longest match and spacing conventions.
 
 The reserved words used in C are the following:
-  | ``Context`` | ``RtemsModelEventsMgr_Context`` | ``Typedef_name`` | ``auto``
-  | ``break`` | ``case`` | ``char`` | ``const``
-  | ``continue`` | ``default`` | ``do`` | ``double``
-  | ``else`` | ``enum`` | ``extern`` | ``float``
-  | ``for`` | ``goto`` | ``if`` | ``int``
-  | ``long`` | ``register`` | ``return`` | ``rtems_event_set``
-  | ``rtems_id`` | ``rtems_status_code`` | ``rtems_task_argument`` | ``rtems_task_priority``
-  | ``short`` | ``signed`` | ``size_t`` | ``sizeof``
-  | ``static`` | ``struct`` | ``switch`` | ``typedef``
-  | ``union`` | ``unsigned`` | ``void`` | ``volatile``
-  | ``while`` |  |  |
+  | ``Context`` | ``RtemsModelEventsMgr_Context`` | ``RtemsModelProtoSem_Context`` | ``Typedef_name``
+  | ``auto`` | ``break`` | ``case`` | ``char``
+  | ``const`` | ``continue`` | ``default`` | ``do``
+  | ``double`` | ``else`` | ``enum`` | ``extern``
+  | ``float`` | ``for`` | ``goto`` | ``if``
+  | ``int`` | ``long`` | ``register`` | ``return``
+  | ``rtems_event_set`` | ``rtems_id`` | ``rtems_status_code`` | ``rtems_task_argument``
+  | ``rtems_task_priority`` | ``short`` | ``signed`` | ``size_t``
+  | ``sizeof`` | ``static`` | ``struct`` | ``switch``
+  | ``typedef`` | ``union`` | ``unsigned`` | ``void``
+  | ``volatile`` | ``while`` |  |
 
 The symbols used in C are the following:
   | ; | , | = | {
@@ -171,6 +171,7 @@ All other symbols are terminals.
   |  |  **|**  | ``rtems_task_priority``
   |  |  **|**  | ``size_t``
   |  |  **|**  | ``RtemsModelEventsMgr_Context``
+  |  |  **|**  | ``RtemsModelProtoSem_Context``
   |  |  **|**  | ``rtems_task_argument``
   | //Storage_class_specifier// | -> | ``typedef``
   |  |  **|**  | ``extern``
@@ -256,18 +257,24 @@ All other symbols are terminals.
   |  |  **|**  | ``case`` //Constant_expression// ``:`` //Stm//
   |  |  **|**  | ``default`` ``:`` //Stm//
   | //Compound_stm// | -> | ``{`` ``}``
-  |  |  **|**  | ``{`` //[Stm]// ``}``
-  |  |  **|**  | ``{`` //[Dec]// ``}``
-  |  |  **|**  | ``{`` //[Dec]// //[Stm]// ``}``
+  |  |  **|**  | ``{`` //DecStmList// ``}``
+  | //DecStm// | -> | //Dec//
+  |  |  **|**  | //Stm//
+  | //DecStmList// | -> | **eps**
+  |  |  **|**  | //DecStm// //DecStmList//
   | //Expression_stm// | -> | ``;``
   |  |  **|**  | //Exp// ``;``
+  | //DeclExprList// | -> | **eps**
+  |  |  **|**  | //DeclExpr// ``;`` //DeclExprList//
+  | //DeclExpr// | -> | //Exp//
+  |  |  **|**  | //Dec//
   | //Selection_stm// | -> | ``if`` ``(`` //Exp// ``)`` //Stm//
   |  |  **|**  | ``if`` ``(`` //Exp// ``)`` //Stm// ``else`` //Stm//
   |  |  **|**  | ``switch`` ``(`` //Exp// ``)`` //Stm//
   | //Iter_stm// | -> | ``while`` ``(`` //Exp// ``)`` //Stm//
   |  |  **|**  | ``do`` //Stm// ``while`` ``(`` //Exp// ``)`` ``;``
-  |  |  **|**  | ``for`` ``(`` //Expression_stm// //Expression_stm// ``)`` //Stm//
-  |  |  **|**  | ``for`` ``(`` //Expression_stm// //Expression_stm// //Exp// ``)`` //Stm//
+  |  |  **|**  | ``for`` ``(`` //DeclExpr// //Expression_stm// ``)`` //Stm//
+  |  |  **|**  | ``for`` ``(`` //DeclExpr// //Expression_stm// //Exp// ``)`` //Stm//
   | //Jump_stm// | -> | ``goto`` //CIdent// ``;``
   |  |  **|**  | ``continue`` ``;``
   |  |  **|**  | ``break`` ``;``

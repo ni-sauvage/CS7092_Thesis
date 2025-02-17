@@ -185,14 +185,20 @@ data Labeled_stm
     | SlabelThree Stm
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data Compound_stm
-    = ScompOne
-    | ScompTwo [Stm]
-    | ScompThree [Dec]
-    | ScompFour [Dec] [Stm]
+data Compound_stm = ScompOne | ScompFour DecStmList
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
+data DecStm = SstmOrDclOne Dec | SstmOrDclTwo Stm
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
+data DecStmList
+    = SDecStmListNone | SDecStmListOne DecStm DecStmList
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Expression_stm = SexprOne | SexprTwo Exp
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
+data DeclExpr = SdExprOne Exp | SdExprTwo Dec
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Selection_stm
@@ -202,8 +208,8 @@ data Selection_stm
 data Iter_stm
     = SiterOne Exp Stm
     | SiterTwo Stm Exp
-    | SiterThree Expression_stm Expression_stm Stm
-    | SiterFour Expression_stm Expression_stm Exp Stm
+    | SiterThree DeclExpr Expression_stm Stm
+    | SiterFour DeclExpr Expression_stm Exp Stm
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Jump_stm

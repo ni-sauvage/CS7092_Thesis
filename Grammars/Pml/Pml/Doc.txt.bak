@@ -45,15 +45,16 @@ The reserved words used in Pml are the following:
   | ``unsigned`` | ``xr`` | ``xs`` |
 
 The symbols used in Pml are the following:
-  | ; | -> | && | ||
-  | + | - | * | /
-  | % | & | ^ | |
-  | > | < | >= | <=
-  | == | != | << | >>
-  | ~ | ! | ( | )
-  | { | } | = | ,
-  | : | [ | ] | @
-  | . | ? | .. | ::
+  | ; | -> | ~ | -
+  | ! | ++ | -- | (
+  | ) | { | } | =
+  | , | : | [ | ]
+  | || | && | | | ^
+  | & | == | != | <
+  | > | <= | >= | <<
+  | >> | + | * | /
+  | % | @ | . | ?
+  | .. | :: |  |
 
 ===Comments===
 There are no single-line comments in the grammar.There are no multiple-line comments in the grammar.
@@ -80,28 +81,11 @@ All other symbols are terminals.
   |  |  **|**  | ``mtype``
   |  |  **|**  | ``chan``
   |  |  **|**  | //Uname//
-  | //AndOr// | -> | ``&&``
-  |  |  **|**  | ``||``
-  | //BinOp// | -> | ``+``
-  |  |  **|**  | ``-``
-  |  |  **|**  | ``*``
-  |  |  **|**  | ``/``
-  |  |  **|**  | ``%``
-  |  |  **|**  | ``&``
-  |  |  **|**  | ``^``
-  |  |  **|**  | ``|``
-  |  |  **|**  | ``>``
-  |  |  **|**  | ``<``
-  |  |  **|**  | ``>=``
-  |  |  **|**  | ``<=``
-  |  |  **|**  | ``==``
-  |  |  **|**  | ``!=``
-  |  |  **|**  | ``<<``
-  |  |  **|**  | ``>>``
-  |  |  **|**  | //AndOr//
   | //UnrOp// | -> | ``~``
   |  |  **|**  | ``-``
   |  |  **|**  | ``!``
+  |  |  **|**  | ``++``
+  |  |  **|**  | ``--``
   | //Const// | -> | ``true``
   |  |  **|**  | ``false``
   |  |  **|**  | ``skip``
@@ -134,6 +118,7 @@ All other symbols are terminals.
   | //Trace// | -> | ``trace`` ``{`` //Sequence// ``}``
   | //Utype// | -> | ``typedef`` //Name// ``{`` //DeclList// ``}`` ``;``
   | //Mtype// | -> | ``mtype`` //Mequals// ``{`` //Mname// ``}`` //Msep//
+  |  |  **|**  | ``mtype`` //Mname// //Msep//
   | //Msep// | -> | **eps**
   |  |  **|**  | ``;``
   | //Mequals// | -> | **eps**
@@ -170,11 +155,35 @@ All other symbols are terminals.
   |  |  **|**  | ``xs`` //VarRefList//
   | //VarRefList// | -> | //VarRef//
   |  |  **|**  | //VarRef// ``,`` //VarRefList//
-  | //AnyExpr// | -> | ``(`` //AnyExpr// ``)``
-  |  |  **|**  | //AnyExpr// //BinOp// //AnyExpr//
-  |  |  **|**  | //UnrOp// //AnyExpr//
-  |  |  **|**  | ``(`` //AnyExpr// ``->`` //AnyExpr// ``:`` //AnyExpr// ``)``
-  |  |  **|**  | ``len`` ``(`` //VarRef// ``)``
+  | //AnyExpr// | -> | ``(`` //AnyExpr2// ``->`` //AnyExpr2// ``:`` //AnyExpr2// ``)``
+  |  |  **|**  | //AnyExpr1//
+  | //AnyExpr2// | -> | //AnyExpr2// ``||`` //AnyExpr3//
+  |  |  **|**  | //AnyExpr2// ``&&`` //AnyExpr3//
+  |  |  **|**  | //AnyExpr3//
+  | //AnyExpr3// | -> | //AnyExpr3// ``|`` //AnyExpr4//
+  |  |  **|**  | //AnyExpr3// ``^`` //AnyExpr4//
+  |  |  **|**  | //AnyExpr3// ``&`` //AnyExpr4//
+  |  |  **|**  | //AnyExpr4//
+  | //AnyExpr4// | -> | //AnyExpr4// ``==`` //AnyExpr5//
+  |  |  **|**  | //AnyExpr4// ``!=`` //AnyExpr5//
+  |  |  **|**  | //AnyExpr5//
+  | //AnyExpr5// | -> | //AnyExpr5// ``<`` //AnyExpr6//
+  |  |  **|**  | //AnyExpr5// ``>`` //AnyExpr6//
+  |  |  **|**  | //AnyExpr5// ``<=`` //AnyExpr6//
+  |  |  **|**  | //AnyExpr5// ``>=`` //AnyExpr6//
+  |  |  **|**  | //AnyExpr6//
+  | //AnyExpr6// | -> | //AnyExpr6// ``<<`` //AnyExpr7//
+  |  |  **|**  | //AnyExpr6// ``>>`` //AnyExpr7//
+  |  |  **|**  | //AnyExpr7//
+  | //AnyExpr7// | -> | //AnyExpr7// ``+`` //AnyExpr8//
+  |  |  **|**  | //AnyExpr7// ``-`` //AnyExpr8//
+  |  |  **|**  | //AnyExpr8//
+  | //AnyExpr8// | -> | //AnyExpr8// ``*`` //AnyExpr9//
+  |  |  **|**  | //AnyExpr8// ``/`` //AnyExpr9//
+  |  |  **|**  | //AnyExpr8// ``%`` //AnyExpr9//
+  |  |  **|**  | //UnrOp// //AnyExpr9//
+  |  |  **|**  | //AnyExpr9//
+  | //AnyExpr9// | -> | ``len`` ``(`` //VarRef// ``)``
   |  |  **|**  | //Poll//
   |  |  **|**  | //VarRef//
   |  |  **|**  | //Const//
@@ -186,6 +195,8 @@ All other symbols are terminals.
   |  |  **|**  | ``run`` //Name// ``(`` //RunArgs// ``)`` //RunPrio//
   |  |  **|**  | ``get_priority`` ``(`` //Expr// ``)``
   |  |  **|**  | ``set_priority`` ``(`` //Expr// ``,`` //Expr// ``)``
+  |  |  **|**  | ``(`` //AnyExpr// ``)``
+  | //AnyExpr1// | -> | //AnyExpr2//
   | //Ivar// | -> | //Name// //IvarConst// //IvarAssign//
   | //IvarConst// | -> | **eps**
   |  |  **|**  | ``[`` //Const// ``]``
@@ -223,8 +234,6 @@ All other symbols are terminals.
   |  |  **|**  | ``eval`` ``(`` //VarRef// ``)``
   |  |  **|**  | //UnaryMinus// //Const//
   | //Assign// | -> | //VarRef// ``=`` //AnyExpr//
-  |  |  **|**  | //VarRef// ``+`` ``+``
-  |  |  **|**  | //VarRef// ``-`` ``-``
   | //Pargs// | -> | //String//
   |  |  **|**  | //ArgList//
   |  |  **|**  | //String// ``,`` //ArgList//
@@ -258,7 +267,6 @@ All other symbols are terminals.
   |  |  **|**  | //ArgList//
   | //Expr// | -> | //AnyExpr//
   |  |  **|**  | ``(`` //Expr// ``)``
-  |  |  **|**  | //Expr// //AndOr// //Expr//
   |  |  **|**  | //ChanPoll// ``(`` //VarRef// ``)``
   | //Uname// | -> | //Name//
   | //Name// | -> | //PIdent//

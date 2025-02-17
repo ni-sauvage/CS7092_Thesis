@@ -414,14 +414,27 @@ instance Print C.Abs.Labeled_stm where
 instance Print C.Abs.Compound_stm where
   prt i = \case
     C.Abs.ScompOne -> prPrec i 0 (concatD [doc (showString "{"), doc (showString "}")])
-    C.Abs.ScompTwo stms -> prPrec i 0 (concatD [doc (showString "{"), prt 0 stms, doc (showString "}")])
-    C.Abs.ScompThree decs -> prPrec i 0 (concatD [doc (showString "{"), prt 0 decs, doc (showString "}")])
-    C.Abs.ScompFour decs stms -> prPrec i 0 (concatD [doc (showString "{"), prt 0 decs, prt 0 stms, doc (showString "}")])
+    C.Abs.ScompFour decstmlist -> prPrec i 0 (concatD [doc (showString "{"), prt 0 decstmlist, doc (showString "}")])
+
+instance Print C.Abs.DecStm where
+  prt i = \case
+    C.Abs.SstmOrDclOne dec -> prPrec i 0 (concatD [prt 0 dec])
+    C.Abs.SstmOrDclTwo stm -> prPrec i 0 (concatD [prt 0 stm])
+
+instance Print C.Abs.DecStmList where
+  prt i = \case
+    C.Abs.SDecStmListNone -> prPrec i 0 (concatD [])
+    C.Abs.SDecStmListOne decstm decstmlist -> prPrec i 0 (concatD [prt 0 decstm, prt 0 decstmlist])
 
 instance Print C.Abs.Expression_stm where
   prt i = \case
     C.Abs.SexprOne -> prPrec i 0 (concatD [doc (showString ";")])
     C.Abs.SexprTwo exp -> prPrec i 0 (concatD [prt 0 exp, doc (showString ";")])
+
+instance Print C.Abs.DeclExpr where
+  prt i = \case
+    C.Abs.SdExprOne exp -> prPrec i 0 (concatD [prt 0 exp])
+    C.Abs.SdExprTwo dec -> prPrec i 0 (concatD [prt 0 dec])
 
 instance Print C.Abs.Selection_stm where
   prt i = \case
@@ -433,8 +446,8 @@ instance Print C.Abs.Iter_stm where
   prt i = \case
     C.Abs.SiterOne exp stm -> prPrec i 0 (concatD [doc (showString "while"), doc (showString "("), prt 0 exp, doc (showString ")"), prt 0 stm])
     C.Abs.SiterTwo stm exp -> prPrec i 0 (concatD [doc (showString "do"), prt 0 stm, doc (showString "while"), doc (showString "("), prt 0 exp, doc (showString ")"), doc (showString ";")])
-    C.Abs.SiterThree expressionstm1 expressionstm2 stm -> prPrec i 0 (concatD [doc (showString "for"), doc (showString "("), prt 0 expressionstm1, prt 0 expressionstm2, doc (showString ")"), prt 0 stm])
-    C.Abs.SiterFour expressionstm1 expressionstm2 exp stm -> prPrec i 0 (concatD [doc (showString "for"), doc (showString "("), prt 0 expressionstm1, prt 0 expressionstm2, prt 0 exp, doc (showString ")"), prt 0 stm])
+    C.Abs.SiterThree declexpr expressionstm stm -> prPrec i 0 (concatD [doc (showString "for"), doc (showString "("), prt 0 declexpr, prt 0 expressionstm, doc (showString ")"), prt 0 stm])
+    C.Abs.SiterFour declexpr expressionstm exp stm -> prPrec i 0 (concatD [doc (showString "for"), doc (showString "("), prt 0 declexpr, prt 0 expressionstm, prt 0 exp, doc (showString ")"), prt 0 stm])
 
 instance Print C.Abs.Jump_stm where
   prt i = \case

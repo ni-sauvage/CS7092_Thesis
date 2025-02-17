@@ -24,7 +24,6 @@ static void TestSegment0( Context* ctx ) {
 
 static void TestSegment3( Context* ctx ) {
   
-  size_t i;
   rtems_status_code sc;
   rtems_task_priority prio;
   T_thread_switch_log *log;
@@ -52,7 +51,8 @@ static void TestSegment3( Context* ctx ) {
   T_log(T_NORMAL,"@@@ 3 CALL CheckNoPreemption");
   log = &ctx->thread_switch_log;
   T_le_sz( log->header.recorded, 1 );
-  for ( i = 0; i < log->header.recorded; ++i ) {
+  
+  for ( size_t i = 0; i < log->header.recorded; ++i ) {
     T_ne_u32( log->events[ i ].executing, ctx->worker_id );
     T_eq_u32( log->events[ i ].heir, ctx->runner_id );
   }

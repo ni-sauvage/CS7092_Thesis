@@ -257,18 +257,22 @@ All other symbols are terminals.
   |  |  **|**  | ``case`` //Constant_expression// ``:`` //Stm//
   |  |  **|**  | ``default`` ``:`` //Stm//
   | //Compound_stm// | -> | ``{`` ``}``
-  |  |  **|**  | ``{`` //[Stm]// ``}``
-  |  |  **|**  | ``{`` //[Dec]// ``}``
-  |  |  **|**  | ``{`` //[Dec]// //[Stm]// ``}``
+  |  |  **|**  | ``{`` //DecStmList// ``}``
+  | //DecStm// | -> | //Dec//
+  |  |  **|**  | //Stm//
+  | //DecStmList// | -> | **eps**
+  |  |  **|**  | //DecStm// //DecStmList//
   | //Expression_stm// | -> | ``;``
   |  |  **|**  | //Exp// ``;``
+  | //DeclExpr// | -> | //Exp//
+  |  |  **|**  | //Dec//
   | //Selection_stm// | -> | ``if`` ``(`` //Exp// ``)`` //Stm//
   |  |  **|**  | ``if`` ``(`` //Exp// ``)`` //Stm// ``else`` //Stm//
   |  |  **|**  | ``switch`` ``(`` //Exp// ``)`` //Stm//
   | //Iter_stm// | -> | ``while`` ``(`` //Exp// ``)`` //Stm//
   |  |  **|**  | ``do`` //Stm// ``while`` ``(`` //Exp// ``)`` ``;``
-  |  |  **|**  | ``for`` ``(`` //Expression_stm// //Expression_stm// ``)`` //Stm//
-  |  |  **|**  | ``for`` ``(`` //Expression_stm// //Expression_stm// //Exp// ``)`` //Stm//
+  |  |  **|**  | ``for`` ``(`` //DeclExpr// //Expression_stm// ``)`` //Stm//
+  |  |  **|**  | ``for`` ``(`` //DeclExpr// //Expression_stm// //Exp// ``)`` //Stm//
   | //Jump_stm// | -> | ``goto`` //CIdent// ``;``
   |  |  **|**  | ``continue`` ``;``
   |  |  **|**  | ``break`` ``;``
