@@ -51,24 +51,25 @@ The symbols -> (production),  **|**  (union)
 and **eps** (empty rule) belong to the BNF notation.
 All other symbols are terminals.
 
-  | //[Obs]// | -> | ``@@@`` //Obs// //[Obs]//
-  |  |  **|**  | ``@@@`` //Obs//
-  | //Obs// | -> | //ThreadId// ``NAME`` //ObsIdent//
-  |  |  **|**  | //ThreadId// ``INIT``
-  |  |  **|**  | //ThreadId// ``TASK`` //Taskname//
-  |  |  **|**  | //ThreadId// ``SIGNAL`` //Integer//
-  |  |  **|**  | //ThreadId// ``DEF`` //Varname// //Varval//
-  |  |  **|**  | //ThreadId// ``DECL`` //Typename// //Varname//
-  |  |  **|**  | //ThreadId// ``DECL`` //Typename// //Varname// //Varval//
-  |  |  **|**  | //ThreadId// ``DCLARRAY`` //Typename// //Varname// //SizeDcl//
-  |  |  **|**  | //ThreadId// ``CALL`` //ObsIdent// //Args//
-  |  |  **|**  | //ThreadId// ``STATE`` //Integer// //StateObs//
-  |  |  **|**  | //ThreadId// ``STRUCT`` //Varname//
-  |  |  **|**  | //ThreadId// ``SEQ`` //Varname// //Scalar//
-  |  |  **|**  | //ThreadId// ``PTR`` //Varname// //Varval//
-  |  |  **|**  | //ThreadId// ``SCALAR`` //Varname// //Varval//
-  |  |  **|**  | //ThreadId// ``SCALAR`` //Varname// //Varindex// //Varval//
-  |  |  **|**  | //ThreadId// ``END`` //Varname//
+  | //[ObsId]// | -> | ``@@@`` //ObsId// //[ObsId]//
+  |  |  **|**  | ``@@@`` //ObsId//
+  | //ObsId// | -> | //ThreadId// //Obs//
+  | //Obs// | -> | ``NAME`` //ObsIdent//
+  |  |  **|**  | ``INIT``
+  |  |  **|**  | ``TASK`` //Taskname//
+  |  |  **|**  | ``SIGNAL`` //Integer//
+  |  |  **|**  | ``DEF`` //Varname// //Varval//
+  |  |  **|**  | ``DECL`` //Typename// //Varname//
+  |  |  **|**  | ``DECL`` //Typename// //Varname// //Varval//
+  |  |  **|**  | ``DCLARRAY`` //Typename// //Varname// //SizeDcl//
+  |  |  **|**  | ``CALL`` //ObsIdent// //Args//
+  |  |  **|**  | ``STATE`` //Integer// //StateObs//
+  |  |  **|**  | ``STRUCT`` //Varname//
+  |  |  **|**  | ``SEQ`` //Varname// //Scalar//
+  |  |  **|**  | ``PTR`` //Varname// //Varval//
+  |  |  **|**  | ``SCALAR`` //Varname// //Varval//
+  |  |  **|**  | ``SCALAR`` //Varname// //Varindex// //Varval//
+  |  |  **|**  | ``END`` //Varname//
   | //Scalar// | -> | //End//
   |  |  **|**  | ``@@@`` //ThreadId// ``SCALAR`` ``_`` //Varval// //Scalar//
   | //End// | -> | ``@@@`` //ThreadId// ``END`` //Varname//

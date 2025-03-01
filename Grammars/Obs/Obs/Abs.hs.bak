@@ -20,7 +20,7 @@ data Obs
     | ObsDeclVal ThreadId Typename Varname Varval
     | ObsDeclArr ThreadId Typename Varname SizeDcl
     | ObsCall ThreadId ObsIdent Args
-    | ObsState ThreadId Integer State
+    | ObsState ThreadId Integer StateObs
     | ObsStruct ThreadId Varname
     | ObsSeq ThreadId Varname Scalar
     | ObsPtr ThreadId Varname Varval
@@ -59,7 +59,7 @@ data Varval
 data Typename = TypeName ObsIdent
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data State = State ObsIdent
+data StateObs = StateObs ObsIdent
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Varindex = VarIndex Integer

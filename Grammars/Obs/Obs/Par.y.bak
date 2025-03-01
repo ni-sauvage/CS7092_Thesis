@@ -17,7 +17,7 @@ module Obs.Par
   , pVarname
   , pVarval
   , pTypename
-  , pState
+  , pStateObs
   , pVarindex
   , pThreadId
   , pSizeDcl
@@ -39,7 +39,7 @@ import Obs.Lex
 %name pVarname Varname
 %name pVarval Varval
 %name pTypename Typename
-%name pState State
+%name pStateObs StateObs
 %name pVarindex Varindex
 %name pThreadId ThreadId
 %name pSizeDcl SizeDcl
@@ -97,7 +97,7 @@ Obs
   | ThreadId 'DECL' Typename Varname Varval { Obs.Abs.ObsDeclVal $1 $3 $4 $5 }
   | ThreadId 'DCLARRAY' Typename Varname SizeDcl { Obs.Abs.ObsDeclArr $1 $3 $4 $5 }
   | ThreadId 'CALL' ObsIdent Args { Obs.Abs.ObsCall $1 $3 $4 }
-  | ThreadId 'STATE' Integer State { Obs.Abs.ObsState $1 $3 $4 }
+  | ThreadId 'STATE' Integer StateObs { Obs.Abs.ObsState $1 $3 $4 }
   | ThreadId 'STRUCT' Varname { Obs.Abs.ObsStruct $1 $3 }
   | ThreadId 'SEQ' Varname Scalar { Obs.Abs.ObsSeq $1 $3 $4 }
   | ThreadId 'PTR' Varname Varval { Obs.Abs.ObsPtr $1 $3 $4 }
@@ -136,8 +136,8 @@ Varval
 Typename :: { Obs.Abs.Typename }
 Typename : ObsIdent { Obs.Abs.TypeName $1 }
 
-State :: { Obs.Abs.State }
-State : ObsIdent { Obs.Abs.State $1 }
+StateObs :: { Obs.Abs.StateObs }
+StateObs : ObsIdent { Obs.Abs.StateObs $1 }
 
 Varindex :: { Obs.Abs.Varindex }
 Varindex : Integer { Obs.Abs.VarIndex $1 }

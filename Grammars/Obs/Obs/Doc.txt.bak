@@ -62,7 +62,7 @@ All other symbols are terminals.
   |  |  **|**  | //ThreadId// ``DECL`` //Typename// //Varname// //Varval//
   |  |  **|**  | //ThreadId// ``DCLARRAY`` //Typename// //Varname// //SizeDcl//
   |  |  **|**  | //ThreadId// ``CALL`` //ObsIdent// //Args//
-  |  |  **|**  | //ThreadId// ``STATE`` //Integer// //State//
+  |  |  **|**  | //ThreadId// ``STATE`` //Integer// //StateObs//
   |  |  **|**  | //ThreadId// ``STRUCT`` //Varname//
   |  |  **|**  | //ThreadId// ``SEQ`` //Varname// //Scalar//
   |  |  **|**  | //ThreadId// ``PTR`` //Varname// //Varval//
@@ -83,7 +83,7 @@ All other symbols are terminals.
   |  |  **|**  | ``NULL``
   |  |  **|**  | //ObsStr//
   | //Typename// | -> | //ObsIdent//
-  | //State// | -> | //ObsIdent//
+  | //StateObs// | -> | //ObsIdent//
   | //Varindex// | -> | //Integer//
   | //ThreadId// | -> | //Integer//
   | //SizeDcl// | -> | //Varval//

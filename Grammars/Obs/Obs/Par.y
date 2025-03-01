@@ -8,7 +8,8 @@
 module Obs.Par
   ( happyError
   , myLexer
-  , pListObs
+  , pListObsId
+  , pObsId
   , pObs
   , pScalar
   , pEnd
@@ -30,7 +31,8 @@ import Obs.Lex
 
 }
 
-%name pListObs ListObs
+%name pListObsId ListObsId
+%name pObsId ObsId
 %name pObs Obs
 %name pScalar Scalar
 %name pEnd End
@@ -83,27 +85,31 @@ ObsIdent  : L_ObsIdent { Obs.Abs.ObsIdent $1 }
 ObsStr :: { Obs.Abs.ObsStr }
 ObsStr  : L_ObsStr { Obs.Abs.ObsStr $1 }
 
-ListObs :: { [Obs.Abs.Obs] }
-ListObs : '@@@' Obs ListObs { (:) $2 $3 } | '@@@' Obs { (:[]) $2 }
+ListObsId :: { [Obs.Abs.ObsId] }
+ListObsId
+  : '@@@' ObsId ListObsId { (:) $2 $3 } | '@@@' ObsId { (:[]) $2 }
+
+ObsId :: { Obs.Abs.ObsId }
+ObsId : ThreadId Obs { Obs.Abs.ObsId $1 $2 }
 
 Obs :: { Obs.Abs.Obs }
 Obs
-  : ThreadId 'NAME' ObsIdent { Obs.Abs.ObsName $1 $3 }
-  | ThreadId 'INIT' { Obs.Abs.ObsInit $1 }
-  | ThreadId 'TASK' Taskname { Obs.Abs.ObsTask $1 $3 }
-  | ThreadId 'SIGNAL' Integer { Obs.Abs.ObsSignal $1 $3 }
-  | ThreadId 'DEF' Varname Varval { Obs.Abs.ObsDef $1 $3 $4 }
-  | ThreadId 'DECL' Typename Varname { Obs.Abs.ObsDecl $1 $3 $4 }
-  | ThreadId 'DECL' Typename Varname Varval { Obs.Abs.ObsDeclVal $1 $3 $4 $5 }
-  | ThreadId 'DCLARRAY' Typename Varname SizeDcl { Obs.Abs.ObsDeclArr $1 $3 $4 $5 }
-  | ThreadId 'CALL' ObsIdent Args { Obs.Abs.ObsCall $1 $3 $4 }
-  | ThreadId 'STATE' Integer StateObs { Obs.Abs.ObsState $1 $3 $4 }
-  | ThreadId 'STRUCT' Varname { Obs.Abs.ObsStruct $1 $3 }
-  | ThreadId 'SEQ' Varname Scalar { Obs.Abs.ObsSeq $1 $3 $4 }
-  | ThreadId 'PTR' Varname Varval { Obs.Abs.ObsPtr $1 $3 $4 }
-  | ThreadId 'SCALAR' Varname Varval { Obs.Abs.ObsScalar $1 $3 $4 }
-  | ThreadId 'SCALAR' Varname Varindex Varval { Obs.Abs.ObsScalarIndex $1 $3 $4 $5 }
-  | ThreadId 'END' Varname { Obs.Abs.ObsEnd $1 $3 }
+  : 'NAME' ObsIdent { Obs.Abs.ObsName $2 }
+  | 'INIT' { Obs.Abs.ObsInit }
+  | 'TASK' Taskname { Obs.Abs.ObsTask $2 }
+  | 'SIGNAL' Integer { Obs.Abs.ObsSignal $2 }
+  | 'DEF' Varname Varval { Obs.Abs.ObsDef $2 $3 }
+  | 'DECL' Typename Varname { Obs.Abs.ObsDecl $2 $3 }
+  | 'DECL' Typename Varname Varval { Obs.Abs.ObsDeclVal $2 $3 $4 }
+  | 'DCLARRAY' Typename Varname SizeDcl { Obs.Abs.ObsDeclArr $2 $3 $4 }
+  | 'CALL' ObsIdent Args { Obs.Abs.ObsCall $2 $3 }
+  | 'STATE' Integer StateObs { Obs.Abs.ObsState $2 $3 }
+  | 'STRUCT' Varname { Obs.Abs.ObsStruct $2 }
+  | 'SEQ' Varname Scalar { Obs.Abs.ObsSeq $2 $3 }
+  | 'PTR' Varname Varval { Obs.Abs.ObsPtr $2 $3 }
+  | 'SCALAR' Varname Varval { Obs.Abs.ObsScalar $2 $3 }
+  | 'SCALAR' Varname Varindex Varval { Obs.Abs.ObsScalarIndex $2 $3 $4 }
+  | 'END' Varname { Obs.Abs.ObsEnd $2 }
 
 Scalar :: { Obs.Abs.Scalar }
 Scalar

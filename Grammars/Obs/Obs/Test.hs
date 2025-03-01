@@ -20,7 +20,7 @@ import Control.Monad      ( when )
 
 import Obs.Abs   ()
 import Obs.Lex   ( Token, mkPosToken )
-import Obs.Par   ( pListObs, myLexer )
+import Obs.Par   ( pListObsId, myLexer )
 import Obs.Print ( Print, printTree )
 import Obs.Skel  ()
 
@@ -70,7 +70,7 @@ main = do
   args <- getArgs
   case args of
     ["--help"] -> usage
-    []         -> getContents >>= run 2 pListObs
-    "-s":fs    -> mapM_ (runFile 0 pListObs) fs
-    fs         -> mapM_ (runFile 2 pListObs) fs
+    []         -> getContents >>= run 2 pListObsId
+    "-s":fs    -> mapM_ (runFile 0 pListObsId) fs
+    fs         -> mapM_ (runFile 2 pListObsId) fs
 

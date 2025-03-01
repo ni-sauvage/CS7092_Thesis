@@ -10,23 +10,26 @@ import Prelude (Double, Integer, String)
 import qualified Prelude as C (Eq, Ord, Show, Read)
 import qualified Data.String
 
+data ObsId = ObsId ThreadId Obs
+  deriving (C.Eq, C.Ord, C.Show, C.Read)
+
 data Obs
-    = ObsName ThreadId ObsIdent
-    | ObsInit ThreadId
-    | ObsTask ThreadId Taskname
-    | ObsSignal ThreadId Integer
-    | ObsDef ThreadId Varname Varval
-    | ObsDecl ThreadId Typename Varname
-    | ObsDeclVal ThreadId Typename Varname Varval
-    | ObsDeclArr ThreadId Typename Varname SizeDcl
-    | ObsCall ThreadId ObsIdent Args
-    | ObsState ThreadId Integer StateObs
-    | ObsStruct ThreadId Varname
-    | ObsSeq ThreadId Varname Scalar
-    | ObsPtr ThreadId Varname Varval
-    | ObsScalar ThreadId Varname Varval
-    | ObsScalarIndex ThreadId Varname Varindex Varval
-    | ObsEnd ThreadId Varname
+    = ObsName ObsIdent
+    | ObsInit
+    | ObsTask Taskname
+    | ObsSignal Integer
+    | ObsDef Varname Varval
+    | ObsDecl Typename Varname
+    | ObsDeclVal Typename Varname Varval
+    | ObsDeclArr Typename Varname SizeDcl
+    | ObsCall ObsIdent Args
+    | ObsState Integer StateObs
+    | ObsStruct Varname
+    | ObsSeq Varname Scalar
+    | ObsPtr Varname Varval
+    | ObsScalar Varname Varval
+    | ObsScalarIndex Varname Varindex Varval
+    | ObsEnd Varname
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Scalar

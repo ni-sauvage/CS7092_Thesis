@@ -34,7 +34,7 @@ transObs x = case x of
   Obs.Abs.ObsDeclVal threadid typename varname varval -> failure x
   Obs.Abs.ObsDeclArr threadid typename varname sizedcl -> failure x
   Obs.Abs.ObsCall threadid obsident args -> failure x
-  Obs.Abs.ObsState threadid integer state -> failure x
+  Obs.Abs.ObsState threadid integer stateobs -> failure x
   Obs.Abs.ObsStruct threadid varname -> failure x
   Obs.Abs.ObsSeq threadid varname scalar -> failure x
   Obs.Abs.ObsPtr threadid varname varval -> failure x
@@ -77,9 +77,9 @@ transTypename :: Obs.Abs.Typename -> Result
 transTypename x = case x of
   Obs.Abs.TypeName obsident -> failure x
 
-transState :: Obs.Abs.State -> Result
-transState x = case x of
-  Obs.Abs.State obsident -> failure x
+transStateObs :: Obs.Abs.StateObs -> Result
+transStateObs x = case x of
+  Obs.Abs.StateObs obsident -> failure x
 
 transVarindex :: Obs.Abs.Varindex -> Result
 transVarindex x = case x of

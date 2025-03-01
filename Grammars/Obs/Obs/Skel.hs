@@ -23,24 +23,28 @@ transObsStr :: Obs.Abs.ObsStr -> Result
 transObsStr x = case x of
   Obs.Abs.ObsStr string -> failure x
 
+transObsId :: Obs.Abs.ObsId -> Result
+transObsId x = case x of
+  Obs.Abs.ObsId threadid obs -> failure x
+
 transObs :: Obs.Abs.Obs -> Result
 transObs x = case x of
-  Obs.Abs.ObsName threadid obsident -> failure x
-  Obs.Abs.ObsInit threadid -> failure x
-  Obs.Abs.ObsTask threadid taskname -> failure x
-  Obs.Abs.ObsSignal threadid integer -> failure x
-  Obs.Abs.ObsDef threadid varname varval -> failure x
-  Obs.Abs.ObsDecl threadid typename varname -> failure x
-  Obs.Abs.ObsDeclVal threadid typename varname varval -> failure x
-  Obs.Abs.ObsDeclArr threadid typename varname sizedcl -> failure x
-  Obs.Abs.ObsCall threadid obsident args -> failure x
-  Obs.Abs.ObsState threadid integer stateobs -> failure x
-  Obs.Abs.ObsStruct threadid varname -> failure x
-  Obs.Abs.ObsSeq threadid varname scalar -> failure x
-  Obs.Abs.ObsPtr threadid varname varval -> failure x
-  Obs.Abs.ObsScalar threadid varname varval -> failure x
-  Obs.Abs.ObsScalarIndex threadid varname varindex varval -> failure x
-  Obs.Abs.ObsEnd threadid varname -> failure x
+  Obs.Abs.ObsName obsident -> failure x
+  Obs.Abs.ObsInit -> failure x
+  Obs.Abs.ObsTask taskname -> failure x
+  Obs.Abs.ObsSignal integer -> failure x
+  Obs.Abs.ObsDef varname varval -> failure x
+  Obs.Abs.ObsDecl typename varname -> failure x
+  Obs.Abs.ObsDeclVal typename varname varval -> failure x
+  Obs.Abs.ObsDeclArr typename varname sizedcl -> failure x
+  Obs.Abs.ObsCall obsident args -> failure x
+  Obs.Abs.ObsState integer stateobs -> failure x
+  Obs.Abs.ObsStruct varname -> failure x
+  Obs.Abs.ObsSeq varname scalar -> failure x
+  Obs.Abs.ObsPtr varname varval -> failure x
+  Obs.Abs.ObsScalar varname varval -> failure x
+  Obs.Abs.ObsScalarIndex varname varindex varval -> failure x
+  Obs.Abs.ObsEnd varname -> failure x
 
 transScalar :: Obs.Abs.Scalar -> Result
 transScalar x = case x of

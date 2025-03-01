@@ -1,22 +1,24 @@
-(:). [Obs] ::= "@@@" Obs [Obs];
-(:[]). [Obs] ::= "@@@" Obs;
+(:). [ObsId] ::= "@@@" ObsId [ObsId];
+(:[]). [ObsId] ::= "@@@" ObsId;
 
-ObsName. Obs ::= ThreadId "NAME" ObsIdent;
-ObsInit. Obs ::= ThreadId "INIT";
-ObsTask. Obs ::= ThreadId "TASK" Taskname;
-ObsSignal. Obs ::= ThreadId "SIGNAL" Integer;
-ObsDef. Obs ::= ThreadId "DEF" Varname Varval;
-ObsDecl. Obs ::= ThreadId "DECL" Typename Varname;
-ObsDeclVal. Obs ::= ThreadId "DECL" Typename Varname Varval;
-ObsDeclArr. Obs ::= ThreadId "DCLARRAY" Typename Varname SizeDcl;
-ObsCall. Obs ::= ThreadId "CALL" ObsIdent Args;
-ObsState. Obs ::= ThreadId "STATE" Integer StateObs;
-ObsStruct. Obs ::= ThreadId "STRUCT" Varname;
-ObsSeq. Obs ::= ThreadId "SEQ" Varname Scalar;
-ObsPtr. Obs ::= ThreadId "PTR" Varname Varval;
-ObsScalar. Obs ::= ThreadId "SCALAR" Varname Varval;
-ObsScalarIndex. Obs ::= ThreadId "SCALAR" Varname Varindex Varval;
-ObsEnd. Obs ::= ThreadId "END" Varname;
+
+ObsId. ObsId ::= ThreadId Obs; 
+ObsName. Obs ::= "NAME" ObsIdent;
+ObsInit. Obs ::= "INIT";
+ObsTask. Obs ::= "TASK" Taskname;
+ObsSignal. Obs ::= "SIGNAL" Integer;
+ObsDef. Obs ::= "DEF" Varname Varval;
+ObsDecl. Obs ::= "DECL" Typename Varname;
+ObsDeclVal. Obs ::= "DECL" Typename Varname Varval;
+ObsDeclArr. Obs ::= "DCLARRAY" Typename Varname SizeDcl;
+ObsCall. Obs ::= "CALL" ObsIdent Args;
+ObsState. Obs ::= "STATE" Integer StateObs;
+ObsStruct. Obs ::= "STRUCT" Varname;
+ObsSeq. Obs ::= "SEQ" Varname Scalar;
+ObsPtr. Obs ::= "PTR" Varname Varval;
+ObsScalar. Obs ::= "SCALAR" Varname Varval;
+ObsScalarIndex. Obs ::= "SCALAR" Varname Varindex Varval;
+ObsEnd. Obs ::= "END" Varname;
 
 ObsScalarNone. Scalar ::= End;
 ObsScalarCons. Scalar ::= "@@@" ThreadId "SCALAR" "_" Varval Scalar;
