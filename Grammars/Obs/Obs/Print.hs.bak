@@ -142,15 +142,14 @@ instance Print Obs.Abs.ObsIdent where
   prt _ (Obs.Abs.ObsIdent i) = doc $ showString i
 instance Print Obs.Abs.ObsStr where
   prt _ (Obs.Abs.ObsStr i) = doc $ showString i
-instance Print Obs.Abs.ObsList where
-  prt i = \case
-    Obs.Abs.ObsListCons obs obslist -> prPrec i 0 (concatD [doc (showString "@@@"), prt 0 obs, prt 0 obslist])
-    Obs.Abs.ObsListOne obs -> prPrec i 0 (concatD [doc (showString "@@@"), prt 0 obs])
+instance Print [Obs.Abs.Obs] where
+  prt _ [] = concatD []
+  prt _ [x] = concatD [doc (showString "@@@"), prt 0 x]
+  prt _ (x:xs) = concatD [doc (showString "@@@"), prt 0 x, prt 0 xs]
 
 instance Print Obs.Abs.Obs where
   prt i = \case
     Obs.Abs.ObsName threadid obsident -> prPrec i 0 (concatD [prt 0 threadid, doc (showString "NAME"), prt 0 obsident])
-    Obs.Abs.ObsLog threadid lmsg -> prPrec i 0 (concatD [prt 0 threadid, doc (showString "LOG"), prt 0 lmsg])
     Obs.Abs.ObsInit threadid -> prPrec i 0 (concatD [prt 0 threadid, doc (showString "INIT")])
     Obs.Abs.ObsTask threadid taskname -> prPrec i 0 (concatD [prt 0 threadid, doc (showString "TASK"), prt 0 taskname])
     Obs.Abs.ObsSignal threadid n -> prPrec i 0 (concatD [prt 0 threadid, doc (showString "SIGNAL"), prt 0 n])
@@ -182,13 +181,6 @@ instance Print Obs.Abs.Args where
     Obs.Abs.ArgsConsInteger n args -> prPrec i 0 (concatD [prt 0 n, prt 0 args])
     Obs.Abs.ArgsConsDouble d args -> prPrec i 0 (concatD [prt 0 d, prt 0 args])
     Obs.Abs.ArgsOne -> prPrec i 0 (concatD [])
-
-instance Print Obs.Abs.LMsg where
-  prt i = \case
-    Obs.Abs.LmsgConsString obsstr lmsg -> prPrec i 0 (concatD [prt 0 obsstr, prt 0 lmsg])
-    Obs.Abs.LmsgConsInt n lmsg -> prPrec i 0 (concatD [prt 0 n, prt 0 lmsg])
-    Obs.Abs.LmsgConsDouble d lmsg -> prPrec i 0 (concatD [prt 0 d, prt 0 lmsg])
-    Obs.Abs.LmsgOne -> prPrec i 0 (concatD [])
 
 instance Print Obs.Abs.Taskname where
   prt i = \case

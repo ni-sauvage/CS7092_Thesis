@@ -35,9 +35,9 @@ The set of reserved words is the set of terminals appearing in the grammar. Thos
 
 The reserved words used in Obs are the following:
   | ``CALL`` | ``DCLARRAY`` | ``DECL`` | ``DEF``
-  | ``END`` | ``INIT`` | ``LOG`` | ``NAME``
-  | ``NULL`` | ``PTR`` | ``SCALAR`` | ``SEQ``
-  | ``SIGNAL`` | ``STATE`` | ``STRUCT`` | ``TASK``
+  | ``END`` | ``INIT`` | ``NAME`` | ``NULL``
+  | ``PTR`` | ``SCALAR`` | ``SEQ`` | ``SIGNAL``
+  | ``STATE`` | ``STRUCT`` | ``TASK`` |
 
 The symbols used in Obs are the following:
   | @@@ | _ |  |
@@ -51,10 +51,9 @@ The symbols -> (production),  **|**  (union)
 and **eps** (empty rule) belong to the BNF notation.
 All other symbols are terminals.
 
-  | //ObsList// | -> | ``@@@`` //Obs// //ObsList//
+  | //[Obs]// | -> | ``@@@`` //Obs// //[Obs]//
   |  |  **|**  | ``@@@`` //Obs//
   | //Obs// | -> | //ThreadId// ``NAME`` //ObsIdent//
-  |  |  **|**  | //ThreadId// ``LOG`` //LMsg//
   |  |  **|**  | //ThreadId// ``INIT``
   |  |  **|**  | //ThreadId// ``TASK`` //Taskname//
   |  |  **|**  | //ThreadId// ``SIGNAL`` //Integer//
@@ -63,7 +62,7 @@ All other symbols are terminals.
   |  |  **|**  | //ThreadId// ``DECL`` //Typename// //Varname// //Varval//
   |  |  **|**  | //ThreadId// ``DCLARRAY`` //Typename// //Varname// //SizeDcl//
   |  |  **|**  | //ThreadId// ``CALL`` //ObsIdent// //Args//
-  |  |  **|**  | //ThreadId// ``STATE`` //Integer// //State//
+  |  |  **|**  | //ThreadId// ``STATE`` //Integer// //StateObs//
   |  |  **|**  | //ThreadId// ``STRUCT`` //Varname//
   |  |  **|**  | //ThreadId// ``SEQ`` //Varname// //Scalar//
   |  |  **|**  | //ThreadId// ``PTR`` //Varname// //Varval//
@@ -77,8 +76,6 @@ All other symbols are terminals.
   |  |  **|**  | //Integer// //Args//
   |  |  **|**  | //Double// //Args//
   |  |  **|**  | **eps**
-  | //LMsg// | -> | //ObsStr// //LMsg//
-  |  |  **|**  | **eps**
   | //Taskname// | -> | //ObsIdent//
   | //Varname// | -> | //ObsIdent//
   | //Varval// | -> | //Integer//
@@ -86,7 +83,7 @@ All other symbols are terminals.
   |  |  **|**  | ``NULL``
   |  |  **|**  | //ObsStr//
   | //Typename// | -> | //ObsIdent//
-  | //State// | -> | //ObsIdent//
+  | //StateObs// | -> | //ObsIdent//
   | //Varindex// | -> | //Integer//
   | //ThreadId// | -> | //Integer//
   | //SizeDcl// | -> | //Varval//

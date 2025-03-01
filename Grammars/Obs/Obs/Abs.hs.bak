@@ -10,12 +10,8 @@ import Prelude (Double, Integer, String)
 import qualified Prelude as C (Eq, Ord, Show, Read)
 import qualified Data.String
 
-data ObsList = ObsListCons Obs ObsList | ObsListOne Obs
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
 data Obs
     = ObsName ThreadId ObsIdent
-    | ObsLog ThreadId LMsg
     | ObsInit ThreadId
     | ObsTask ThreadId Taskname
     | ObsSignal ThreadId Integer
@@ -45,13 +41,6 @@ data Args
     | ArgsConsInteger Integer Args
     | ArgsConsDouble Double Args
     | ArgsOne
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
-data LMsg
-    = LmsgConsString ObsStr LMsg
-    | LmsgConsInt Integer LMsg
-    | LmsgConsDouble Double LMsg
-    | LmsgOne
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Taskname = TaskName ObsIdent
