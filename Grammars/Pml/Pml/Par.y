@@ -31,10 +31,10 @@ module Pml.Par
   , pMtype
   , pMsep
   , pMequals
-  , pMname
+  , pListPIdent
   , pDeclList
   , pDecl
-  , pDclIvar
+  , pListIvar
   , pDeclVisible
   , pUnsignedDecl
   , pUDclAssign
@@ -60,7 +60,7 @@ module Pml.Par
   , pIvarConst
   , pIvarAssign
   , pChInit
-  , pChType
+  , pListTypename
   , pVarRef
   , pVarRefAnyExpr
   , pVarRefTypedef
@@ -68,23 +68,19 @@ module Pml.Par
   , pReceive
   , pPoll
   , pSendArgs
-  , pArgList
+  , pListAnyExpr
   , pRecvArgs
-  , pRecvArgList
+  , pListRecvArg
   , pUnaryMinus
   , pRecvArg
   , pAssign
   , pPargs
-  , pPArgList
-  , pPargList
   , pStmt
   , pRange
   , pOptions
   , pRunPrio
   , pRunArgs
   , pExpr
-  , pUname
-  , pName
   ) where
 
 import Prelude
@@ -117,10 +113,10 @@ import Pml.Lex
 %name pMtype Mtype
 %name pMsep Msep
 %name pMequals Mequals
-%name pMname Mname
+%name pListPIdent ListPIdent
 %name pDeclList DeclList
 %name pDecl Decl
-%name pDclIvar DclIvar
+%name pListIvar ListIvar
 %name pDeclVisible DeclVisible
 %name pUnsignedDecl UnsignedDecl
 %name pUDclAssign UDclAssign
@@ -146,7 +142,7 @@ import Pml.Lex
 %name pIvarConst IvarConst
 %name pIvarAssign IvarAssign
 %name pChInit ChInit
-%name pChType ChType
+%name pListTypename ListTypename
 %name pVarRef VarRef
 %name pVarRefAnyExpr VarRefAnyExpr
 %name pVarRefTypedef VarRefTypedef
@@ -154,23 +150,19 @@ import Pml.Lex
 %name pReceive Receive
 %name pPoll Poll
 %name pSendArgs SendArgs
-%name pArgList ArgList
+%name pListAnyExpr ListAnyExpr
 %name pRecvArgs RecvArgs
-%name pRecvArgList RecvArgList
+%name pListRecvArg ListRecvArg
 %name pUnaryMinus UnaryMinus
 %name pRecvArg RecvArg
 %name pAssign Assign
 %name pPargs Pargs
-%name pPArgList PArgList
-%name pPargList PargList
 %name pStmt Stmt
 %name pRange Range
 %name pOptions Options
 %name pRunPrio RunPrio
 %name pRunArgs RunArgs
 %name pExpr Expr
-%name pUname Uname
-%name pName Name
 -- no lexer declaration
 %monad { Err } { (>>=) } { return }
 %tokentype {Token}
@@ -309,7 +301,7 @@ Typename
   | 'int' { Pml.Abs.Typename_int }
   | 'mtype' { Pml.Abs.Typename_mtype }
   | 'chan' { Pml.Abs.Typename_chan }
-  | Uname { Pml.Abs.TypenameUname $1 }
+  | PIdent { Pml.Abs.TypenamePIdent $1 }
 
 UnrOp :: { Pml.Abs.UnrOp }
 UnrOp
@@ -343,11 +335,11 @@ Module
 
 Proctype :: { Pml.Abs.Proctype }
 Proctype
-  : Pactive 'proctype' Name '(' PdeclList ')' Ppriority Penabler '{' Sequence '}' { Pml.Abs.Ptype $1 $3 $5 $7 $8 $10 }
+  : Pactive 'proctype' PIdent '(' PdeclList ')' Ppriority Penabler '{' Sequence '}' { Pml.Abs.Ptype $1 $3 $5 $7 $8 $10 }
 
 Inline :: { Pml.Abs.Inline }
 Inline
-  : 'inline' Name '(' ArgList ')' '{' Sequence '}' { Pml.Abs.Iline $2 $4 $7 }
+  : 'inline' PIdent '(' ListAnyExpr ')' '{' Sequence '}' { Pml.Abs.Iline $2 $4 $7 }
 
 Pactive :: { Pml.Abs.Pactive }
 Pactive
@@ -385,12 +377,12 @@ Trace :: { Pml.Abs.Trace }
 Trace : 'trace' '{' Sequence '}' { Pml.Abs.Trc $3 }
 
 Utype :: { Pml.Abs.Utype }
-Utype : 'typedef' Name '{' DeclList '}' ';' { Pml.Abs.Utp $2 $4 }
+Utype : 'typedef' PIdent '{' DeclList '}' ';' { Pml.Abs.Utp $2 $4 }
 
 Mtype :: { Pml.Abs.Mtype }
 Mtype
-  : 'mtype' Mequals '{' Mname '}' Msep { Pml.Abs.MtpEq $2 $4 $6 }
-  | 'mtype' Mname Msep { Pml.Abs.MtpNoEq $2 $3 }
+  : 'mtype' Mequals '{' ListPIdent '}' Msep { Pml.Abs.MtpEq $2 $4 $6 }
+  | 'mtype' ListPIdent Msep { Pml.Abs.MtpNoEq $2 $3 }
 
 Msep :: { Pml.Abs.Msep }
 Msep : {- empty -} { Pml.Abs.MsepNone } | ';' { Pml.Abs.MsepOne }
@@ -398,10 +390,9 @@ Msep : {- empty -} { Pml.Abs.MsepNone } | ';' { Pml.Abs.MsepOne }
 Mequals :: { Pml.Abs.Mequals }
 Mequals : {- empty -} { Pml.Abs.Meq } | '=' { Pml.Abs.Meq }
 
-Mname :: { Pml.Abs.Mname }
-Mname
-  : Name { Pml.Abs.MnameOne $1 }
-  | Name ',' Mname { Pml.Abs.Mnamecons $1 $3 }
+ListPIdent :: { [Pml.Abs.PIdent] }
+ListPIdent
+  : PIdent { (:[]) $1 } | PIdent ',' ListPIdent { (:) $1 $3 }
 
 DeclList :: { Pml.Abs.DeclList }
 DeclList
@@ -411,13 +402,11 @@ DeclList
 
 Decl :: { Pml.Abs.Decl }
 Decl
-  : DeclVisible Typename DclIvar { Pml.Abs.DclOne $1 $2 $3 }
+  : DeclVisible Typename ListIvar { Pml.Abs.DclOne $1 $2 $3 }
   | DeclVisible UnsignedDecl { Pml.Abs.DclOneUnsigned $1 $2 }
 
-DclIvar :: { Pml.Abs.DclIvar }
-DclIvar
-  : Ivar ',' DclIvar { Pml.Abs.DclIvarCons $1 $3 }
-  | Ivar { Pml.Abs.DclIvarSub $1 }
+ListIvar :: { [Pml.Abs.Ivar] }
+ListIvar : Ivar ',' ListIvar { (:) $1 $3 } | Ivar { (:[]) $1 }
 
 DeclVisible :: { Pml.Abs.DeclVisible }
 DeclVisible
@@ -426,7 +415,7 @@ DeclVisible
 
 UnsignedDecl :: { Pml.Abs.UnsignedDecl }
 UnsignedDecl
-  : 'unsigned' Name ':' Const UDclAssign { Pml.Abs.UDcl $2 $4 $5 }
+  : 'unsigned' PIdent ':' Const UDclAssign { Pml.Abs.UDcl $2 $4 $5 }
 
 UDclAssign :: { Pml.Abs.UDclAssign }
 UDclAssign
@@ -486,7 +475,7 @@ AnyExpr2
 AnyExpr3 :: { Pml.Abs.AnyExpr }
 AnyExpr3
   : AnyExpr3 '|' AnyExpr4 { Pml.Abs.AnyExprbitor $1 $3 }
-  | AnyExpr3 '^' AnyExpr4 { Pml.Abs.AnyExprbitexor $1 $3 }
+  | AnyExpr3 '^' AnyExpr4 { Pml.Abs.AnyExprbitxor $1 $3 }
   | AnyExpr3 '&' AnyExpr4 { Pml.Abs.AnyExprbitand $1 $3 }
   | AnyExpr4 { $1 }
 
@@ -498,8 +487,8 @@ AnyExpr4
 
 AnyExpr5 :: { Pml.Abs.AnyExpr }
 AnyExpr5
-  : AnyExpr5 '<' AnyExpr6 { Pml.Abs.AnyExprlthen $1 $3 }
-  | AnyExpr5 '>' AnyExpr6 { Pml.Abs.AnyExprgrthen $1 $3 }
+  : AnyExpr5 '<' AnyExpr6 { Pml.Abs.AnyExprlthan $1 $3 }
+  | AnyExpr5 '>' AnyExpr6 { Pml.Abs.AnyExprgrthan $1 $3 }
   | AnyExpr5 '<=' AnyExpr6 { Pml.Abs.AnyExprle $1 $3 }
   | AnyExpr5 '>=' AnyExpr6 { Pml.Abs.AnyExprge $1 $3 }
   | AnyExpr6 { $1 }
@@ -534,8 +523,8 @@ AnyExpr9
   | 'np_' { Pml.Abs.AnyExprNp }
   | 'enabled' '(' AnyExpr ')' { Pml.Abs.AnyExprEnabled $3 }
   | 'pc_value' '(' AnyExpr ')' { Pml.Abs.AnyExprPCValue $3 }
-  | Name '[' AnyExpr ']' '@' Name { Pml.Abs.AnyExprName $1 $3 $6 }
-  | 'run' Name '(' RunArgs ')' RunPrio { Pml.Abs.AnyExprRun $2 $4 $6 }
+  | PIdent '[' AnyExpr ']' '@' PIdent { Pml.Abs.AnyExprName $1 $3 $6 }
+  | 'run' PIdent '(' RunArgs ')' RunPrio { Pml.Abs.AnyExprRun $2 $4 $6 }
   | 'get_priority' '(' Expr ')' { Pml.Abs.AnyExprGetPrio $3 }
   | 'set_priority' '(' Expr ',' Expr ')' { Pml.Abs.AnyExprSetPrio $3 $5 }
   | '(' AnyExpr ')' { $2 }
@@ -544,7 +533,7 @@ AnyExpr1 :: { Pml.Abs.AnyExpr }
 AnyExpr1 : AnyExpr2 { $1 }
 
 Ivar :: { Pml.Abs.Ivar }
-Ivar : Name IvarConst IvarAssign { Pml.Abs.Ivar $1 $2 $3 }
+Ivar : PIdent IvarConst IvarAssign { Pml.Abs.Ivar $1 $2 $3 }
 
 IvarConst :: { Pml.Abs.IvarConst }
 IvarConst
@@ -558,16 +547,16 @@ IvarAssign
   | '=' ChInit { Pml.Abs.IvarAssignChInit $2 }
 
 ChInit :: { Pml.Abs.ChInit }
-ChInit : '[' Const ']' 'of' '{' ChType '}' { Pml.Abs.ChInit $2 $6 }
+ChInit
+  : '[' Const ']' 'of' '{' ListTypename '}' { Pml.Abs.ChInit $2 $6 }
 
-ChType :: { Pml.Abs.ChType }
-ChType
-  : Typename { Pml.Abs.ChTypeOne $1 }
-  | Typename ',' ChType { Pml.Abs.ChTypeCons $1 $3 }
+ListTypename :: { [Pml.Abs.Typename] }
+ListTypename
+  : Typename { (:[]) $1 } | Typename ',' ListTypename { (:) $1 $3 }
 
 VarRef :: { Pml.Abs.VarRef }
 VarRef
-  : Name VarRefAnyExpr VarRefTypedef { Pml.Abs.VarRef $1 $2 $3 }
+  : PIdent VarRefAnyExpr VarRefTypedef { Pml.Abs.VarRef $1 $2 $3 }
 
 VarRefAnyExpr :: { Pml.Abs.VarRefAnyExpr }
 VarRefAnyExpr
@@ -598,24 +587,23 @@ Poll
 
 SendArgs :: { Pml.Abs.SendArgs }
 SendArgs
-  : ArgList { Pml.Abs.SendArgs $1 }
-  | AnyExpr '(' ArgList ')' { Pml.Abs.SendArgsExpr $1 $3 }
+  : ListAnyExpr { Pml.Abs.SendArgs $1 }
+  | AnyExpr '(' ListAnyExpr ')' { Pml.Abs.SendArgsExpr $1 $3 }
 
-ArgList :: { Pml.Abs.ArgList }
-ArgList
-  : AnyExpr ',' ArgList { Pml.Abs.ArgListCons $1 $3 }
-  | AnyExpr { Pml.Abs.ArgListOne $1 }
-  | {- empty -} { Pml.Abs.ArgListNone }
+ListAnyExpr :: { [Pml.Abs.AnyExpr] }
+ListAnyExpr
+  : AnyExpr ',' ListAnyExpr { (:) $1 $3 }
+  | AnyExpr { (:[]) $1 }
+  | {- empty -} { [] }
 
 RecvArgs :: { Pml.Abs.RecvArgs }
 RecvArgs
-  : RecvArgList { Pml.Abs.RecvArgsList $1 }
-  | RecvArgList '(' RecvArgs ')' { Pml.Abs.RecvArgsParen $1 $3 }
+  : ListRecvArg { Pml.Abs.RecvArgsList $1 }
+  | ListRecvArg '(' RecvArgs ')' { Pml.Abs.RecvArgsParen $1 $3 }
 
-RecvArgList :: { Pml.Abs.RecvArgList }
-RecvArgList
-  : RecvArg { Pml.Abs.RecvArgListOne $1 }
-  | RecvArg RecvArgList { Pml.Abs.RecvArgListCons $1 $2 }
+ListRecvArg :: { [Pml.Abs.RecvArg] }
+ListRecvArg
+  : RecvArg { (:[]) $1 } | RecvArg ListRecvArg { (:) $1 $2 }
 
 UnaryMinus :: { Pml.Abs.UnaryMinus }
 UnaryMinus
@@ -637,14 +625,8 @@ Assign
 Pargs :: { Pml.Abs.Pargs }
 Pargs
   : String { Pml.Abs.PArgsString $1 }
-  | ArgList { Pml.Abs.PArgsNoString $1 }
-  | String ',' ArgList { Pml.Abs.PArgsBoth $1 $3 }
-
-PArgList :: { Pml.Abs.PArgList }
-PArgList : {- empty -} { Pml.Abs.PArgListNone }
-
-PargList :: { Pml.Abs.PargList }
-PargList : ',' ArgList { Pml.Abs.PargListOne $2 }
+  | ListAnyExpr { Pml.Abs.PArgsNoString $1 }
+  | String ',' ListAnyExpr { Pml.Abs.PArgsBoth $1 $3 }
 
 Stmt :: { Pml.Abs.Stmt }
 Stmt
@@ -660,17 +642,17 @@ Stmt
   | Assign { Pml.Abs.StmtAssign $1 }
   | 'else' { Pml.Abs.StmtElse }
   | 'break' { Pml.Abs.StmtBreak }
-  | 'goto' Name { Pml.Abs.StmtGoto $2 }
-  | Name ':' Stmt { Pml.Abs.StmtLabel $1 $3 }
+  | 'goto' PIdent { Pml.Abs.StmtGoto $2 }
+  | PIdent ':' Stmt { Pml.Abs.StmtLabel $1 $3 }
   | PrintType '(' Pargs ')' { Pml.Abs.StmtPrint $1 $3 }
   | 'assert' Expr { Pml.Abs.StmtAssert $2 }
-  | Name '(' ArgList ')' { Pml.Abs.StmtCall $1 $3 }
+  | PIdent '(' ListAnyExpr ')' { Pml.Abs.StmtCall $1 $3 }
   | Expr { Pml.Abs.StmtExpr $1 }
 
 Range :: { Pml.Abs.Range }
 Range
-  : Name 'in' Name { Pml.Abs.RangeIn $1 $3 }
-  | Name ':' AnyExpr '..' AnyExpr { Pml.Abs.RangeNoIn $1 $3 $5 }
+  : PIdent 'in' PIdent { Pml.Abs.RangeIn $1 $3 }
+  | PIdent ':' AnyExpr '..' AnyExpr { Pml.Abs.RangeNoIn $1 $3 $5 }
 
 Options :: { Pml.Abs.Options }
 Options
@@ -685,19 +667,13 @@ RunPrio
 RunArgs :: { Pml.Abs.RunArgs }
 RunArgs
   : {- empty -} { Pml.Abs.RunArgsNone }
-  | ArgList { Pml.Abs.RunArgsOne $1 }
+  | ListAnyExpr { Pml.Abs.RunArgsOne $1 }
 
 Expr :: { Pml.Abs.Expr }
 Expr
   : AnyExpr { Pml.Abs.ExprAny $1 }
   | '(' Expr ')' { Pml.Abs.ExprParen $2 }
   | ChanPoll '(' VarRef ')' { Pml.Abs.ExprChanPoll $1 $3 }
-
-Uname :: { Pml.Abs.Uname }
-Uname : Name { Pml.Abs.Uname $1 }
-
-Name :: { Pml.Abs.Name }
-Name : PIdent { Pml.Abs.Name $1 }
 
 {
 

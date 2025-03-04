@@ -80,7 +80,7 @@ All other symbols are terminals.
   |  |  **|**  | ``int``
   |  |  **|**  | ``mtype``
   |  |  **|**  | ``chan``
-  |  |  **|**  | //Uname//
+  |  |  **|**  | //PIdent//
   | //UnrOp// | -> | ``~``
   |  |  **|**  | ``-``
   |  |  **|**  | ``!``
@@ -99,8 +99,8 @@ All other symbols are terminals.
   |  |  **|**  | //Utype//
   |  |  **|**  | //Mtype//
   |  |  **|**  | //DeclList//
-  | //Proctype// | -> | //Pactive// ``proctype`` //Name// ``(`` //PdeclList// ``)`` //Ppriority// //Penabler// ``{`` //Sequence// ``}``
-  | //Inline// | -> | ``inline`` //Name// ``(`` //ArgList// ``)`` ``{`` //Sequence// ``}``
+  | //Proctype// | -> | //Pactive// ``proctype`` //PIdent// ``(`` //PdeclList// ``)`` //Ppriority// //Penabler// ``{`` //Sequence// ``}``
+  | //Inline// | -> | ``inline`` //PIdent// ``(`` //[AnyExpr]// ``)`` ``{`` //Sequence// ``}``
   | //Pactive// | -> | **eps**
   |  |  **|**  | //Active//
   | //PdeclList// | -> | **eps**
@@ -114,25 +114,25 @@ All other symbols are terminals.
   |  |  **|**  | //Priority//
   | //Never// | -> | ``never`` ``{`` //Sequence// ``}``
   | //Trace// | -> | ``trace`` ``{`` //Sequence// ``}``
-  | //Utype// | -> | ``typedef`` //Name// ``{`` //DeclList// ``}`` ``;``
-  | //Mtype// | -> | ``mtype`` //Mequals// ``{`` //Mname// ``}`` //Msep//
-  |  |  **|**  | ``mtype`` //Mname// //Msep//
+  | //Utype// | -> | ``typedef`` //PIdent// ``{`` //DeclList// ``}`` ``;``
+  | //Mtype// | -> | ``mtype`` //Mequals// ``{`` //[PIdent]// ``}`` //Msep//
+  |  |  **|**  | ``mtype`` //[PIdent]// //Msep//
   | //Msep// | -> | **eps**
   |  |  **|**  | ``;``
   | //Mequals// | -> | **eps**
   |  |  **|**  | ``=``
-  | //Mname// | -> | //Name//
-  |  |  **|**  | //Name// ``,`` //Mname//
+  | //[PIdent]// | -> | //PIdent//
+  |  |  **|**  | //PIdent// ``,`` //[PIdent]//
   | //DeclList// | -> | //Decl// //Separator//
   |  |  **|**  | //Decl//
   |  |  **|**  | //Decl// //Separator// //DeclList//
-  | //Decl// | -> | //DeclVisible// //Typename// //DclIvar//
+  | //Decl// | -> | //DeclVisible// //Typename// //[Ivar]//
   |  |  **|**  | //DeclVisible// //UnsignedDecl//
-  | //DclIvar// | -> | //Ivar// ``,`` //DclIvar//
+  | //[Ivar]// | -> | //Ivar// ``,`` //[Ivar]//
   |  |  **|**  | //Ivar//
   | //DeclVisible// | -> | **eps**
   |  |  **|**  | //Visible//
-  | //UnsignedDecl// | -> | ``unsigned`` //Name// ``:`` //Const// //UDclAssign//
+  | //UnsignedDecl// | -> | ``unsigned`` //PIdent// ``:`` //Const// //UDclAssign//
   | //UDclAssign// | -> | **eps**
   |  |  **|**  | ``=`` //AnyExpr//
   | //Active// | -> | ``active`` //AConst//
@@ -189,22 +189,22 @@ All other symbols are terminals.
   |  |  **|**  | ``np_``
   |  |  **|**  | ``enabled`` ``(`` //AnyExpr// ``)``
   |  |  **|**  | ``pc_value`` ``(`` //AnyExpr// ``)``
-  |  |  **|**  | //Name// ``[`` //AnyExpr// ``]`` ``@`` //Name//
-  |  |  **|**  | ``run`` //Name// ``(`` //RunArgs// ``)`` //RunPrio//
+  |  |  **|**  | //PIdent// ``[`` //AnyExpr// ``]`` ``@`` //PIdent//
+  |  |  **|**  | ``run`` //PIdent// ``(`` //RunArgs// ``)`` //RunPrio//
   |  |  **|**  | ``get_priority`` ``(`` //Expr// ``)``
   |  |  **|**  | ``set_priority`` ``(`` //Expr// ``,`` //Expr// ``)``
   |  |  **|**  | ``(`` //AnyExpr// ``)``
   | //AnyExpr1// | -> | //AnyExpr2//
-  | //Ivar// | -> | //Name// //IvarConst// //IvarAssign//
+  | //Ivar// | -> | //PIdent// //IvarConst// //IvarAssign//
   | //IvarConst// | -> | **eps**
   |  |  **|**  | ``[`` //Const// ``]``
   | //IvarAssign// | -> | **eps**
   |  |  **|**  | ``=`` //AnyExpr//
   |  |  **|**  | ``=`` //ChInit//
-  | //ChInit// | -> | ``[`` //Const// ``]`` ``of`` ``{`` //ChType// ``}``
-  | //ChType// | -> | //Typename//
-  |  |  **|**  | //Typename// ``,`` //ChType//
-  | //VarRef// | -> | //Name// //VarRefAnyExpr// //VarRefTypedef//
+  | //ChInit// | -> | ``[`` //Const// ``]`` ``of`` ``{`` //[Typename]// ``}``
+  | //[Typename]// | -> | //Typename//
+  |  |  **|**  | //Typename// ``,`` //[Typename]//
+  | //VarRef// | -> | //PIdent// //VarRefAnyExpr// //VarRefTypedef//
   | //VarRefAnyExpr// | -> | **eps**
   |  |  **|**  | ``[`` //AnyExpr// ``]``
   | //VarRefTypedef// | -> | **eps**
@@ -217,15 +217,15 @@ All other symbols are terminals.
   |  |  **|**  | //VarRef// ``?`` ``?`` ``<`` //RecvArgs// ``>``
   | //Poll// | -> | //VarRef// ``?`` ``[`` //RecvArgs// ``]``
   |  |  **|**  | //VarRef// ``?`` ``?`` ``[`` //RecvArgs// ``]``
-  | //SendArgs// | -> | //ArgList//
-  |  |  **|**  | //AnyExpr// ``(`` //ArgList// ``)``
-  | //ArgList// | -> | //AnyExpr// ``,`` //ArgList//
+  | //SendArgs// | -> | //[AnyExpr]//
+  |  |  **|**  | //AnyExpr// ``(`` //[AnyExpr]// ``)``
+  | //[AnyExpr]// | -> | //AnyExpr// ``,`` //[AnyExpr]//
   |  |  **|**  | //AnyExpr//
   |  |  **|**  | **eps**
-  | //RecvArgs// | -> | //RecvArgList//
-  |  |  **|**  | //RecvArgList// ``(`` //RecvArgs// ``)``
-  | //RecvArgList// | -> | //RecvArg//
-  |  |  **|**  | //RecvArg// //RecvArgList//
+  | //RecvArgs// | -> | //[RecvArg]//
+  |  |  **|**  | //[RecvArg]// ``(`` //RecvArgs// ``)``
+  | //[RecvArg]// | -> | //RecvArg//
+  |  |  **|**  | //RecvArg// //[RecvArg]//
   | //UnaryMinus// | -> | **eps**
   |  |  **|**  | ``-``
   | //RecvArg// | -> | //VarRef//
@@ -235,10 +235,8 @@ All other symbols are terminals.
   |  |  **|**  | //VarRef// ``++``
   |  |  **|**  | //VarRef// ``--``
   | //Pargs// | -> | //String//
-  |  |  **|**  | //ArgList//
-  |  |  **|**  | //String// ``,`` //ArgList//
-  | //PArgList// | -> | **eps**
-  | //PargList// | -> | ``,`` //ArgList//
+  |  |  **|**  | //[AnyExpr]//
+  |  |  **|**  | //String// ``,`` //[AnyExpr]//
   | //Stmt// | -> | ``if`` //Options// ``fi``
   |  |  **|**  | ``do`` //Options// ``od``
   |  |  **|**  | ``for`` ``(`` //Range// ``)`` ``{`` //Sequence// ``}``
@@ -251,25 +249,23 @@ All other symbols are terminals.
   |  |  **|**  | //Assign//
   |  |  **|**  | ``else``
   |  |  **|**  | ``break``
-  |  |  **|**  | ``goto`` //Name//
-  |  |  **|**  | //Name// ``:`` //Stmt//
+  |  |  **|**  | ``goto`` //PIdent//
+  |  |  **|**  | //PIdent// ``:`` //Stmt//
   |  |  **|**  | //PrintType// ``(`` //Pargs// ``)``
   |  |  **|**  | ``assert`` //Expr//
-  |  |  **|**  | //Name// ``(`` //ArgList// ``)``
+  |  |  **|**  | //PIdent// ``(`` //[AnyExpr]// ``)``
   |  |  **|**  | //Expr//
-  | //Range// | -> | //Name// ``in`` //Name//
-  |  |  **|**  | //Name// ``:`` //AnyExpr// ``..`` //AnyExpr//
+  | //Range// | -> | //PIdent// ``in`` //PIdent//
+  |  |  **|**  | //PIdent// ``:`` //AnyExpr// ``..`` //AnyExpr//
   | //Options// | -> | ``::`` //Sequence//
   |  |  **|**  | ``::`` //Sequence// //Options//
   | //RunPrio// | -> | **eps**
   |  |  **|**  | //Priority//
   | //RunArgs// | -> | **eps**
-  |  |  **|**  | //ArgList//
+  |  |  **|**  | //[AnyExpr]//
   | //Expr// | -> | //AnyExpr//
   |  |  **|**  | ``(`` //Expr// ``)``
   |  |  **|**  | //ChanPoll// ``(`` //VarRef// ``)``
-  | //Uname// | -> | //Name//
-  | //Name// | -> | //PIdent//
 
 
 

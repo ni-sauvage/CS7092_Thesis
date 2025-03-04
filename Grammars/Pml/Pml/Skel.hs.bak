@@ -43,15 +43,13 @@ transTypename x = case x of
   Pml.Abs.Typename_int -> failure x
   Pml.Abs.Typename_mtype -> failure x
   Pml.Abs.Typename_chan -> failure x
-  Pml.Abs.TypenameUname uname -> failure x
+  Pml.Abs.TypenamePIdent pident -> failure x
 
 transUnrOp :: Pml.Abs.UnrOp -> Result
 transUnrOp x = case x of
   Pml.Abs.UnrOp1 -> failure x
   Pml.Abs.UnrOp2 -> failure x
   Pml.Abs.UnrOp3 -> failure x
-  Pml.Abs.UnrOp4 -> failure x
-  Pml.Abs.UnrOp5 -> failure x
 
 transConst :: Pml.Abs.Const -> Result
 transConst x = case x of
@@ -79,11 +77,11 @@ transModule x = case x of
 
 transProctype :: Pml.Abs.Proctype -> Result
 transProctype x = case x of
-  Pml.Abs.Ptype pactive name pdecllist ppriority penabler sequence -> failure x
+  Pml.Abs.Ptype pactive pident pdecllist ppriority penabler sequence -> failure x
 
 transInline :: Pml.Abs.Inline -> Result
 transInline x = case x of
-  Pml.Abs.Iline name arglist sequence -> failure x
+  Pml.Abs.Iline pident anyexprs sequence -> failure x
 
 transPactive :: Pml.Abs.Pactive -> Result
 transPactive x = case x of
@@ -124,12 +122,12 @@ transTrace x = case x of
 
 transUtype :: Pml.Abs.Utype -> Result
 transUtype x = case x of
-  Pml.Abs.Utp name decllist -> failure x
+  Pml.Abs.Utp pident decllist -> failure x
 
 transMtype :: Pml.Abs.Mtype -> Result
 transMtype x = case x of
-  Pml.Abs.MtpEq mequals mname msep -> failure x
-  Pml.Abs.MtpNoEq mname msep -> failure x
+  Pml.Abs.MtpEq mequals pidents msep -> failure x
+  Pml.Abs.MtpNoEq pidents msep -> failure x
 
 transMsep :: Pml.Abs.Msep -> Result
 transMsep x = case x of
@@ -140,11 +138,6 @@ transMequals :: Pml.Abs.Mequals -> Result
 transMequals x = case x of
   Pml.Abs.Meq -> failure x
 
-transMname :: Pml.Abs.Mname -> Result
-transMname x = case x of
-  Pml.Abs.MnameOne name -> failure x
-  Pml.Abs.Mnamecons name mname -> failure x
-
 transDeclList :: Pml.Abs.DeclList -> Result
 transDeclList x = case x of
   Pml.Abs.DclListOne decl separator -> failure x
@@ -153,13 +146,8 @@ transDeclList x = case x of
 
 transDecl :: Pml.Abs.Decl -> Result
 transDecl x = case x of
-  Pml.Abs.DclOne declvisible typename dclivar -> failure x
+  Pml.Abs.DclOne declvisible typename ivars -> failure x
   Pml.Abs.DclOneUnsigned declvisible unsigneddecl -> failure x
-
-transDclIvar :: Pml.Abs.DclIvar -> Result
-transDclIvar x = case x of
-  Pml.Abs.DclIvarCons ivar dclivar -> failure x
-  Pml.Abs.DclIvarSub ivar -> failure x
 
 transDeclVisible :: Pml.Abs.DeclVisible -> Result
 transDeclVisible x = case x of
@@ -168,7 +156,7 @@ transDeclVisible x = case x of
 
 transUnsignedDecl :: Pml.Abs.UnsignedDecl -> Result
 transUnsignedDecl x = case x of
-  Pml.Abs.UDcl name const udclassign -> failure x
+  Pml.Abs.UDcl pident const udclassign -> failure x
 
 transUDclAssign :: Pml.Abs.UDclAssign -> Result
 transUDclAssign x = case x of
@@ -247,14 +235,14 @@ transAnyExpr x = case x of
   Pml.Abs.AnyExprNp -> failure x
   Pml.Abs.AnyExprEnabled anyexpr -> failure x
   Pml.Abs.AnyExprPCValue anyexpr -> failure x
-  Pml.Abs.AnyExprName name1 anyexpr name2 -> failure x
-  Pml.Abs.AnyExprRun name runargs runprio -> failure x
+  Pml.Abs.AnyExprName pident1 anyexpr pident2 -> failure x
+  Pml.Abs.AnyExprRun pident runargs runprio -> failure x
   Pml.Abs.AnyExprGetPrio expr -> failure x
   Pml.Abs.AnyExprSetPrio expr1 expr2 -> failure x
 
 transIvar :: Pml.Abs.Ivar -> Result
 transIvar x = case x of
-  Pml.Abs.Ivar name ivarconst ivarassign -> failure x
+  Pml.Abs.Ivar pident ivarconst ivarassign -> failure x
 
 transIvarConst :: Pml.Abs.IvarConst -> Result
 transIvarConst x = case x of
@@ -269,16 +257,11 @@ transIvarAssign x = case x of
 
 transChInit :: Pml.Abs.ChInit -> Result
 transChInit x = case x of
-  Pml.Abs.ChInit const chtype -> failure x
-
-transChType :: Pml.Abs.ChType -> Result
-transChType x = case x of
-  Pml.Abs.ChTypeOne typename -> failure x
-  Pml.Abs.ChTypeCons typename chtype -> failure x
+  Pml.Abs.ChInit const typenames -> failure x
 
 transVarRef :: Pml.Abs.VarRef -> Result
 transVarRef x = case x of
-  Pml.Abs.VarRef name varrefanyexpr varreftypedef -> failure x
+  Pml.Abs.VarRef pident varrefanyexpr varreftypedef -> failure x
 
 transVarRefAnyExpr :: Pml.Abs.VarRefAnyExpr -> Result
 transVarRefAnyExpr x = case x of
@@ -309,24 +292,13 @@ transPoll x = case x of
 
 transSendArgs :: Pml.Abs.SendArgs -> Result
 transSendArgs x = case x of
-  Pml.Abs.SendArgs arglist -> failure x
-  Pml.Abs.SendArgsExpr anyexpr arglist -> failure x
-
-transArgList :: Pml.Abs.ArgList -> Result
-transArgList x = case x of
-  Pml.Abs.ArgListCons anyexpr arglist -> failure x
-  Pml.Abs.ArgListOne anyexpr -> failure x
-  Pml.Abs.ArgListNone -> failure x
+  Pml.Abs.SendArgs anyexprs -> failure x
+  Pml.Abs.SendArgsExpr anyexpr anyexprs -> failure x
 
 transRecvArgs :: Pml.Abs.RecvArgs -> Result
 transRecvArgs x = case x of
-  Pml.Abs.RecvArgsList recvarglist -> failure x
-  Pml.Abs.RecvArgsParen recvarglist recvargs -> failure x
-
-transRecvArgList :: Pml.Abs.RecvArgList -> Result
-transRecvArgList x = case x of
-  Pml.Abs.RecvArgListOne recvarg -> failure x
-  Pml.Abs.RecvArgListCons recvarg recvarglist -> failure x
+  Pml.Abs.RecvArgsList recvargs -> failure x
+  Pml.Abs.RecvArgsParen recvargs1 recvargs2 -> failure x
 
 transUnaryMinus :: Pml.Abs.UnaryMinus -> Result
 transUnaryMinus x = case x of
@@ -342,20 +314,14 @@ transRecvArg x = case x of
 transAssign :: Pml.Abs.Assign -> Result
 transAssign x = case x of
   Pml.Abs.AssignStd varref anyexpr -> failure x
+  Pml.Abs.AssignInc varref -> failure x
+  Pml.Abs.AssignDec varref -> failure x
 
 transPargs :: Pml.Abs.Pargs -> Result
 transPargs x = case x of
   Pml.Abs.PArgsString string -> failure x
-  Pml.Abs.PArgsNoString arglist -> failure x
-  Pml.Abs.PArgsBoth string arglist -> failure x
-
-transPArgList :: Pml.Abs.PArgList -> Result
-transPArgList x = case x of
-  Pml.Abs.PArgListNone -> failure x
-
-transPargList :: Pml.Abs.PargList -> Result
-transPargList x = case x of
-  Pml.Abs.PargListOne arglist -> failure x
+  Pml.Abs.PArgsNoString anyexprs -> failure x
+  Pml.Abs.PArgsBoth string anyexprs -> failure x
 
 transStmt :: Pml.Abs.Stmt -> Result
 transStmt x = case x of
@@ -371,17 +337,17 @@ transStmt x = case x of
   Pml.Abs.StmtAssign assign -> failure x
   Pml.Abs.StmtElse -> failure x
   Pml.Abs.StmtBreak -> failure x
-  Pml.Abs.StmtGoto name -> failure x
-  Pml.Abs.StmtLabel name stmt -> failure x
+  Pml.Abs.StmtGoto pident -> failure x
+  Pml.Abs.StmtLabel pident stmt -> failure x
   Pml.Abs.StmtPrint printtype pargs -> failure x
   Pml.Abs.StmtAssert expr -> failure x
-  Pml.Abs.StmtCall name arglist -> failure x
+  Pml.Abs.StmtCall pident anyexprs -> failure x
   Pml.Abs.StmtExpr expr -> failure x
 
 transRange :: Pml.Abs.Range -> Result
 transRange x = case x of
-  Pml.Abs.RangeIn name1 name2 -> failure x
-  Pml.Abs.RangeNoIn name anyexpr1 anyexpr2 -> failure x
+  Pml.Abs.RangeIn pident1 pident2 -> failure x
+  Pml.Abs.RangeNoIn pident anyexpr1 anyexpr2 -> failure x
 
 transOptions :: Pml.Abs.Options -> Result
 transOptions x = case x of
@@ -396,18 +362,10 @@ transRunPrio x = case x of
 transRunArgs :: Pml.Abs.RunArgs -> Result
 transRunArgs x = case x of
   Pml.Abs.RunArgsNone -> failure x
-  Pml.Abs.RunArgsOne arglist -> failure x
+  Pml.Abs.RunArgsOne anyexprs -> failure x
 
 transExpr :: Pml.Abs.Expr -> Result
 transExpr x = case x of
   Pml.Abs.ExprAny anyexpr -> failure x
   Pml.Abs.ExprParen expr -> failure x
   Pml.Abs.ExprChanPoll chanpoll varref -> failure x
-
-transUname :: Pml.Abs.Uname -> Result
-transUname x = case x of
-  Pml.Abs.Uname name -> failure x
-
-transName :: Pml.Abs.Name -> Result
-transName x = case x of
-  Pml.Abs.Name pident -> failure x
