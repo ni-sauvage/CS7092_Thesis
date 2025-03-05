@@ -18,6 +18,7 @@ import GHC.Num
 import GHC.Prelude
 import qualified Data.Map as Data
 import Data.Maybe (fromJust)
+import Text.ParserCombinators.ReadPrec (step)
 
 data Visible = Visible_hidden | Visible_show
   deriving (C.Eq, C.Ord, C.Show, C.Read)
@@ -139,7 +140,7 @@ data Enabler = Enabler Expr
 data Sequence
     = SeqOne Step
     | SeqOneSep Step Separator
-    | SeqNoStep Step Sequence
+    | SeqNoSep Step Sequence
     | SeqCons Step Separator Sequence
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
@@ -328,97 +329,234 @@ data TState = Zombie | Dormant | Ready | Blocked | TimeWait | Otherwait
 
 type ProgState a = StateT (ProgMem, ControlMem) (WriterT [String] IO) a -- Programme State
 type ControlMem = (Integer, Integer, Proctype, Inline, Stmt, TStates) -- Control Memory is defined as a 6-tuple of current thread, last executed thread, proctypes, inlines, labels and thread states
-type TStates = (Map.Map Integer TState) -- Thread states are defined as a mapping between threadId and thread state
+type TStates = (Map.Map Integer (TState, Sequence)) -- Thread states are defined as a mapping between threadId and the tuple of Tstate and Sequence, representing the sequence of statements yet to be taken
 type ProgMem = (Map.Map Integer Mem, Mem) -- Programme memory is a tuple of local memory (A mapping between threadId and Memory) and Global Memory (Mem)
 type Mem = Map.Map PIdent (Vars, Typename) -- Memory is modelled as a mapping from identifiers to a (variable, type) tuple
 
-evalExpr :: AnyExpr -> ProgState Vars
-evalExpr (AnyExprCond c p q) = do
-    c' <- evalExpr c
+evalSequence :: Sequence -> ProgState ()
+evalSequence (SeqOne step) = evalStep step
+evalSequence (SeqOneSep step _) = evalStep step
+evalSequence (SeqNoSep step seq) = do
+    evalStep step
+    evalSequence seq
+evalSequence (SeqCons step _ seq) = do
+    evalStep step
+    evalSequence seq
+
+evalStep :: Step -> ProgState ()
+evalStep (StepMType m) = do
+    (p@(threads, g), c@(tid, _, _, _, _, _)) <- get
+    let locals = fromJust $ Data.lookup tid threads
+    case m of 
+        (MtpEq _ ms _) -> do
+            let update = Data.union (Data.fromList $ zip (reverse ms) (zip (map I [1..]) (repeat . TypenamePIdent . PIdent $ "mtype"))) locals
+            let newthreads = Data.insert tid update threads
+            put ((newthreads, g), c)
+        (MtpNoEq ms _) -> do
+            let update = Data.union (Data.fromList $ zip (reverse ms) (zip (map I [1..]) (repeat . TypenamePIdent . PIdent $ "mtype"))) locals
+            let newthreads = Data.insert tid update threads
+            put ((newthreads, g), c)
+evalStep (StepStmt s su) = do
+    evalStmt s
+    case su of 
+        (UStmtOne s') -> evalStmt s'
+        UStmtNone -> return ()
+
+{--
+evalStep (StepDclList dcls) = do -- this will be replaced with bespoke logic for functions
+    case dcls of 
+        (DclListOneNoSep dcl) -> return ()
+        (DclListOne dcl _) -> evalStep (StepDclList (DclListOneNoSep dcl))
+        (DclListCons dcl _ dcls') -> do
+            evalStep (StepDclList (DclListOneNoSep dcl))
+            evalStep (StepDclList dcls')
+    --case (DclListCons d _ dcls') 
+--}
+
+
+evalStmt :: Stmt -> ProgState ()
+evalStmt _ = return ()
+
+
+-- Promela has a notion of executability
+-- THis will check if a statement is executable
+executableStmt :: Stmt -> ProgState Bool
+executableStmt (StmtIf opts) = executableOpts opts
+executableStmt (StmtDo opts) = executableOpts opts
+executableStmt (StmtFor _ seq) = executableSeq seq
+executableStmt (StmtAtomic atm) = executableSeq atm
+executableStmt (StmtDAtomic atm) = executableSeq atm
+executableStmt (StmtSelect _) = return True
+executableStmt (StmtNorm seq) = executableSeq seq
+executableStmt (StmtSend _) = return True
+executableStmt (StmtRec _) = return True
+executableStmt (StmtAssign _) = return True
+executableStmt StmtElse = return True
+executableStmt StmtBreak = return True
+executableStmt (StmtGoto _) = return True
+executableStmt (StmtLabel _ _) = return True
+executableStmt (StmtPrint _ _) = return True
+executableStmt (StmtAssert _) = return True
+executableStmt (StmtCall _ _) = return True
+executableStmt (StmtExpr e) = do
+    val <- evalExpr e
+    case val of 
+        (Bl a) -> return a
+        (By 0) -> return False
+        (UBy 0) -> return False
+        (Sh 0) -> return False
+        (USh 0) -> return False
+        (I 0) -> return False
+        (UI 0) -> return False
+        (Bs 0) -> return False
+        Pml.Abs.Null -> return False
+        _ -> return True
+
+-- Some statements mention sequences, so this evaluates those    
+executableSeq :: Sequence -> ProgState Bool
+executableSeq (SeqOne step) = executableStep step
+executableSeq (SeqNoSep step _) = executableStep step
+executableSeq (SeqOneSep step _) = executableStep step
+executableSeq (SeqCons step _ _) = executableStep step
+
+-- Some sequences mention steps, this evaluates those
+executableStep :: Step -> ProgState Bool
+executableStep (StepMType _) = return True
+executableStep (StepDclList _) = return True
+executableStep (StepXR _) = return True
+executableStep (StepXS _) = return True
+executableStep (StepStmt stmt _) = executableStmt stmt
+
+-- Opts are used for if/do statements, as long as their disjunction is executable, they are too
+executableOpts :: Options -> ProgState Bool
+executableOpts (OptionsOne seq) = executableSeq seq
+executableOpts (OptionsCons seq opts) = do 
+    seq <- executableSeq seq
+    opts <- executableOpts opts
+    return $ seq || opts
+
+-- EVALUATORS
+-- evalExpr is self-explantory
+evalExpr :: Expr -> ProgState Vars
+evalExpr (ExprAny e) = evalAnyExpr e
+evalExpr (ExprParen e) = evalExpr e
+
+
+-- Evaluates anyExpr, only difficult part is further down
+evalAnyExpr :: AnyExpr -> ProgState Vars
+evalAnyExpr (AnyExprCond c p q) = do
+    c' <- evalAnyExpr c
     case c' of 
         (Bl a)
-            | a -> evalExpr p
-            | otherwise -> evalExpr q
+            | a -> evalAnyExpr p
+            | otherwise -> evalAnyExpr q
         _ -> error "Conditional expression does not evaluate to boolean"
-evalExpr (AnyExprland e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprland e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     case (e1', e2') of 
         (Bl a, Bl b) -> return . Bl $ a && b
-evalExpr (AnyExprlor e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprlor e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     case (e1', e2') of 
         (Bl a, Bl b) -> return . Bl $ a || b
-evalExpr (AnyExprbitand e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprbitand e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpNum ((.&.) :: Int -> Int -> Int) e1' e2'
-evalExpr (AnyExprbitor e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprbitor e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpNum ((.|.) :: Int -> Int -> Int) e1' e2'
-evalExpr (AnyExprbitxor e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprbitxor e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpNum (xor :: Int -> Int -> Int) e1' e2'
-evalExpr (AnyExpreq e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExpreq e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     case (e1', e2') of 
         (Bl a, Bl b) -> return . Bl $ a == b
         _ -> return $ evalOpBool ((==) :: Int -> Int -> Bool) e1' e2'
-evalExpr (AnyExprneq e1 e2) = do
-    (Bl a) <- evalExpr (AnyExpreq e1 e2)
+
+evalAnyExpr (AnyExprneq e1 e2) = do
+    (Bl a) <- evalAnyExpr (AnyExpreq e1 e2)
     return $ Bl . not $ a
-evalExpr (AnyExprlthan e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprlthan e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpBool ((<) :: Int -> Int -> Bool) e1' e2'
-evalExpr (AnyExprgrthan e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprgrthan e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpBool ((>) :: Int -> Int -> Bool) e1' e2'
-evalExpr (AnyExprge e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprge e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpBool ((>=) :: Int -> Int -> Bool) e1' e2'
-evalExpr (AnyExprle e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprle e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpBool ((<=) :: Int -> Int -> Bool) e1' e2'
-evalExpr (AnyExprleft e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprleft e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpNum (shift :: Int -> Int -> Int) e1' e2'
-evalExpr (AnyExprright e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprright e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpNum (shift :: Int -> Int -> Int) e1' (evalUnrOp UnrOp2 e2')
-evalExpr (AnyExprplus e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprplus e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpNum ((+) :: Int -> Int -> Int) e1' e2'
-evalExpr (AnyExprminus e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprminus e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpNum ((-) :: Int -> Int -> Int) e1' e2'
-evalExpr (AnyExprtimes e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprtimes e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpNum ((*) :: Int -> Int -> Int) e1' e2'
-evalExpr (AnyExprdiv e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprdiv e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpNum (div :: Int -> Int -> Int) e1' e2'
-evalExpr (AnyExprmod e1 e2) = do
-    e1' <- evalExpr e1
-    e2' <- evalExpr e2
+
+evalAnyExpr (AnyExprmod e1 e2) = do
+    e1' <- evalAnyExpr e1
+    e2' <- evalAnyExpr e2
     return $ evalOpNum (mod:: Int -> Int -> Int) e1' e2'
-evalExpr (AnyExprUnrOp op e) = do
-    e' <- evalExpr e
+
+evalAnyExpr (AnyExprUnrOp op e) = do
+    e' <- evalAnyExpr e
     return $ evalUnrOp op e'
-evalExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone VarRefTypedefNone)) = do -- Simplest case, struct reference is just a reference to a variable
+
+evalAnyExpr (AnyExprConst const) = do
+    case const of 
+        Const_true -> return . Bl $ True
+        Const_false -> return . Bl $ False
+        (ConstInteger int) -> return . I $ fromIntegral int
+        Const_skip -> return . Bl $ True 
+
+evalAnyExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone VarRefTypedefNone)) = do -- Simplest case, struct reference is just a reference to a variable
     ((local, global), cm@(tid, _, _, _, _, _)) <- get
     case Data.lookup id global of -- Check globals
          (Just (v, _)) -> return v
@@ -426,9 +564,10 @@ evalExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone VarRefTypedefNone)) = do --
             case Data.lookup id (fromJust $ Data.lookup tid local) of -- then check locals
                 (Just (v, _)) -> return v
                 Nothing -> error $ "Variable " ++ show id ++ "does not exist" -- then cry and give up
-evalExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone )) = do -- Now it's a reference to an array
+
+evalAnyExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone )) = do -- Now it's a reference to an array
     ((local, global), cm@(tid, _, _, _, _, _)) <- get
-    e' <- evalExpr e -- so evaluate the array index
+    e' <- evalAnyExpr e -- so evaluate the array index
     let idx :: Int = case e' of -- cast to an int
             (UI a) -> fromIntegral a
             (I a) -> fromIntegral a
@@ -444,26 +583,26 @@ evalExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone )) = d
                 (Just (v, _)) -> listIndex v idx
                 Nothing -> error $ "Variable " ++ show id ++ "does not exist" -- then give up again
 
-evalExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone (VarRefTypedefOne vr))) = do -- We are now looking for an element of a struct
-    struct <- evalExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone VarRefTypedefNone)) -- so first find the struct
-    evalExpr (AnyExprStructRef struct vr) -- Then find the element
+evalAnyExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone (VarRefTypedefOne vr))) = do -- We are now looking for an element of a struct
+    struct <- evalAnyExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone VarRefTypedefNone)) -- so first find the struct
+    evalAnyExpr (AnyExprStructRef struct vr) -- Then find the element
 
-evalExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) (VarRefTypedefOne vr))) = do -- We are looking for an element in a struct, in an array
-    struct <- evalExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone)) -- so first index the array for the struct
-    evalExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone (VarRefTypedefOne vr))) -- Then find the element in the struct
+evalAnyExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) (VarRefTypedefOne vr))) = do -- We are looking for an element in a struct, in an array
+    struct <- evalAnyExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone)) -- so first index the array for the struct
+    evalAnyExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone (VarRefTypedefOne vr))) -- Then find the element in the struct
     
-evalExpr (AnyExprStructRef struct (VarRef id VarRefAnyExprNone VarRefTypedefNone)) = -- Logic for finding elements in a struct
+evalAnyExpr (AnyExprStructRef struct (VarRef id VarRefAnyExprNone VarRefTypedefNone)) = -- Logic for finding elements in a struct
     case (struct, id) of -- lookup the element in the struct
         (S m, id) ->  return . fromJust $ Data.lookup id m -- return it
         _ -> error $ "struct " ++ show struct ++ " does not contain member " ++ show id
 
-evalExpr (AnyExprStructRef struct (VarRef id VarRefAnyExprNone (VarRefTypedefOne vr))) =
+evalAnyExpr (AnyExprStructRef struct (VarRef id VarRefAnyExprNone (VarRefTypedefOne vr))) =
     case (struct, id) of
-        (S m, id) ->  evalExpr (AnyExprStructRef (fromJust $ Data.lookup id m) vr) -- look up the element in the struct and recursively search using variable reference
+        (S m, id) ->  evalAnyExpr (AnyExprStructRef (fromJust $ Data.lookup id m) vr) -- look up the element in the struct and recursively search using variable reference
         _ -> error $ "struct " ++ show struct ++ " does not contain member " ++ show id
 
-evalExpr (AnyExprStructRef struct (VarRef id (VarRefAnyExprOne e) (VarRefTypedefOne vr))) = do -- we are looking for an element of an element of a struct that is itself an element of a list 
-    e' <- evalExpr e -- evaluate index
+evalAnyExpr (AnyExprStructRef struct (VarRef id (VarRefAnyExprOne e) (VarRefTypedefOne vr))) = do -- we are looking for an element of an element of a struct that is itself an element of a list 
+    e' <- evalAnyExpr e -- evaluate index
     let idx :: Int = case e' of
             (UI a) -> fromIntegral a
             (I a) -> fromIntegral a
@@ -474,11 +613,11 @@ evalExpr (AnyExprStructRef struct (VarRef id (VarRefAnyExprOne e) (VarRefTypedef
     case (struct, id) of -- look up the 
         (S m, id) -> do
              lv <- listIndex (fromJust $ Data.lookup id m) idx
-             evalExpr (AnyExprStructRef lv vr)
+             evalAnyExpr (AnyExprStructRef lv vr)
         _ -> error $ "struct " ++ show struct ++ " does not contain member " ++ show id
 
-evalExpr (AnyExprStructRef struct (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone)) = do -- looking for an element of a struct that is itself an element of a list
-    e' <- evalExpr e
+evalAnyExpr (AnyExprStructRef struct (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone)) = do -- looking for an element of a struct that is itself an element of a list
+    e' <- evalAnyExpr e
     let idx :: Int = case e' of
             (UI a) -> fromIntegral a
             (I a) -> fromIntegral a
@@ -490,6 +629,26 @@ evalExpr (AnyExprStructRef struct (VarRef id (VarRefAnyExprOne e) VarRefTypedefN
         (S m, id) -> listIndex (fromJust $ Data.lookup id m) idx
         _ -> error $ "struct " ++ show struct ++ " does not contain member " ++ show id
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Underneath this is bad stuff that I've bodged together to get this to work. Just ignore it.
+-- If you really have to know, it's fun type coercion stuff
+
+-- Strip off the type constructor to index a list
 listIndex :: Vars -> Int -> ProgState Vars
 listIndex vars idx = case vars of
     (BlL v) -> return . Bl $ v !! idx
@@ -500,6 +659,8 @@ listIndex vars idx = case vars of
     (IL v) -> return . I $ v !! idx
     (UIL v) -> return . UI $ v !! idx
 
+
+-- Strip off type constructor, then reapply for unary operator
 evalUnrOp :: UnrOp -> Vars -> Vars
 evalUnrOp UnrOp2 (Bl False) = Bl True
 evalUnrOp UnrOp2 (Bl True) = Bl False
@@ -532,9 +693,14 @@ evalUnrOp UnrOp2 (Bs a) = Bs $ - a
 evalUnrOp UnrOp3 (Bs 0) = Bs 1 
 evalUnrOp UnrOp3 (Bs a) = Bs 0 
 
+-- HACKINESS ENSUES
+-- We want to have our applyOp function actually work, so here goes
+-- We promite a and b to Integers, then apply the op
 applyOp :: (Bits a1, Integral a1, Bits a2, Integral a2, Bits t1, Num t1, Bits t2, Num t2) => (t1 -> t2 -> t3) -> a1 -> a2 -> t3
 applyOp op a b = fromIntegral a `op` fromIntegral b 
 
+
+-- We applyOp and apply the correct type constructor (a byte added to an int should be an int)
 evalOpNum :: (Bits a, Integral a, Bits t1, Num t1, Bits t2, Num t2) => (t1 -> t2 -> a) -> Vars -> Vars -> Vars
 evalOpNum op (By a) (By b) = By . fromIntegral $ applyOp op a b
 evalOpNum op (By a) (UBy b) = By . fromIntegral $ applyOp op a b
@@ -574,6 +740,8 @@ evalOpNum op (UI a) (I b) = I . fromIntegral $ applyOp op a b
 evalOpNum op (UI a) (UI b) = UI . fromIntegral $ applyOp op a b
 evalOpNum op (Bs a) (Bs b) = Bs . fromIntegral $ applyOp op a b
 
+
+-- Same as above but with binary boolean operators
 evalOpBool :: (Bits t1, Num t1, Bits t2, Num t2) => (t1 -> t2 -> Bool) -> Vars -> Vars -> Vars
 evalOpBool op (By a) (By b) = Bl $ applyOp op a b
 evalOpBool op (By a) (UBy b) = Bl $ applyOp op a b

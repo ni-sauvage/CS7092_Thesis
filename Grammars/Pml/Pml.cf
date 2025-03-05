@@ -78,7 +78,7 @@ Enabler. Enabler ::= "provided" "(" Expr ")";
 
 SeqOne. Sequence ::= Step;
 SeqOneSep. Sequence ::= Step Separator;
-SeqNoStep. Sequence ::= Step Sequence;
+SeqNoSep. Sequence ::= Step Sequence;
 SeqCons. Sequence ::= Step Separator Sequence;
 
 UStmtNone. UStmt ::= ;
