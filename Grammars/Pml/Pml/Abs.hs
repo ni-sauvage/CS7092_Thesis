@@ -130,7 +130,7 @@ data Enabler = Enabler Expr
 data Sequence
     = SeqOne Step
     | SeqOneSep Step Separator
-    | SeqNoStep Step Sequence
+    | SeqNoSep Step Sequence
     | SeqCons Step Separator Sequence
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 

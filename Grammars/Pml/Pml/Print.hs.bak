@@ -282,7 +282,7 @@ instance Print Pml.Abs.Decl where
 
 instance Print [Pml.Abs.Ivar] where
   prt _ [] = concatD []
-  prt _ [x] = concatD [prt 0 x, doc (showString ",")]
+  prt _ [x] = concatD [prt 0 x]
   prt _ (x:xs) = concatD [prt 0 x, doc (showString ","), prt 0 xs]
 
 instance Print Pml.Abs.DeclVisible where
@@ -347,12 +347,12 @@ instance Print Pml.Abs.AnyExpr where
     Pml.Abs.AnyExprlor anyexpr1 anyexpr2 -> prPrec i 2 (concatD [prt 2 anyexpr1, doc (showString "||"), prt 3 anyexpr2])
     Pml.Abs.AnyExprland anyexpr1 anyexpr2 -> prPrec i 2 (concatD [prt 2 anyexpr1, doc (showString "&&"), prt 3 anyexpr2])
     Pml.Abs.AnyExprbitor anyexpr1 anyexpr2 -> prPrec i 3 (concatD [prt 3 anyexpr1, doc (showString "|"), prt 4 anyexpr2])
-    Pml.Abs.AnyExprbitexor anyexpr1 anyexpr2 -> prPrec i 3 (concatD [prt 3 anyexpr1, doc (showString "^"), prt 4 anyexpr2])
+    Pml.Abs.AnyExprbitxor anyexpr1 anyexpr2 -> prPrec i 3 (concatD [prt 3 anyexpr1, doc (showString "^"), prt 4 anyexpr2])
     Pml.Abs.AnyExprbitand anyexpr1 anyexpr2 -> prPrec i 3 (concatD [prt 3 anyexpr1, doc (showString "&"), prt 4 anyexpr2])
     Pml.Abs.AnyExpreq anyexpr1 anyexpr2 -> prPrec i 4 (concatD [prt 4 anyexpr1, doc (showString "=="), prt 5 anyexpr2])
     Pml.Abs.AnyExprneq anyexpr1 anyexpr2 -> prPrec i 4 (concatD [prt 4 anyexpr1, doc (showString "!="), prt 5 anyexpr2])
-    Pml.Abs.AnyExprlthen anyexpr1 anyexpr2 -> prPrec i 5 (concatD [prt 5 anyexpr1, doc (showString "<"), prt 6 anyexpr2])
-    Pml.Abs.AnyExprgrthen anyexpr1 anyexpr2 -> prPrec i 5 (concatD [prt 5 anyexpr1, doc (showString ">"), prt 6 anyexpr2])
+    Pml.Abs.AnyExprlthan anyexpr1 anyexpr2 -> prPrec i 5 (concatD [prt 5 anyexpr1, doc (showString "<"), prt 6 anyexpr2])
+    Pml.Abs.AnyExprgrthan anyexpr1 anyexpr2 -> prPrec i 5 (concatD [prt 5 anyexpr1, doc (showString ">"), prt 6 anyexpr2])
     Pml.Abs.AnyExprle anyexpr1 anyexpr2 -> prPrec i 5 (concatD [prt 5 anyexpr1, doc (showString "<="), prt 6 anyexpr2])
     Pml.Abs.AnyExprge anyexpr1 anyexpr2 -> prPrec i 5 (concatD [prt 5 anyexpr1, doc (showString ">="), prt 6 anyexpr2])
     Pml.Abs.AnyExprleft anyexpr1 anyexpr2 -> prPrec i 6 (concatD [prt 6 anyexpr1, doc (showString "<<"), prt 7 anyexpr2])

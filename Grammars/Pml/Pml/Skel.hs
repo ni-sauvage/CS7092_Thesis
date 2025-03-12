@@ -184,7 +184,7 @@ transSequence :: Pml.Abs.Sequence -> Result
 transSequence x = case x of
   Pml.Abs.SeqOne step -> failure x
   Pml.Abs.SeqOneSep step separator -> failure x
-  Pml.Abs.SeqNoStep step sequence -> failure x
+  Pml.Abs.SeqNoSep step sequence -> failure x
   Pml.Abs.SeqCons step separator sequence -> failure x
 
 transUStmt :: Pml.Abs.UStmt -> Result

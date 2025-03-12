@@ -1506,7 +1506,7 @@ happyReduction_153 happy_x_2
 	 =  case happyOut115 happy_x_1 of { (HappyWrap115 happy_var_1) -> 
 	case happyOut113 happy_x_2 of { (HappyWrap113 happy_var_2) -> 
 	happyIn113
-		 (Pml.Abs.SeqNoStep happy_var_1 happy_var_2
+		 (Pml.Abs.SeqNoSep happy_var_1 happy_var_2
 	)}}
 
 happyReduce_154 = happySpecReduce_3  37# happyReduction_154

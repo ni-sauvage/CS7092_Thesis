@@ -406,7 +406,7 @@ Decl
   | DeclVisible UnsignedDecl { Pml.Abs.DclOneUnsigned $1 $2 }
 
 ListIvar :: { [Pml.Abs.Ivar] }
-ListIvar : Ivar ',' { (:[]) $1 } | Ivar ',' ListIvar { (:) $1 $3 }
+ListIvar : Ivar ',' ListIvar { (:) $1 $3 } | Ivar { (:[]) $1 }
 
 DeclVisible :: { Pml.Abs.DeclVisible }
 DeclVisible
@@ -475,7 +475,7 @@ AnyExpr2
 AnyExpr3 :: { Pml.Abs.AnyExpr }
 AnyExpr3
   : AnyExpr3 '|' AnyExpr4 { Pml.Abs.AnyExprbitor $1 $3 }
-  | AnyExpr3 '^' AnyExpr4 { Pml.Abs.AnyExprbitexor $1 $3 }
+  | AnyExpr3 '^' AnyExpr4 { Pml.Abs.AnyExprbitxor $1 $3 }
   | AnyExpr3 '&' AnyExpr4 { Pml.Abs.AnyExprbitand $1 $3 }
   | AnyExpr4 { $1 }
 
@@ -487,8 +487,8 @@ AnyExpr4
 
 AnyExpr5 :: { Pml.Abs.AnyExpr }
 AnyExpr5
-  : AnyExpr5 '<' AnyExpr6 { Pml.Abs.AnyExprlthen $1 $3 }
-  | AnyExpr5 '>' AnyExpr6 { Pml.Abs.AnyExprgrthen $1 $3 }
+  : AnyExpr5 '<' AnyExpr6 { Pml.Abs.AnyExprlthan $1 $3 }
+  | AnyExpr5 '>' AnyExpr6 { Pml.Abs.AnyExprgrthan $1 $3 }
   | AnyExpr5 '<=' AnyExpr6 { Pml.Abs.AnyExprle $1 $3 }
   | AnyExpr5 '>=' AnyExpr6 { Pml.Abs.AnyExprge $1 $3 }
   | AnyExpr6 { $1 }

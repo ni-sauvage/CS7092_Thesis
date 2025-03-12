@@ -154,12 +154,12 @@ data AnyExpr
     | AnyExprlor AnyExpr AnyExpr
     | AnyExprland AnyExpr AnyExpr
     | AnyExprbitor AnyExpr AnyExpr
-    | AnyExprbitexor AnyExpr AnyExpr
+    | AnyExprbitxor AnyExpr AnyExpr
     | AnyExprbitand AnyExpr AnyExpr
     | AnyExpreq AnyExpr AnyExpr
     | AnyExprneq AnyExpr AnyExpr
-    | AnyExprlthen AnyExpr AnyExpr
-    | AnyExprgrthen AnyExpr AnyExpr
+    | AnyExprlthan AnyExpr AnyExpr
+    | AnyExprgrthan AnyExpr AnyExpr
     | AnyExprle AnyExpr AnyExpr
     | AnyExprge AnyExpr AnyExpr
     | AnyExprleft AnyExpr AnyExpr

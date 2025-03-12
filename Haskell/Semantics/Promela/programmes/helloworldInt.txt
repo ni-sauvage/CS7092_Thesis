@@ -1,0 +1,1 @@
+[Minit (Initialise IpriorityNone (SeqNoSep (StepDclList (DclListOne (DclOne DclVisNone Typename_int [Ivar (PIdent "x") IvarConstNone (IvarAssignAnyExpr (AnyExprConst (ConstInteger 5)))]) Separator1)) (SeqOne (StepStmt (StmtPrint PrintType_printf (PArgsBoth "hello world %d" [AnyExprVarRef (VarRef (PIdent "x") VarRefAnyExprNone VarRefTypedefNone)])) UStmtNone))))]

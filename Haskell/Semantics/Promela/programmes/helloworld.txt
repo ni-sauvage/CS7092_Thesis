@@ -1,0 +1,1 @@
+[Minit (Initialise IpriorityNone (SeqOne (StepStmt (StmtPrint PrintType_printf (PArgsString "hello world")) UStmtNone)))]

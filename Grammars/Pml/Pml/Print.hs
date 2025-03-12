@@ -320,7 +320,7 @@ instance Print Pml.Abs.Sequence where
   prt i = \case
     Pml.Abs.SeqOne step -> prPrec i 0 (concatD [prt 0 step])
     Pml.Abs.SeqOneSep step separator -> prPrec i 0 (concatD [prt 0 step, prt 0 separator])
-    Pml.Abs.SeqNoStep step sequence -> prPrec i 0 (concatD [prt 0 step, prt 0 sequence])
+    Pml.Abs.SeqNoSep step sequence -> prPrec i 0 (concatD [prt 0 step, prt 0 sequence])
     Pml.Abs.SeqCons step separator sequence -> prPrec i 0 (concatD [prt 0 step, prt 0 separator, prt 0 sequence])
 
 instance Print Pml.Abs.UStmt where

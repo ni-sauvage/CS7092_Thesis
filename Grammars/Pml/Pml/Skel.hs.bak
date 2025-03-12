@@ -211,12 +211,12 @@ transAnyExpr x = case x of
   Pml.Abs.AnyExprlor anyexpr1 anyexpr2 -> failure x
   Pml.Abs.AnyExprland anyexpr1 anyexpr2 -> failure x
   Pml.Abs.AnyExprbitor anyexpr1 anyexpr2 -> failure x
-  Pml.Abs.AnyExprbitexor anyexpr1 anyexpr2 -> failure x
+  Pml.Abs.AnyExprbitxor anyexpr1 anyexpr2 -> failure x
   Pml.Abs.AnyExprbitand anyexpr1 anyexpr2 -> failure x
   Pml.Abs.AnyExpreq anyexpr1 anyexpr2 -> failure x
   Pml.Abs.AnyExprneq anyexpr1 anyexpr2 -> failure x
-  Pml.Abs.AnyExprlthen anyexpr1 anyexpr2 -> failure x
-  Pml.Abs.AnyExprgrthen anyexpr1 anyexpr2 -> failure x
+  Pml.Abs.AnyExprlthan anyexpr1 anyexpr2 -> failure x
+  Pml.Abs.AnyExprgrthan anyexpr1 anyexpr2 -> failure x
   Pml.Abs.AnyExprle anyexpr1 anyexpr2 -> failure x
   Pml.Abs.AnyExprge anyexpr1 anyexpr2 -> failure x
   Pml.Abs.AnyExprleft anyexpr1 anyexpr2 -> failure x
