@@ -14,7 +14,7 @@ import GHC.Prelude
 import qualified Data.Map as Data
 import Data.Maybe (fromJust)
 import Control.Monad.IO.Class (MonadIO(liftIO))
-import Data.List (elemIndex, find)
+import Data.List (elemIndex, find, partition)
 import System.Random (randomRIO)
 
 data Visible = Visible_hidden | Visible_show
@@ -330,15 +330,17 @@ runProgState :: [Pml.Abs.Module] -> IO ()
 runProgState prog = do
   st <- runWriterT $ (runStateT $ runProg prog) ((Map.fromList [(0, Map.empty)], Map.empty), (0::Integer, [], [], Map.empty, Map.fromList [(0, (Ready, Nothing, []))], Map.empty))
   case st of 
-    (((), st), log) -> putStr $ 
-      "State: " ++ show st ++
-      "Log: " ++ show log
+    (((), ((threads, globals), (tid, p, i, l, tstates, structs))), log) -> putStr $ 
+      "Threads: " ++ show threads ++ "\n" ++
+      "Global Vars: " ++ show globals ++ "\n" ++
+      "Last TID: " ++ show tid ++ "\n" ++
+      "Tstates: " ++ show tstates ++ "\n" ++
+      "Log: " ++ show log ++ "\n"
 
 runProg :: [Pml.Abs.Module] -> ProgState ()
 runProg ms = do
   mapM_ evalModule ms
   execProgramme
-
 
 evalDcl :: Decl -> ProgState (Vars, Typename, PIdent)
 evalDcl (DclOne _ typename ((Ivar ident const assign):ivs)) = do
@@ -428,7 +430,7 @@ evalModule (Minline i) = do
   put (pm, (tid, ps, i:is, gt, tstate, structs))
 evalModule (Minit (Initialise _ sequence)) = do
   ((threads, globals), (tid, ps, is, gt, tstate, structs)) <- get
-  let threads' = Data.insert 0 Map.empty threads
+  let threads' = Data.insert 0 (Map.fromList [(PIdent "_pid" , (I 0, Typename_int))]) threads
   let tstate' = Data.insert 0 (Ready, Nothing, [sequence]) tstate
   put ((threads', globals), (tid, ps, is, gt, tstate', structs))
 
@@ -445,12 +447,13 @@ createStruct dl map =
 
 execProgramme :: ProgState ()
 execProgramme = do 
-  (pm, c@(tid, p, i, l, tstates, s)) <- get
+  (_, (_, _, _, _, tstates, _)) <- get
   let tids = Data.keys tstates
   mapM_ updateBlocked tids
+  (pm, c@(tid, p, i, l, tstates, s)) <- get
   let execTids = map fst (filter (\(_, (st, _, _)) -> st == Ready) (Map.toList tstates))
   case execTids of
-    [] -> liftIO $ print "ALL THREADS BLOCKED"
+    [] -> liftIO $ print "No 'Ready' threads available, programme terminating."
     _ -> do
       tidIdx <- liftIO $ randomRIO (0, length execTids -1)
       let tid' = execTids !! tidIdx
@@ -467,8 +470,8 @@ updateBlocked tid = do
       case rm of
         (x:xs) -> do 
           ex <- executableSeq x
-          let ready = if ex then Ready else Blocked
-          let tstates' = Data.insert tid (ready, seq, (x:xs)) tstates
+          let tstate = if ex then Ready else Blocked
+          let tstates' = Data.insert tid (tstate, seq, (x:xs)) tstates
           put (pm, (tid, p, i, l, tstates', s))
         [] -> do 
           let tstates' = Data.insert tid (Zombie, Nothing, []) tstates
@@ -566,7 +569,7 @@ evalStep (StepStmt s su) = do
         (UStmtOne s') -> evalStmt s'
         UStmtNone -> return ()
 
-evalStep (StepDclList dcls) = do -- this will be replaced with bespoke logic for functions
+evalStep (StepDclList dcls) = do
     case dcls of 
         (DclListOneNoSep dcl) -> do
           (val, typename, ident) <- evalDcl dcl
@@ -590,6 +593,7 @@ optsToSeq (OptionsOne s) = [s]
 optsToSeq (OptionsCons s o) = s:optsToSeq o
 
 filterSeq :: [Sequence] -> ProgState [Sequence]
+filterSeq [] = return []
 filterSeq (x:xs) = do
   executable <- executableSeq x
   if executable
@@ -597,15 +601,34 @@ filterSeq (x:xs) = do
       seqs <- filterSeq xs
       return (x:seqs)
     else filterSeq xs
-filterSeq [] = return []
+
+partitionSeqs :: Sequence -> Bool
+partitionSeqs s = 
+  case s of 
+    SeqCons (StepStmt StmtElse _) _ _ -> False
+    SeqOne (StepStmt StmtElse _) -> False
+    SeqOneSep (StepStmt StmtElse _) _ -> False
+    SeqNoSep (StepStmt StmtElse _) _ -> False
+    _ -> True
+
+iterateSeq :: ProgState ()
+iterateSeq = do
+  (pm, c@(tid, p, i, l, tstates, s)) <- get
+  let (st, curr, rm) = fromJust $ Data.lookup tid tstates
+  let tstates' = Data.insert tid (Ready, Nothing, rm) tstates
+  put (pm, (tid, p, i, l, tstates', s))
 
 evalStmt :: Stmt -> ProgState ()
 evalStmt (StmtAtomic seq) = evalSequenceAtm seq
 evalStmt (StmtDAtomic seq) = evalSequenceAtm seq
 evalStmt (StmtDo opts) = do
   seqs <- filterSeq $ optsToSeq opts
-  seqIdx <- liftIO $ randomRIO (0, length seqs - 1)
-  let seq = seqs !! seqIdx
+  let pseqs@(validSeqs, _) = partition partitionSeqs seqs
+  seqIdx <- liftIO $ randomRIO (0, length validSeqs - 1)
+  let seq = case pseqs of
+        ([], elseSeqs) -> head elseSeqs
+        (validSeqs, _) -> do 
+            seqs !! seqIdx
   (pm, c@(tid, p, i, l, tstates, s)) <- get
   let loop = SeqOne $ StepStmt (StmtDo opts) UStmtNone
   let (st, curr, rm) = fromJust $ Data.lookup tid tstates
@@ -624,46 +647,50 @@ evalStmt (StmtAssign a) = do
     (AssignStd var expr) -> do
       ((threads, g), c@(tid, _, _, _, _, _)) <- get
       e <- evalAnyExpr expr
-      updateVar var e 
-  (pm, c@(tid, p, i, l, tstates, s)) <- get
-  let (st, curr, rm) = fromJust $ Data.lookup tid tstates
-  let tstates' = Data.insert tid (Ready, Nothing, rm) tstates
-  put (pm, (tid, p, i, l, tstates', s))
+      updateVar var e
+  iterateSeq
 evalStmt (StmtPrint _ args) = do 
-  evalPrint args
-  (pm, c@(tid, p, i, l, tstates, s)) <- get
-  let (st, curr, rm) = fromJust $ Data.lookup tid tstates
-  let tstates' = Data.insert tid (Ready, Nothing, rm) tstates
-  put (pm, (tid, p, i, l, tstates', s))
+  str <- evalPrint args
+  liftIO . putStr $ str
+  iterateSeq
 evalStmt (StmtAssert e) = do 
   rv <- executableStmt (StmtExpr e)
   if rv then return () else error $ "assertion violated" ++ show e
-  (pm, c@(tid, p, i, l, tstates, s)) <- get
-  let (st, curr, rm) = fromJust $ Data.lookup tid tstates
-  let tstates' = Data.insert tid (Ready, Nothing, rm) tstates
-  put (pm, (tid, p, i, l, tstates', s))
+  iterateSeq
+evalStmt (StmtExpr ( ExprAny (AnyExprRun ident args prio))) = do
+  evalAnyExpr (AnyExprRun ident args prio)
+  iterateSeq
 evalStmt se@(StmtExpr e) = do 
-    executable <- executableStmt se 
-    (pm, (tid, p, i, l, tstates, s)) <- get
-    let (st, seq, rm) = fromJust $ Data.lookup tid tstates
-    if executable 
-      then return () else
-      put (pm, (tid, p, i, l, Data.insert tid (Blocked, Nothing, rm) tstates, s))
+  executable <- executableStmt se
+  (pm, (tid, p, i, l, tstates, s)) <- get
+  let (st, seq, rm) = fromJust $ Data.lookup tid tstates
+  if executable 
+    then put (pm, (tid, p, i, l, Data.insert tid (Ready, Nothing, rm) tstates, s)) else
+    put (pm, (tid, p, i, l, Data.insert tid (Blocked, Nothing, rm) tstates, s))
 evalStmt StmtBreak = do
   (pm, (tid, p, i, l, tstates, s)) <- get
   let (st, seq, rm) = fromJust $ Data.lookup tid tstates
-  let (x:xs) = dropWhile (\x -> case x of {(SeqOne ( StepStmt ( StmtDo _) _)) -> True; _ -> False;}) rm
+  let xs = dropWhile (\x -> case x of {(SeqOne ( StepStmt ( StmtDo _) _)) -> True; _ -> False;}) rm
   let tstates' = Data.insert tid (Ready, Nothing, xs) tstates
   put (pm, (tid, p, i, l, tstates', s))
+evalStmt StmtElse = iterateSeq
 
-evalPrint :: Pargs -> ProgState ()
-evalPrint (PArgsNoString []) = return ()
-evalPrint (PArgsBoth "" []) = return ()
-evalPrint (PArgsBoth str []) = liftIO $ putStr str
-evalPrint (PArgsString str) = liftIO $ putStrLn str
+evalPrint :: Pargs -> ProgState String
+evalPrint (PArgsNoString []) = return []
+evalPrint (PArgsBoth "" []) = return []
+evalPrint (PArgsBoth str []) = return str
+evalPrint (PArgsString str) = return str
 evalPrint (PArgsNoString (e:es)) = do
   e' <- evalAnyExpr e
-  evalPrint (PArgsNoString es)
+  let arg = case e' of  
+        (Bl a) -> show a
+        (By a) -> show a
+        (Sh a) -> show a
+        (I a) -> show a
+        (UI a b) -> show a
+        (S a) -> show a
+  val <- evalPrint (PArgsNoString es)
+  return $ arg ++ val
 evalPrint (PArgsBoth str (e:es)) = do
   e' <- evalAnyExpr e
   let arg = case e' of  
@@ -675,15 +702,16 @@ evalPrint (PArgsBoth str (e:es)) = do
         (S a) -> show a
   case elemIndex '%' str of
     (Just idx) -> do 
-      liftIO . putStr $ take (idx-1) str ++ show arg
-      evalPrint (PArgsBoth (drop (idx+2) str) es)
-    Nothing -> liftIO . putStr $ str
+      let s = take idx str ++ arg
+      end <- evalPrint (PArgsBoth (drop (idx+2) str) es)
+      return $ s ++ end
+    Nothing -> return []
 
 -- Promela has a notion of executability
--- THis will check if a statement is executable
+-- This will check if a statement is executable
 executableStmt :: Stmt -> ProgState Bool
 executableStmt (StmtIf opts) = executableOpts opts
-executableStmt (StmtDo opts) = executableOpts opts
+executableStmt (StmtDo opts) =  executableOpts opts
 executableStmt (StmtFor _ seq) = executableSeq seq
 executableStmt (StmtAtomic atm) = executableSeq atm
 executableStmt (StmtDAtomic atm) = executableSeq atm
@@ -729,7 +757,7 @@ executableStep (StepStmt stmt _) = executableStmt stmt
 -- Opts are used for if/do statements, as long as their disjunction is executable, they are too
 executableOpts :: Options -> ProgState Bool
 executableOpts (OptionsOne seq) = executableSeq seq
-executableOpts (OptionsCons seq opts) = do 
+executableOpts (OptionsCons seq opts) = do
     seq <- executableSeq seq
     opts <- executableOpts opts
     return $ seq || opts
@@ -740,6 +768,26 @@ evalExpr :: Expr -> ProgState Vars
 evalExpr (ExprAny e) = evalAnyExpr e
 evalExpr (ExprParen e) = evalExpr e
 
+evalBinOpNum :: (Bits a, Integral a) => (Int -> Int -> a) -> AnyExpr -> AnyExpr -> ProgState Vars
+evalBinOpNum f e1 e2 = do
+  e1' <- evalAnyExpr e1
+  e2' <- evalAnyExpr e2
+  return $ evalOpNum f e1' e2'
+
+evalBinOpBool :: (Int -> Int -> Bool) -> AnyExpr -> AnyExpr -> ProgState Vars
+evalBinOpBool f e1 e2 = do
+  e1' <- evalAnyExpr e1
+  e2' <- evalAnyExpr e2
+  return $ evalOpBool f e1' e2'
+
+dclIdents :: DeclList -> [(PIdent, Typename)]
+dclIdents (DclListOneNoSep dcl) =
+  case dcl of 
+    (DclOne a typename ivar) -> map (\(Ivar ident _ _) -> (ident, typename)) ivar
+    (DclOneUnsigned _ (UDcl ident _ _)) -> [(ident, TypenamePIdent . PIdent $ "unsigned")]
+dclIdents (DclListOne dcl _) = dclIdents (DclListOneNoSep dcl)
+dclIdents (DclListCons dcl _ dcls) = dclIdents (DclListOneNoSep dcl) ++ dclIdents dcls
+
 -- Evaluates anyExpr, only difficult part is further down
 evalAnyExpr :: AnyExpr -> ProgState Vars
 evalAnyExpr (AnyExprCond c p q) = do
@@ -749,100 +797,42 @@ evalAnyExpr (AnyExprCond c p q) = do
             | a -> evalAnyExpr p
             | otherwise -> evalAnyExpr q
         _ -> error "Conditional expression does not evaluate to boolean"
-
 evalAnyExpr (AnyExprland e1 e2) = do
     e1' <- evalAnyExpr e1
     e2' <- evalAnyExpr e2
     case (e1', e2') of 
         (Bl a, Bl b) -> return . Bl $ a && b
-
 evalAnyExpr (AnyExprlor e1 e2) = do
     e1' <- evalAnyExpr e1
     e2' <- evalAnyExpr e2
     case (e1', e2') of 
         (Bl a, Bl b) -> return . Bl $ a || b
-
-evalAnyExpr (AnyExprbitand e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpNum ((.&.) :: Int -> Int -> Int) e1' e2'
-
-evalAnyExpr (AnyExprbitor e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpNum ((.|.) :: Int -> Int -> Int) e1' e2'
-
-evalAnyExpr (AnyExprbitxor e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpNum (xor :: Int -> Int -> Int) e1' e2'
-
+evalAnyExpr (AnyExprbitand e1 e2) = evalBinOpNum ((.&.) :: Int -> Int -> Int) e1 e2
+evalAnyExpr (AnyExprbitor e1 e2) = evalBinOpNum ((.|.) :: Int -> Int -> Int) e1 e2
+evalAnyExpr (AnyExprbitxor e1 e2) = evalBinOpNum (xor :: Int -> Int -> Int) e1 e2
 evalAnyExpr (AnyExpreq e1 e2) = do
     e1' <- evalAnyExpr e1
     e2' <- evalAnyExpr e2
     case (e1', e2') of 
         (Bl a, Bl b) -> return . Bl $ a == b
         _ -> return $ evalOpBool ((==) :: Int -> Int -> Bool) e1' e2'
-
 evalAnyExpr (AnyExprneq e1 e2) = do
     (Bl a) <- evalAnyExpr (AnyExpreq e1 e2)
     return $ Bl . not $ a
-
-evalAnyExpr (AnyExprlthan e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpBool ((<) :: Int -> Int -> Bool) e1' e2'
-
-evalAnyExpr (AnyExprgrthan e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpBool ((>) :: Int -> Int -> Bool) e1' e2'
-
-evalAnyExpr (AnyExprge e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpBool ((>=) :: Int -> Int -> Bool) e1' e2'
-
-evalAnyExpr (AnyExprle e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpBool ((<=) :: Int -> Int -> Bool) e1' e2'
-
-evalAnyExpr (AnyExprleft e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpNum (shift :: Int -> Int -> Int) e1' e2'
-
+evalAnyExpr (AnyExprlthan e1 e2) = evalBinOpBool ((<) :: Int -> Int -> Bool) e1 e2
+evalAnyExpr (AnyExprgrthan e1 e2) = evalBinOpBool ((>) :: Int -> Int -> Bool) e1 e2
+evalAnyExpr (AnyExprge e1 e2) = evalBinOpBool ((>=) :: Int -> Int -> Bool) e1 e2
+evalAnyExpr (AnyExprle e1 e2) = evalBinOpBool ((<=) :: Int -> Int -> Bool) e1 e2
+evalAnyExpr (AnyExprleft e1 e2) = evalBinOpNum (shift :: Int -> Int -> Int) e1 e2
 evalAnyExpr (AnyExprright e1 e2) = do
     e1' <- evalAnyExpr e1
     e2' <- evalAnyExpr e2
     return $ evalOpNum (shift :: Int -> Int -> Int) e1' (evalUnrOp UnrOp2 e2')
-
-evalAnyExpr (AnyExprplus e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpNum ((+) :: Int -> Int -> Int) e1' e2'
-
-evalAnyExpr (AnyExprminus e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpNum ((-) :: Int -> Int -> Int) e1' e2'
-
-evalAnyExpr (AnyExprtimes e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpNum ((*) :: Int -> Int -> Int) e1' e2'
-
-evalAnyExpr (AnyExprdiv e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpNum (div :: Int -> Int -> Int) e1' e2'
-
-evalAnyExpr (AnyExprmod e1 e2) = do
-    e1' <- evalAnyExpr e1
-    e2' <- evalAnyExpr e2
-    return $ evalOpNum (mod:: Int -> Int -> Int) e1' e2'
-
+evalAnyExpr (AnyExprplus e1 e2) = evalBinOpNum ((+) :: Int -> Int -> Int) e1 e2
+evalAnyExpr (AnyExprminus e1 e2) = evalBinOpNum ((-) :: Int -> Int -> Int) e1 e2
+evalAnyExpr (AnyExprtimes e1 e2) = evalBinOpNum ((*) :: Int -> Int -> Int) e1 e2
+evalAnyExpr (AnyExprdiv e1 e2) = evalBinOpNum (div :: Int -> Int -> Int) e1 e2
+evalAnyExpr (AnyExprmod e1 e2) = evalBinOpNum (mod:: Int -> Int -> Int) e1 e2
 evalAnyExpr (AnyExprUnrOp op e) = do
     e' <- evalAnyExpr e
     return $ evalUnrOp op e'
@@ -871,7 +861,6 @@ evalAnyExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone )) 
             (I a) -> fromIntegral a
             (Sh a) -> fromIntegral a
             (By a) -> fromIntegral a
-
     case Data.lookup id global of -- look for the array globally
          (Just (v, _)) -> listIndex v idx
          Nothing -> 
@@ -920,7 +909,28 @@ evalAnyExpr (AnyExprStructRef struct (VarRef id (VarRefAnyExprOne e) VarRefTyped
     case (struct, id) of
         (S m, id) -> listIndex (fromJust $ Data.lookup id m) idx
         _ -> error $ "struct " ++ show struct ++ " does not contain member " ++ show id
-
+evalAnyExpr (AnyExprRun ident args _) = do
+  ((threads, g), c@(tid, p, i, l, tstates, s)) <- get
+  let arg_lst = case args of
+        RunArgsNone -> []
+        (RunArgsOne es) -> do
+          map evalAnyExpr es
+  let tid' =  (+1) $ foldl max 0 (map fst (Map.toList tstates)) 
+  args' <- GHC.Base.sequence (arg_lst ++ [pure . I . fromIntegral $ tid'])
+  let ptype = fromJust $ find (\(Ptype _ id _ _ _ _) -> id == ident) p 
+  let (vars, seq) = case ptype of (Ptype _ _ vars _ _ seq) -> (vars, seq)
+  let dcls = case vars of 
+        PdeclListNone -> [(PIdent "_pid", Typename_int)]
+        (PdeclListOne dcl) -> dclIdents dcl ++ [(PIdent "_pid", Typename_int)]
+  let locals = setMem (zip args' dcls)
+  let threads' = Data.insert tid' locals threads
+  let tstates' = Data.insert tid' (Ready, Nothing, [seq]) tstates
+  put ((threads', g), (tid, p, i, l, tstates', s))
+  return (I 0)
+  where 
+    setMem m = setMem' m Map.empty
+    setMem' [] = id
+    setMem' ((val, (ident, typename)):xs) = Map.insert ident (val, typename) <$> setMem' xs
 
 
 updateVar :: VarRef -> Vars -> ProgState ()
@@ -969,7 +979,8 @@ updateVar (VarRef id (VarRefAnyExprOne e) (VarRefTypedefOne (VarRef elem VarRefA
     case struct of -- look for the array globally
       (S str) -> do
         let updateStruct = S $ Data.insert elem e' str
-        updateVar (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone) updateStruct  
+        updateVar (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone) updateStruct 
+
 -- Underneath this is bad stuff that I've bodged together to get this to work. Just ignore it.
 -- If you really have to know, it's fun type coercion stuff
 
@@ -1004,6 +1015,7 @@ listInsert list var idx = do
       return $ UIL ((map ((.&.) mval) (take (fromIntegral $ idx-1) vs)) ++ [v] ++ (map ((.&.) mval) (drop (fromIntegral idx) vs))) (max b1 b2) 
     (a, b) -> error $ "could not insert into list, type mismatch: " ++ show a ++ " " ++ show b 
 
+evalUnrOp :: UnrOp -> Vars -> Vars
 evalUnrOp UnrOp1 (By a) = By $ complement a
 evalUnrOp UnrOp2 (By a) = By $ - a
 evalUnrOp UnrOp3 (By 0) = By 1 
@@ -1031,7 +1043,6 @@ evalUnrOp UnrOp3 (Bs a) = Bs 0
 applyOp :: (Bits a1, Integral a1, Bits a2, Integral a2, Bits t1, Num t1, Bits t2, Num t2) => (t1 -> t2 -> t3) -> a1 -> a2 -> t3
 applyOp op a b = fromIntegral a `op` fromIntegral b 
 
-
 -- We applyOp and apply the correct type constructor (a byte added to an int should be an int)
 evalOpNum :: (Bits a, Integral a, Bits t1, Num t1, Bits t2, Num t2) => (t1 -> t2 -> a) -> Vars -> Vars -> Vars
 evalOpNum op (By a) (By b) = By . fromIntegral $ applyOp op a b
@@ -1051,7 +1062,6 @@ evalOpNum op (UI a bits) (Sh b) = UI ((fromIntegral $ applyOp op a b) .&. ((2^(m
 evalOpNum op (UI a bits) (I b) = I . fromIntegral $ applyOp op a b
 evalOpNum op (UI a bits) (UI b bits') = UI ( (fromIntegral $ applyOp op a b) .&. (2^(max bits bits')-1)) (max bits bits')
 evalOpNum op (Bs a) (Bs b) = Bs . fromIntegral $ applyOp op a b
-
 
 -- Same as above but with binary boolean operators
 evalOpBool :: (Bits t1, Num t1, Bits t2, Num t2) => (t1 -> t2 -> Bool) -> Vars -> Vars -> Vars
