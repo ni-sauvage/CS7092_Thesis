@@ -191,7 +191,6 @@ instance Print C.Abs.Function_def where
 
 instance Print C.Abs.Dec where
   prt i = \case
-    C.Abs.NoDeclarator declarationspecifiers -> prPrec i 0 (concatD [prt 0 declarationspecifiers, doc (showString ";")])
     C.Abs.Declarators declarationspecifiers initdeclarators -> prPrec i 0 (concatD [prt 0 declarationspecifiers, prt 0 initdeclarators, doc (showString ";")])
 
 instance Print [C.Abs.Dec] where
@@ -217,8 +216,8 @@ instance Print [C.Abs.Init_declarator] where
 
 instance Print C.Abs.Init_declarator where
   prt i = \case
-    C.Abs.OnlyDecl declarator -> prPrec i 0 (concatD [prt 0 declarator])
     C.Abs.InitDecl declarator initializer -> prPrec i 0 (concatD [prt 0 declarator, doc (showString "="), prt 0 initializer])
+    C.Abs.OnlyDecl declarator -> prPrec i 0 (concatD [prt 0 declarator])
 
 instance Print C.Abs.Type_specifier where
   prt i = \case
@@ -243,6 +242,7 @@ instance Print C.Abs.Type_specifier where
     C.Abs.Tevctx -> prPrec i 0 (concatD [doc (showString "RtemsModelEventsMgr_Context")])
     C.Abs.Tpsctx -> prPrec i 0 (concatD [doc (showString "RtemsModelProtoSem_Context")])
     C.Abs.Trtta -> prPrec i 0 (concatD [doc (showString "rtems_task_argument")])
+    C.Abs.Ttypedef cident -> prPrec i 0 (concatD [prt 0 cident])
 
 instance Print C.Abs.Storage_class_specifier where
   prt i = \case
@@ -431,15 +431,10 @@ instance Print C.Abs.Expression_stm where
     C.Abs.SexprOne -> prPrec i 0 (concatD [doc (showString ";")])
     C.Abs.SexprTwo exp -> prPrec i 0 (concatD [prt 0 exp, doc (showString ";")])
 
-instance Print C.Abs.DeclExprList where
-  prt i = \case
-    C.Abs.SdexprListNone -> prPrec i 0 (concatD [])
-    C.Abs.SdexprListOne declexpr declexprlist -> prPrec i 0 (concatD [prt 0 declexpr, doc (showString ";"), prt 0 declexprlist])
-
 instance Print C.Abs.DeclExpr where
   prt i = \case
-    C.Abs.SdExprOne exp -> prPrec i 0 (concatD [prt 0 exp])
     C.Abs.SdExprTwo dec -> prPrec i 0 (concatD [prt 0 dec])
+    C.Abs.SdExprOne exp -> prPrec i 0 (concatD [prt 0 exp])
 
 instance Print C.Abs.Selection_stm where
   prt i = \case

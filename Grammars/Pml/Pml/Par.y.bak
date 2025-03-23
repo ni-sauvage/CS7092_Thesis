@@ -440,7 +440,7 @@ Sequence :: { Pml.Abs.Sequence }
 Sequence
   : Step { Pml.Abs.SeqOne $1 }
   | Step Separator { Pml.Abs.SeqOneSep $1 $2 }
-  | Step Sequence { Pml.Abs.SeqNoStep $1 $2 }
+  | Step Sequence { Pml.Abs.SeqNoSep $1 $2 }
   | Step Separator Sequence { Pml.Abs.SeqCons $1 $2 $3 }
 
 UStmt :: { Pml.Abs.UStmt }
@@ -451,8 +451,8 @@ UStmt
 Step :: { Pml.Abs.Step }
 Step
   : Mtype { Pml.Abs.StepMType $1 }
-  | Stmt UStmt { Pml.Abs.StepStmt $1 $2 }
   | DeclList { Pml.Abs.StepDclList $1 }
+  | Stmt UStmt { Pml.Abs.StepStmt $1 $2 }
   | 'xr' VarRefList { Pml.Abs.StepXR $2 }
   | 'xs' VarRefList { Pml.Abs.StepXS $2 }
 

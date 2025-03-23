@@ -96,8 +96,8 @@ data Mequals = Meq
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data DeclList
-    = DclListOne Decl Separator
-    | DclListOneNoSep Decl
+    = DclListOneNoSep Decl
+    | DclListOne Decl Separator
     | DclListCons Decl Separator DeclList
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
@@ -139,8 +139,8 @@ data UStmt = UStmtNone | UStmtOne Stmt
 
 data Step
     = StepMType Mtype
-    | StepStmt Stmt UStmt
     | StepDclList DeclList
+    | StepStmt Stmt UStmt
     | StepXR VarRefList
     | StepXS VarRefList
   deriving (C.Eq, C.Ord, C.Show, C.Read)

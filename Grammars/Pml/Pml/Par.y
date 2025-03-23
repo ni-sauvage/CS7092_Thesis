@@ -396,8 +396,8 @@ ListPIdent
 
 DeclList :: { Pml.Abs.DeclList }
 DeclList
-  : Decl Separator { Pml.Abs.DclListOne $1 $2 }
-  | Decl { Pml.Abs.DclListOneNoSep $1 }
+  : Decl { Pml.Abs.DclListOneNoSep $1 }
+  | Decl Separator { Pml.Abs.DclListOne $1 $2 }
   | Decl Separator DeclList { Pml.Abs.DclListCons $1 $2 $3 }
 
 Decl :: { Pml.Abs.Decl }
@@ -451,8 +451,8 @@ UStmt
 Step :: { Pml.Abs.Step }
 Step
   : Mtype { Pml.Abs.StepMType $1 }
-  | Stmt UStmt { Pml.Abs.StepStmt $1 $2 }
   | DeclList { Pml.Abs.StepDclList $1 }
+  | Stmt UStmt { Pml.Abs.StepStmt $1 $2 }
   | 'xr' VarRefList { Pml.Abs.StepXR $2 }
   | 'xs' VarRefList { Pml.Abs.StepXS $2 }
 

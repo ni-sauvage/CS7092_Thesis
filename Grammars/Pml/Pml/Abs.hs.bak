@@ -130,7 +130,7 @@ data Enabler = Enabler Expr
 data Sequence
     = SeqOne Step
     | SeqOneSep Step Separator
-    | SeqNoStep Step Sequence
+    | SeqNoSep Step Sequence
     | SeqCons Step Separator Sequence
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
@@ -139,8 +139,8 @@ data UStmt = UStmtNone | UStmtOne Stmt
 
 data Step
     = StepMType Mtype
-    | StepStmt Stmt UStmt
     | StepDclList DeclList
+    | StepStmt Stmt UStmt
     | StepXR VarRefList
     | StepXS VarRefList
   deriving (C.Eq, C.Ord, C.Show, C.Read)

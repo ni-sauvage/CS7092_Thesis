@@ -271,8 +271,8 @@ instance Print [Pml.Abs.PIdent] where
 
 instance Print Pml.Abs.DeclList where
   prt i = \case
-    Pml.Abs.DclListOne decl separator -> prPrec i 0 (concatD [prt 0 decl, prt 0 separator])
     Pml.Abs.DclListOneNoSep decl -> prPrec i 0 (concatD [prt 0 decl])
+    Pml.Abs.DclListOne decl separator -> prPrec i 0 (concatD [prt 0 decl, prt 0 separator])
     Pml.Abs.DclListCons decl separator decllist -> prPrec i 0 (concatD [prt 0 decl, prt 0 separator, prt 0 decllist])
 
 instance Print Pml.Abs.Decl where
@@ -331,8 +331,8 @@ instance Print Pml.Abs.UStmt where
 instance Print Pml.Abs.Step where
   prt i = \case
     Pml.Abs.StepMType mtype -> prPrec i 0 (concatD [prt 0 mtype])
-    Pml.Abs.StepStmt stmt ustmt -> prPrec i 0 (concatD [prt 0 stmt, prt 0 ustmt])
     Pml.Abs.StepDclList decllist -> prPrec i 0 (concatD [prt 0 decllist])
+    Pml.Abs.StepStmt stmt ustmt -> prPrec i 0 (concatD [prt 0 stmt, prt 0 ustmt])
     Pml.Abs.StepXR varreflist -> prPrec i 0 (concatD [doc (showString "xr"), prt 0 varreflist])
     Pml.Abs.StepXS varreflist -> prPrec i 0 (concatD [doc (showString "xs"), prt 0 varreflist])
 

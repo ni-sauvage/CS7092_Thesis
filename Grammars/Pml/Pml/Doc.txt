@@ -123,8 +123,8 @@ All other symbols are terminals.
   |  |  **|**  | ``=``
   | //[PIdent]// | -> | //PIdent//
   |  |  **|**  | //PIdent// ``,`` //[PIdent]//
-  | //DeclList// | -> | //Decl// //Separator//
-  |  |  **|**  | //Decl//
+  | //DeclList// | -> | //Decl//
+  |  |  **|**  | //Decl// //Separator//
   |  |  **|**  | //Decl// //Separator// //DeclList//
   | //Decl// | -> | //DeclVisible// //Typename// //[Ivar]//
   |  |  **|**  | //DeclVisible// //UnsignedDecl//
@@ -147,8 +147,8 @@ All other symbols are terminals.
   | //UStmt// | -> | **eps**
   |  |  **|**  | ``unless`` //Stmt//
   | //Step// | -> | //Mtype//
-  |  |  **|**  | //Stmt// //UStmt//
   |  |  **|**  | //DeclList//
+  |  |  **|**  | //Stmt// //UStmt//
   |  |  **|**  | ``xr`` //VarRefList//
   |  |  **|**  | ``xs`` //VarRefList//
   | //VarRefList// | -> | //VarRef//

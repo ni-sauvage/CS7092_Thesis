@@ -51,8 +51,8 @@ Meq. Mequals ::= "=";
 (:[]). [PIdent] ::= PIdent;
 (:). [PIdent] ::= PIdent "," [PIdent];
 
-DclListOne. DeclList ::= Decl Separator;
 DclListOneNoSep. DeclList ::= Decl;
+DclListOne. DeclList ::= Decl Separator;
 DclListCons. DeclList ::= Decl Separator DeclList;
 
 DclOne. Decl ::= DeclVisible Typename [Ivar];
@@ -85,8 +85,8 @@ UStmtNone. UStmt ::= ;
 UStmtOne. UStmt ::= "unless" Stmt;
 
 StepMType. Step ::= Mtype;
-StepStmt. Step ::= Stmt UStmt;
 StepDclList. Step ::= DeclList;
+StepStmt. Step ::= Stmt UStmt;
 StepXR. Step ::= "xr" VarRefList;
 StepXS. Step ::= "xs" VarRefList;
 

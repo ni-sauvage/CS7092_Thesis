@@ -128,8 +128,8 @@ All other symbols are terminals.
   |  |  **|**  | //Decl// //Separator// //DeclList//
   | //Decl// | -> | //DeclVisible// //Typename// //[Ivar]//
   |  |  **|**  | //DeclVisible// //UnsignedDecl//
-  | //[Ivar]// | -> | //Ivar// ``,``
-  |  |  **|**  | //Ivar// ``,`` //[Ivar]//
+  | //[Ivar]// | -> | //Ivar// ``,`` //[Ivar]//
+  |  |  **|**  | //Ivar//
   | //DeclVisible// | -> | **eps**
   |  |  **|**  | //Visible//
   | //UnsignedDecl// | -> | ``unsigned`` //PIdent// ``:`` //Const// //UDclAssign//
@@ -147,8 +147,8 @@ All other symbols are terminals.
   | //UStmt// | -> | **eps**
   |  |  **|**  | ``unless`` //Stmt//
   | //Step// | -> | //Mtype//
-  |  |  **|**  | //Stmt// //UStmt//
   |  |  **|**  | //DeclList//
+  |  |  **|**  | //Stmt// //UStmt//
   |  |  **|**  | ``xr`` //VarRefList//
   |  |  **|**  | ``xs`` //VarRefList//
   | //VarRefList// | -> | //VarRef//

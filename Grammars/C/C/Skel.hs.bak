@@ -93,7 +93,6 @@ transFunction_def x = case x of
 
 transDec :: C.Abs.Dec -> Result
 transDec x = case x of
-  C.Abs.NoDeclarator declarationspecifiers -> failure x
   C.Abs.Declarators declarationspecifiers initdeclarators -> failure x
 
 transDeclaration_specifier :: C.Abs.Declaration_specifier -> Result
@@ -104,8 +103,8 @@ transDeclaration_specifier x = case x of
 
 transInit_declarator :: C.Abs.Init_declarator -> Result
 transInit_declarator x = case x of
-  C.Abs.OnlyDecl declarator -> failure x
   C.Abs.InitDecl declarator initializer -> failure x
+  C.Abs.OnlyDecl declarator -> failure x
 
 transType_specifier :: C.Abs.Type_specifier -> Result
 transType_specifier x = case x of
@@ -130,6 +129,7 @@ transType_specifier x = case x of
   C.Abs.Tevctx -> failure x
   C.Abs.Tpsctx -> failure x
   C.Abs.Trtta -> failure x
+  C.Abs.Ttypedef cident -> failure x
 
 transStorage_class_specifier :: C.Abs.Storage_class_specifier -> Result
 transStorage_class_specifier x = case x of
@@ -288,15 +288,10 @@ transExpression_stm x = case x of
   C.Abs.SexprOne -> failure x
   C.Abs.SexprTwo exp -> failure x
 
-transDeclExprList :: C.Abs.DeclExprList -> Result
-transDeclExprList x = case x of
-  C.Abs.SdexprListNone -> failure x
-  C.Abs.SdexprListOne declexpr declexprlist -> failure x
-
 transDeclExpr :: C.Abs.DeclExpr -> Result
 transDeclExpr x = case x of
-  C.Abs.SdExprOne exp -> failure x
   C.Abs.SdExprTwo dec -> failure x
+  C.Abs.SdExprOne exp -> failure x
 
 transSelection_stm :: C.Abs.Selection_stm -> Result
 transSelection_stm x = case x of

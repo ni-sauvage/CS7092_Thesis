@@ -176,8 +176,8 @@ Grammar
 	Mequals -> '='                                     (131)
 	ListPIdent -> PIdent                               (132)
 	ListPIdent -> PIdent ',' ListPIdent                (133)
-	DeclList -> Decl Separator                         (134)
-	DeclList -> Decl                                   (135)
+	DeclList -> Decl                                   (134)
+	DeclList -> Decl Separator                         (135)
 	DeclList -> Decl Separator DeclList                (136)
 	Decl -> DeclVisible Typename ListIvar              (137)
 	Decl -> DeclVisible UnsignedDecl                   (138)
@@ -200,8 +200,8 @@ Grammar
 	UStmt ->                                           (155)
 	UStmt -> 'unless' Stmt                             (156)
 	Step -> Mtype                                      (157)
-	Step -> Stmt UStmt                                 (158)
-	Step -> DeclList                                   (159)
+	Step -> DeclList                                   (158)
+	Step -> Stmt UStmt                                 (159)
 	Step -> 'xr' VarRefList                            (160)
 	Step -> 'xs' VarRefList                            (161)
 	VarRefList -> VarRef                               (162)
@@ -6427,133 +6427,133 @@ State 208
 
 State 209
 
-	Step -> DeclList .                                  (rule 159)
+	Step -> DeclList .                                  (rule 158)
 
-	'!'            reduce using rule 159
-	'('            reduce using rule 159
-	')'            reduce using rule 159
-	'-'            reduce using rule 159
-	'->'           reduce using rule 159
-	'::'           reduce using rule 159
-	';'            reduce using rule 159
-	'assert'       reduce using rule 159
-	'atomic'       reduce using rule 159
-	'bit'          reduce using rule 159
-	'bool'         reduce using rule 159
-	'break'        reduce using rule 159
-	'byte'         reduce using rule 159
-	'chan'         reduce using rule 159
-	'd_step'       reduce using rule 159
-	'do'           reduce using rule 159
-	'else'         reduce using rule 159
-	'empty'        reduce using rule 159
-	'enabled'      reduce using rule 159
-	'false'        reduce using rule 159
-	'fi'           reduce using rule 159
-	'for'          reduce using rule 159
-	'full'         reduce using rule 159
-	'get_priority' reduce using rule 159
-	'goto'         reduce using rule 159
-	'hidden'       reduce using rule 159
-	'if'           reduce using rule 159
-	'int'          reduce using rule 159
-	'len'          reduce using rule 159
-	'mtype'        reduce using rule 159
-	'np_'          reduce using rule 159
-	'od'           reduce using rule 159
-	'pc_value'     reduce using rule 159
-	'print'        reduce using rule 159
-	'printf'       reduce using rule 159
-	'printm'       reduce using rule 159
-	'run'          reduce using rule 159
-	'select'       reduce using rule 159
-	'set_priority' reduce using rule 159
-	'short'        reduce using rule 159
-	'show'         reduce using rule 159
-	'skip'         reduce using rule 159
-	'timeout'      reduce using rule 159
-	'true'         reduce using rule 159
-	'unsigned'     reduce using rule 159
-	'xr'           reduce using rule 159
-	'xs'           reduce using rule 159
-	'{'            reduce using rule 159
-	'}'            reduce using rule 159
-	'~'            reduce using rule 159
-	L_integ        reduce using rule 159
-	L_PIdent       reduce using rule 159
-	%eof           reduce using rule 159
+	'!'            reduce using rule 158
+	'('            reduce using rule 158
+	')'            reduce using rule 158
+	'-'            reduce using rule 158
+	'->'           reduce using rule 158
+	'::'           reduce using rule 158
+	';'            reduce using rule 158
+	'assert'       reduce using rule 158
+	'atomic'       reduce using rule 158
+	'bit'          reduce using rule 158
+	'bool'         reduce using rule 158
+	'break'        reduce using rule 158
+	'byte'         reduce using rule 158
+	'chan'         reduce using rule 158
+	'd_step'       reduce using rule 158
+	'do'           reduce using rule 158
+	'else'         reduce using rule 158
+	'empty'        reduce using rule 158
+	'enabled'      reduce using rule 158
+	'false'        reduce using rule 158
+	'fi'           reduce using rule 158
+	'for'          reduce using rule 158
+	'full'         reduce using rule 158
+	'get_priority' reduce using rule 158
+	'goto'         reduce using rule 158
+	'hidden'       reduce using rule 158
+	'if'           reduce using rule 158
+	'int'          reduce using rule 158
+	'len'          reduce using rule 158
+	'mtype'        reduce using rule 158
+	'np_'          reduce using rule 158
+	'od'           reduce using rule 158
+	'pc_value'     reduce using rule 158
+	'print'        reduce using rule 158
+	'printf'       reduce using rule 158
+	'printm'       reduce using rule 158
+	'run'          reduce using rule 158
+	'select'       reduce using rule 158
+	'set_priority' reduce using rule 158
+	'short'        reduce using rule 158
+	'show'         reduce using rule 158
+	'skip'         reduce using rule 158
+	'timeout'      reduce using rule 158
+	'true'         reduce using rule 158
+	'unsigned'     reduce using rule 158
+	'xr'           reduce using rule 158
+	'xs'           reduce using rule 158
+	'{'            reduce using rule 158
+	'}'            reduce using rule 158
+	'~'            reduce using rule 158
+	L_integ        reduce using rule 158
+	L_PIdent       reduce using rule 158
+	%eof           reduce using rule 158
 
 
 State 210
 
-	DeclList -> Decl . Separator                        (rule 134)
-	DeclList -> Decl .                                  (rule 135)
+	DeclList -> Decl .                                  (rule 134)
+	DeclList -> Decl . Separator                        (rule 135)
 	DeclList -> Decl . Separator DeclList               (rule 136)
 
-	'!'            reduce using rule 135
-	'('            reduce using rule 135
-	')'            reduce using rule 135
-	'-'            reduce using rule 135
+	'!'            reduce using rule 134
+	'('            reduce using rule 134
+	')'            reduce using rule 134
+	'-'            reduce using rule 134
 	'->'           shift, and enter state 282
-			(reduce using rule 135)
+			(reduce using rule 134)
 
-	'::'           reduce using rule 135
+	'::'           reduce using rule 134
 	';'            shift, and enter state 283
-			(reduce using rule 135)
+			(reduce using rule 134)
 
-	'active'       reduce using rule 135
-	'assert'       reduce using rule 135
-	'atomic'       reduce using rule 135
-	'bit'          reduce using rule 135
-	'bool'         reduce using rule 135
-	'break'        reduce using rule 135
-	'byte'         reduce using rule 135
-	'chan'         reduce using rule 135
-	'd_step'       reduce using rule 135
-	'do'           reduce using rule 135
-	'else'         reduce using rule 135
-	'empty'        reduce using rule 135
-	'enabled'      reduce using rule 135
-	'false'        reduce using rule 135
-	'fi'           reduce using rule 135
-	'for'          reduce using rule 135
-	'full'         reduce using rule 135
-	'get_priority' reduce using rule 135
-	'goto'         reduce using rule 135
-	'hidden'       reduce using rule 135
-	'if'           reduce using rule 135
-	'init'         reduce using rule 135
-	'inline'       reduce using rule 135
-	'int'          reduce using rule 135
-	'len'          reduce using rule 135
-	'mtype'        reduce using rule 135
-	'never'        reduce using rule 135
-	'np_'          reduce using rule 135
-	'od'           reduce using rule 135
-	'pc_value'     reduce using rule 135
-	'print'        reduce using rule 135
-	'printf'       reduce using rule 135
-	'printm'       reduce using rule 135
-	'proctype'     reduce using rule 135
-	'run'          reduce using rule 135
-	'select'       reduce using rule 135
-	'set_priority' reduce using rule 135
-	'short'        reduce using rule 135
-	'show'         reduce using rule 135
-	'skip'         reduce using rule 135
-	'timeout'      reduce using rule 135
-	'trace'        reduce using rule 135
-	'true'         reduce using rule 135
-	'typedef'      reduce using rule 135
-	'unsigned'     reduce using rule 135
-	'xr'           reduce using rule 135
-	'xs'           reduce using rule 135
-	'{'            reduce using rule 135
-	'}'            reduce using rule 135
-	'~'            reduce using rule 135
-	L_integ        reduce using rule 135
-	L_PIdent       reduce using rule 135
-	%eof           reduce using rule 135
+	'active'       reduce using rule 134
+	'assert'       reduce using rule 134
+	'atomic'       reduce using rule 134
+	'bit'          reduce using rule 134
+	'bool'         reduce using rule 134
+	'break'        reduce using rule 134
+	'byte'         reduce using rule 134
+	'chan'         reduce using rule 134
+	'd_step'       reduce using rule 134
+	'do'           reduce using rule 134
+	'else'         reduce using rule 134
+	'empty'        reduce using rule 134
+	'enabled'      reduce using rule 134
+	'false'        reduce using rule 134
+	'fi'           reduce using rule 134
+	'for'          reduce using rule 134
+	'full'         reduce using rule 134
+	'get_priority' reduce using rule 134
+	'goto'         reduce using rule 134
+	'hidden'       reduce using rule 134
+	'if'           reduce using rule 134
+	'init'         reduce using rule 134
+	'inline'       reduce using rule 134
+	'int'          reduce using rule 134
+	'len'          reduce using rule 134
+	'mtype'        reduce using rule 134
+	'never'        reduce using rule 134
+	'np_'          reduce using rule 134
+	'od'           reduce using rule 134
+	'pc_value'     reduce using rule 134
+	'print'        reduce using rule 134
+	'printf'       reduce using rule 134
+	'printm'       reduce using rule 134
+	'proctype'     reduce using rule 134
+	'run'          reduce using rule 134
+	'select'       reduce using rule 134
+	'set_priority' reduce using rule 134
+	'short'        reduce using rule 134
+	'show'         reduce using rule 134
+	'skip'         reduce using rule 134
+	'timeout'      reduce using rule 134
+	'trace'        reduce using rule 134
+	'true'         reduce using rule 134
+	'typedef'      reduce using rule 134
+	'unsigned'     reduce using rule 134
+	'xr'           reduce using rule 134
+	'xs'           reduce using rule 134
+	'{'            reduce using rule 134
+	'}'            reduce using rule 134
+	'~'            reduce using rule 134
+	L_integ        reduce using rule 134
+	L_PIdent       reduce using rule 134
+	%eof           reduce using rule 134
 
 	Separator      goto state 312
 
@@ -6585,7 +6585,7 @@ State 212
 
 State 213
 
-	Step -> Stmt . UStmt                                (rule 158)
+	Step -> Stmt . UStmt                                (rule 159)
 
 	'!'            reduce using rule 155
 	'('            reduce using rule 155
@@ -8584,61 +8584,61 @@ State 308
 
 State 309
 
-	Step -> Stmt UStmt .                                (rule 158)
+	Step -> Stmt UStmt .                                (rule 159)
 
-	'!'            reduce using rule 158
-	'('            reduce using rule 158
-	')'            reduce using rule 158
-	'-'            reduce using rule 158
-	'->'           reduce using rule 158
-	'::'           reduce using rule 158
-	';'            reduce using rule 158
-	'assert'       reduce using rule 158
-	'atomic'       reduce using rule 158
-	'bit'          reduce using rule 158
-	'bool'         reduce using rule 158
-	'break'        reduce using rule 158
-	'byte'         reduce using rule 158
-	'chan'         reduce using rule 158
-	'd_step'       reduce using rule 158
-	'do'           reduce using rule 158
-	'else'         reduce using rule 158
-	'empty'        reduce using rule 158
-	'enabled'      reduce using rule 158
-	'false'        reduce using rule 158
-	'fi'           reduce using rule 158
-	'for'          reduce using rule 158
-	'full'         reduce using rule 158
-	'get_priority' reduce using rule 158
-	'goto'         reduce using rule 158
-	'hidden'       reduce using rule 158
-	'if'           reduce using rule 158
-	'int'          reduce using rule 158
-	'len'          reduce using rule 158
-	'mtype'        reduce using rule 158
-	'np_'          reduce using rule 158
-	'od'           reduce using rule 158
-	'pc_value'     reduce using rule 158
-	'print'        reduce using rule 158
-	'printf'       reduce using rule 158
-	'printm'       reduce using rule 158
-	'run'          reduce using rule 158
-	'select'       reduce using rule 158
-	'set_priority' reduce using rule 158
-	'short'        reduce using rule 158
-	'show'         reduce using rule 158
-	'skip'         reduce using rule 158
-	'timeout'      reduce using rule 158
-	'true'         reduce using rule 158
-	'unsigned'     reduce using rule 158
-	'xr'           reduce using rule 158
-	'xs'           reduce using rule 158
-	'{'            reduce using rule 158
-	'}'            reduce using rule 158
-	'~'            reduce using rule 158
-	L_integ        reduce using rule 158
-	L_PIdent       reduce using rule 158
-	%eof           reduce using rule 158
+	'!'            reduce using rule 159
+	'('            reduce using rule 159
+	')'            reduce using rule 159
+	'-'            reduce using rule 159
+	'->'           reduce using rule 159
+	'::'           reduce using rule 159
+	';'            reduce using rule 159
+	'assert'       reduce using rule 159
+	'atomic'       reduce using rule 159
+	'bit'          reduce using rule 159
+	'bool'         reduce using rule 159
+	'break'        reduce using rule 159
+	'byte'         reduce using rule 159
+	'chan'         reduce using rule 159
+	'd_step'       reduce using rule 159
+	'do'           reduce using rule 159
+	'else'         reduce using rule 159
+	'empty'        reduce using rule 159
+	'enabled'      reduce using rule 159
+	'false'        reduce using rule 159
+	'fi'           reduce using rule 159
+	'for'          reduce using rule 159
+	'full'         reduce using rule 159
+	'get_priority' reduce using rule 159
+	'goto'         reduce using rule 159
+	'hidden'       reduce using rule 159
+	'if'           reduce using rule 159
+	'int'          reduce using rule 159
+	'len'          reduce using rule 159
+	'mtype'        reduce using rule 159
+	'np_'          reduce using rule 159
+	'od'           reduce using rule 159
+	'pc_value'     reduce using rule 159
+	'print'        reduce using rule 159
+	'printf'       reduce using rule 159
+	'printm'       reduce using rule 159
+	'run'          reduce using rule 159
+	'select'       reduce using rule 159
+	'set_priority' reduce using rule 159
+	'short'        reduce using rule 159
+	'show'         reduce using rule 159
+	'skip'         reduce using rule 159
+	'timeout'      reduce using rule 159
+	'true'         reduce using rule 159
+	'unsigned'     reduce using rule 159
+	'xr'           reduce using rule 159
+	'xs'           reduce using rule 159
+	'{'            reduce using rule 159
+	'}'            reduce using rule 159
+	'~'            reduce using rule 159
+	L_integ        reduce using rule 159
+	L_PIdent       reduce using rule 159
+	%eof           reduce using rule 159
 
 
 State 310
@@ -8719,91 +8719,91 @@ State 311
 
 State 312
 
-	DeclList -> Decl Separator .                        (rule 134)
+	DeclList -> Decl Separator .                        (rule 135)
 	DeclList -> Decl Separator . DeclList               (rule 136)
 
-	'!'            reduce using rule 134
-	'('            reduce using rule 134
-	')'            reduce using rule 134
-	'-'            reduce using rule 134
-	'->'           reduce using rule 134
-	'::'           reduce using rule 134
-	';'            reduce using rule 134
-	'active'       reduce using rule 134
-	'assert'       reduce using rule 134
-	'atomic'       reduce using rule 134
+	'!'            reduce using rule 135
+	'('            reduce using rule 135
+	')'            reduce using rule 135
+	'-'            reduce using rule 135
+	'->'           reduce using rule 135
+	'::'           reduce using rule 135
+	';'            reduce using rule 135
+	'active'       reduce using rule 135
+	'assert'       reduce using rule 135
+	'atomic'       reduce using rule 135
 	'bit'          reduce using rule 141
-			(reduce using rule 134)
+			(reduce using rule 135)
 
 	'bool'         reduce using rule 141
-			(reduce using rule 134)
+			(reduce using rule 135)
 
-	'break'        reduce using rule 134
+	'break'        reduce using rule 135
 	'byte'         reduce using rule 141
-			(reduce using rule 134)
+			(reduce using rule 135)
 
 	'chan'         reduce using rule 141
-			(reduce using rule 134)
+			(reduce using rule 135)
 
-	'd_step'       reduce using rule 134
-	'do'           reduce using rule 134
-	'else'         reduce using rule 134
-	'empty'        reduce using rule 134
-	'enabled'      reduce using rule 134
-	'false'        reduce using rule 134
-	'fi'           reduce using rule 134
-	'for'          reduce using rule 134
-	'full'         reduce using rule 134
-	'get_priority' reduce using rule 134
-	'goto'         reduce using rule 134
+	'd_step'       reduce using rule 135
+	'do'           reduce using rule 135
+	'else'         reduce using rule 135
+	'empty'        reduce using rule 135
+	'enabled'      reduce using rule 135
+	'false'        reduce using rule 135
+	'fi'           reduce using rule 135
+	'for'          reduce using rule 135
+	'full'         reduce using rule 135
+	'get_priority' reduce using rule 135
+	'goto'         reduce using rule 135
 	'hidden'       shift, and enter state 214
-			(reduce using rule 134)
+			(reduce using rule 135)
 
-	'if'           reduce using rule 134
-	'init'         reduce using rule 134
-	'inline'       reduce using rule 134
+	'if'           reduce using rule 135
+	'init'         reduce using rule 135
+	'inline'       reduce using rule 135
 	'int'          reduce using rule 141
-			(reduce using rule 134)
+			(reduce using rule 135)
 
-	'len'          reduce using rule 134
+	'len'          reduce using rule 135
 	'mtype'        reduce using rule 141
-			(reduce using rule 134)
+			(reduce using rule 135)
 
-	'never'        reduce using rule 134
-	'np_'          reduce using rule 134
-	'od'           reduce using rule 134
-	'pc_value'     reduce using rule 134
-	'print'        reduce using rule 134
-	'printf'       reduce using rule 134
-	'printm'       reduce using rule 134
-	'proctype'     reduce using rule 134
-	'run'          reduce using rule 134
-	'select'       reduce using rule 134
-	'set_priority' reduce using rule 134
+	'never'        reduce using rule 135
+	'np_'          reduce using rule 135
+	'od'           reduce using rule 135
+	'pc_value'     reduce using rule 135
+	'print'        reduce using rule 135
+	'printf'       reduce using rule 135
+	'printm'       reduce using rule 135
+	'proctype'     reduce using rule 135
+	'run'          reduce using rule 135
+	'select'       reduce using rule 135
+	'set_priority' reduce using rule 135
 	'short'        reduce using rule 141
-			(reduce using rule 134)
+			(reduce using rule 135)
 
 	'show'         shift, and enter state 216
-			(reduce using rule 134)
+			(reduce using rule 135)
 
-	'skip'         reduce using rule 134
-	'timeout'      reduce using rule 134
-	'trace'        reduce using rule 134
-	'true'         reduce using rule 134
-	'typedef'      reduce using rule 134
+	'skip'         reduce using rule 135
+	'timeout'      reduce using rule 135
+	'trace'        reduce using rule 135
+	'true'         reduce using rule 135
+	'typedef'      reduce using rule 135
 	'unsigned'     reduce using rule 141
-			(reduce using rule 134)
+			(reduce using rule 135)
 
-	'xr'           reduce using rule 134
-	'xs'           reduce using rule 134
-	'{'            reduce using rule 134
-	'}'            reduce using rule 134
-	'~'            reduce using rule 134
-	L_integ        reduce using rule 134
+	'xr'           reduce using rule 135
+	'xs'           reduce using rule 135
+	'{'            reduce using rule 135
+	'}'            reduce using rule 135
+	'~'            reduce using rule 135
+	L_integ        reduce using rule 135
 	L_PIdent       reduce using rule 141
-			(reduce using rule 134)
+			(reduce using rule 135)
 
-	%eof           reduce using rule 134
+	%eof           reduce using rule 135
 
 	Visible        goto state 207
 	DeclList       goto state 449

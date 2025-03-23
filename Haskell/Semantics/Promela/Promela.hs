@@ -16,6 +16,7 @@ import Data.Maybe (fromJust)
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.List (elemIndex, find, partition)
 import System.Random (randomRIO)
+import qualified Control.Monad
 
 data Visible = Visible_hidden | Visible_show
   deriving (C.Eq, C.Ord, C.Show, C.Read)
@@ -328,7 +329,9 @@ type Mem = Map.Map PIdent (Vars, Typename) -- Memory is modelled as a mapping fr
 
 runProgState :: [Pml.Abs.Module] -> IO ()
 runProgState prog = do
-  st <- runWriterT $ (runStateT $ runProg prog) ((Map.fromList [(0, Map.empty)], Map.empty), (0::Integer, [], [], Map.empty, Map.fromList [(0, (Ready, Nothing, []))], Map.empty))
+  st <- runWriterT $ (runStateT $ runProg prog) 
+    ((Map.fromList [(0, Map.empty)], Map.fromList [(PIdent "_nr_pr", (I 1, Typename_int))]), 
+    (0::Integer, [], [], Map.empty, Map.fromList [(0, (Ready, Nothing, []))], Map.empty))
   case st of 
     (((), ((threads, globals), (tid, p, i, l, tstates, structs))), log) -> putStr $ 
       "Threads: " ++ show threads ++ "\n" ++
@@ -423,8 +426,8 @@ evalModule (Mmtype m) = do
 evalModule (Mutype (Utp ident dl)) = do
   struct <- createStruct dl Map.empty
   (pm, (tid, ps, is, gt, tstate, structs)) <- get
-  let update = Data.insert ident (S struct) structs
-  put (pm, (tid, ps, is, gt, tstate, structs))
+  let structs' = Data.insert ident (S struct) structs
+  put (pm, (tid, ps, is, gt, tstate, structs'))
 evalModule (Minline i) = do 
   (pm, (tid, ps, is, gt, tstate, structs)) <- get
   put (pm, (tid, ps, i:is, gt, tstate, structs))
@@ -463,7 +466,7 @@ execProgramme = do
 
 updateBlocked :: Integer -> ProgState ()
 updateBlocked tid = do
-  (pm, c@(tid, p, i, l, tstates, s)) <- get
+  (pm@(threads, globals), c@(tid, p, i, l, tstates, s)) <- get
   let (state, seq, rm) = fromJust $ Data.lookup tid tstates
   case seq of 
     Nothing -> 
@@ -474,8 +477,12 @@ updateBlocked tid = do
           let tstates' = Data.insert tid (tstate, seq, (x:xs)) tstates
           put (pm, (tid, p, i, l, tstates', s))
         [] -> do 
-          let tstates' = Data.insert tid (Zombie, Nothing, []) tstates
-          put (pm, (tid, p, i, l, tstates', s))
+          Control.Monad.when (state /= Zombie) 
+            (do 
+              let tstates' = Data.insert tid (Zombie, Nothing, []) tstates
+              let (I a, _) = fromJust $ Data.lookup (PIdent "_nr_pr") globals
+              let globals' = Data.insert (PIdent "_nr_pr") (I (a-1), Typename_int) globals
+              put ((threads, globals'), (tid, p, i, l, tstates', s)))
     (Just x) -> do
       ex <- executableSeq x
       let ready = if ex then Ready else Blocked
@@ -484,7 +491,7 @@ updateBlocked tid = do
 
 execThread :: ProgState ()
 execThread = do
-  (pm, c@(tid, p, i, l, tstates, s)) <- get
+  (pm@(threads, globals), c@(tid, p, i, l, tstates, s)) <- get
   let (st, seq, rm) = fromJust $ Data.lookup tid tstates
   case seq of 
     Nothing -> case rm of 
@@ -499,7 +506,7 @@ execThread = do
 
 execThreadAtm :: ProgState ()
 execThreadAtm = do
-  (pm, c@(tid, p, i, l, tstates, s)) <- get
+  (pm@(threads, globals), c@(tid, p, i, l, tstates, s)) <- get
   let (st, seq, rm) = fromJust $ Data.lookup tid tstates
   case seq of 
     Nothing -> case rm of 
@@ -508,8 +515,8 @@ execThreadAtm = do
         put (pm, (tid, p, i, l, tstates, s))
         evalSequenceAtm x
       [] -> do
-        let tstates' = Data.insert tid (Zombie, Nothing, [])
-        put (pm, (tid, p, i, l, tstates, s))
+        let tstates' = Data.insert tid (Zombie, Nothing, []) tstates
+        put (pm, (tid, p, i, l, tstates', s))
     (Just seq) -> evalSequenceAtm seq
 
 evalSequenceAtm :: Sequence -> ProgState ()
@@ -919,13 +926,15 @@ evalAnyExpr (AnyExprRun ident args _) = do
   args' <- GHC.Base.sequence (arg_lst ++ [pure . I . fromIntegral $ tid'])
   let ptype = fromJust $ find (\(Ptype _ id _ _ _ _) -> id == ident) p 
   let (vars, seq) = case ptype of (Ptype _ _ vars _ _ seq) -> (vars, seq)
+  let (I pr, _) = fromJust $ Data.lookup (PIdent "_nr_pr") g
+  let globals' = Data.insert (PIdent "_nr_pr") (I (pr+1), Typename_int) g
   let dcls = case vars of 
         PdeclListNone -> [(PIdent "_pid", Typename_int)]
         (PdeclListOne dcl) -> dclIdents dcl ++ [(PIdent "_pid", Typename_int)]
   let locals = setMem (zip args' dcls)
   let threads' = Data.insert tid' locals threads
   let tstates' = Data.insert tid' (Ready, Nothing, [seq]) tstates
-  put ((threads', g), (tid, p, i, l, tstates', s))
+  put ((threads', globals'), (tid, p, i, l, tstates', s))
   return (I 0)
   where 
     setMem m = setMem' m Map.empty
@@ -946,28 +955,43 @@ updateVar (VarRef id VarRefAnyExprNone VarRefTypedefNone) val = do -- Simplest c
                   let threads' = Data.insert tid locals' threads
                   put ((threads', global), cm)
                 Nothing -> error $ "Variable " ++ show id ++ "does not exist" -- then cry and give up
+updateVar (VarRef id VarRefAnyExprNone (VarRefTypedefOne vr)) val = do
+  ((threads, global), cm@(tid, _, _, _, _, _)) <- get
+  case Data.lookup id global of -- Check globals
+       (Just (v, typename)) -> do
+        val' <- updateStruct vr v val
+        put ((threads, Data.insert id (val', typename) global), cm)
+       Nothing -> do
+          let locals = fromJust $ Data.lookup tid threads
+          case Data.lookup id locals of -- then check locals
+              (Just (v, typename)) -> do 
+                val' <- updateStruct vr v val
+                let locals' = Data.insert id (val', typename) locals
+                let threads' = Data.insert tid locals' threads
+                put ((threads', global), cm)
+              Nothing -> error $ "Variable " ++ show id ++ "does not exist" -- then cry and give up
 updateVar (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone) val = do
-    ((threads, global), cm@(tid, _, _, _, _, _)) <- get
-    e' <- evalAnyExpr e -- so evaluate the array index
-    let idx :: Int = case e' of -- cast to an int
-            (UI a b) -> fromIntegral a
-            (I a) -> fromIntegral a
-            (Sh a) -> fromIntegral a
-            (By a) -> fromIntegral a
-    case Data.lookup id global of -- look for the array globally
-         (Just (v, typename)) -> do 
-          list' <- listInsert v e' idx
-          put ((threads, Data.insert id (list', typename) global), cm)
-         Nothing -> do
-            let locals = fromJust $ Data.lookup tid threads
-            case Data.lookup id locals of -- then check locals
-                (Just (v, typename)) -> do 
-                  list' <- listInsert v e' idx
-                  let locals' = Data.insert id (list', typename) locals
-                  let threads' = Data.insert tid locals' threads
-                  put ((threads', global), cm)
-                Nothing -> error $ "Variable " ++ show id ++ "does not exist" -- then cry and give up
-updateVar (VarRef id (VarRefAnyExprOne e) (VarRefTypedefOne (VarRef elem VarRefAnyExprNone VarRefTypedefNone))) val = do
+  ((threads, global), cm@(tid, _, _, _, _, _)) <- get
+  e' <- evalAnyExpr e -- so evaluate the array index
+  let idx :: Int = case e' of -- cast to an int
+          (UI a b) -> fromIntegral a
+          (I a) -> fromIntegral a
+          (Sh a) -> fromIntegral a
+          (By a) -> fromIntegral a
+  case Data.lookup id global of -- look for the array globally
+       (Just (v, typename)) -> do 
+        list' <- listInsert v e' idx
+        put ((threads, Data.insert id (list', typename) global), cm)
+       Nothing -> do
+          let locals = fromJust $ Data.lookup tid threads
+          case Data.lookup id locals of -- then check locals
+              (Just (v, typename)) -> do 
+                list' <- listInsert v e' idx
+                let locals' = Data.insert id (list', typename) locals
+                let threads' = Data.insert tid locals' threads
+                put ((threads', global), cm)
+              Nothing -> error $ "Variable " ++ show id ++ "does not exist" -- then cry and give up
+updateVar (VarRef id (VarRefAnyExprOne e) (VarRefTypedefOne vr)) val = do
     ((threads, global), cm@(tid, _, _, _, _, _)) <- get
     e' <- evalAnyExpr e -- so evaluate the array index
     let idx :: Int = case e' of -- cast to an int
@@ -976,11 +1000,55 @@ updateVar (VarRef id (VarRefAnyExprOne e) (VarRefTypedefOne (VarRef elem VarRefA
             (Sh a) -> fromIntegral a
             (By a) -> fromIntegral a
     struct <- evalAnyExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone))
-    case struct of -- look for the array globally
-      (S str) -> do
-        let updateStruct = S $ Data.insert elem e' str
-        updateVar (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone) updateStruct 
+    struct' <- updateStruct vr struct val
+    case Data.lookup id global of -- look for the array globally
+         (Just (v, typename)) -> do 
+          list' <- listInsert v struct' idx
+          put ((threads, Data.insert id (list', typename) global), cm)
+         Nothing -> do
+            let locals = fromJust $ Data.lookup tid threads
+            case Data.lookup id locals of -- then check locals
+                (Just (v, typename)) -> do 
+                  list' <- listInsert v struct' idx
+                  let locals' = Data.insert id (list', typename) locals
+                  let threads' = Data.insert tid locals' threads
+                  put ((threads', global), cm)
+                Nothing -> error $ "Variable " ++ show id ++ "does not exist" -- then cry and give up
 
+updateStruct :: VarRef -> Vars -> Vars -> ProgState Vars
+updateStruct (VarRef id VarRefAnyExprNone VarRefTypedefNone) (S struct) var = return . S $ Data.insert id var struct
+updateStruct (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone) (S struct) var = do 
+  e' <- evalAnyExpr e -- so evaluate the array index
+  let idx :: Int = case e' of -- cast to an int
+          (UI a b) -> fromIntegral a
+          (I a) -> fromIntegral a
+          (Sh a) -> fromIntegral a
+          (By a) -> fromIntegral a
+  case Data.lookup id struct of 
+    (Just list) -> do 
+      list' <- listInsert list var idx
+      return . S $ Data.insert id list' struct
+    Nothing -> error $ "Field: " ++ show id ++ " does not exist in struct " ++ show struct
+updateStruct (VarRef id VarRefAnyExprNone (VarRefTypedefOne vr)) (S struct) var = do
+  case Data.lookup id struct of 
+    (Just field) -> do
+      field' <- updateStruct vr field var
+      return . S $ Data.insert id field' struct
+    Nothing -> error $ "Field: " ++ show id ++ " does not exist in struct " ++ show struct
+updateStruct (VarRef id (VarRefAnyExprOne e) (VarRefTypedefOne vr)) (S struct) var = do
+  e' <- evalAnyExpr e -- so evaluate the array index
+  let idx :: Int = case e' of -- cast to an int
+          (UI a b) -> fromIntegral a
+          (I a) -> fromIntegral a
+          (Sh a) -> fromIntegral a
+          (By a) -> fromIntegral a
+  case Data.lookup id struct of 
+    (Just list) -> do 
+      listElem <- listIndex list idx
+      listElem' <- updateStruct vr listElem var
+      list' <- listInsert list listElem' idx
+      return . S $ Data.insert id list' struct
+    Nothing -> error $ "Field: " ++ show id ++ " does not exist in struct " ++ show struct
 -- Underneath this is bad stuff that I've bodged together to get this to work. Just ignore it.
 -- If you really have to know, it's fun type coercion stuff
 

@@ -139,8 +139,7 @@ All other symbols are terminals.
   |  |  **|**  | //[Declaration_specifier]// //Declarator// //Compound_stm//
   |  |  **|**  | //Declarator// //[Dec]// //Compound_stm//
   |  |  **|**  | //Declarator// //Compound_stm//
-  | //Dec// | -> | //[Declaration_specifier]// ``;``
-  |  |  **|**  | //[Declaration_specifier]// //[Init_declarator]// ``;``
+  | //Dec// | -> | //[Declaration_specifier]// //[Init_declarator]// ``;``
   | //[Dec]// | -> | //Dec//
   |  |  **|**  | //Dec// //[Dec]//
   | //[Declaration_specifier]// | -> | //Declaration_specifier//
@@ -150,8 +149,8 @@ All other symbols are terminals.
   |  |  **|**  | //Type_qualifier//
   | //[Init_declarator]// | -> | //Init_declarator//
   |  |  **|**  | //Init_declarator// ``,`` //[Init_declarator]//
-  | //Init_declarator// | -> | //Declarator//
-  |  |  **|**  | //Declarator// ``=`` //Initializer//
+  | //Init_declarator// | -> | //Declarator// ``=`` //Initializer//
+  |  |  **|**  | //Declarator//
   | //Type_specifier// | -> | ``void``
   |  |  **|**  | ``char``
   |  |  **|**  | ``short``
@@ -173,6 +172,7 @@ All other symbols are terminals.
   |  |  **|**  | ``RtemsModelEventsMgr_Context``
   |  |  **|**  | ``RtemsModelProtoSem_Context``
   |  |  **|**  | ``rtems_task_argument``
+  |  |  **|**  | //CIdent//
   | //Storage_class_specifier// | -> | ``typedef``
   |  |  **|**  | ``extern``
   |  |  **|**  | ``static``
@@ -264,10 +264,8 @@ All other symbols are terminals.
   |  |  **|**  | //DecStm// //DecStmList//
   | //Expression_stm// | -> | ``;``
   |  |  **|**  | //Exp// ``;``
-  | //DeclExprList// | -> | **eps**
-  |  |  **|**  | //DeclExpr// ``;`` //DeclExprList//
-  | //DeclExpr// | -> | //Exp//
-  |  |  **|**  | //Dec//
+  | //DeclExpr// | -> | //Dec//
+  |  |  **|**  | //Exp//
   | //Selection_stm// | -> | ``if`` ``(`` //Exp// ``)`` //Stm//
   |  |  **|**  | ``if`` ``(`` //Exp// ``)`` //Stm// ``else`` //Stm//
   |  |  **|**  | ``switch`` ``(`` //Exp// ``)`` //Stm//

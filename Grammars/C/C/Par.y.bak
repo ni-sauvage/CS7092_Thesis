@@ -215,8 +215,7 @@ Function_def
 
 Dec :: { C.Abs.Dec }
 Dec
-  : ListDeclaration_specifier ';' { C.Abs.NoDeclarator $1 }
-  | ListDeclaration_specifier ListInit_declarator ';' { C.Abs.Declarators $1 $2 }
+  : ListDeclaration_specifier ListInit_declarator ';' { C.Abs.Declarators $1 $2 }
 
 ListDec :: { [C.Abs.Dec] }
 ListDec : Dec { (:[]) $1 } | Dec ListDec { (:) $1 $2 }
@@ -239,8 +238,8 @@ ListInit_declarator
 
 Init_declarator :: { C.Abs.Init_declarator }
 Init_declarator
-  : Declarator { C.Abs.OnlyDecl $1 }
-  | Declarator '=' Initializer { C.Abs.InitDecl $1 $3 }
+  : Declarator '=' Initializer { C.Abs.InitDecl $1 $3 }
+  | Declarator { C.Abs.OnlyDecl $1 }
 
 Type_specifier :: { C.Abs.Type_specifier }
 Type_specifier
@@ -265,6 +264,7 @@ Type_specifier
   | 'RtemsModelEventsMgr_Context' { C.Abs.Tevctx }
   | 'RtemsModelProtoSem_Context' { C.Abs.Tpsctx }
   | 'rtems_task_argument' { C.Abs.Trtta }
+  | CIdent { C.Abs.Ttypedef $1 }
 
 Storage_class_specifier :: { C.Abs.Storage_class_specifier }
 Storage_class_specifier
@@ -446,13 +446,8 @@ Expression_stm :: { C.Abs.Expression_stm }
 Expression_stm
   : ';' { C.Abs.SexprOne } | Exp ';' { C.Abs.SexprTwo $1 }
 
-DeclExprList :: { C.Abs.DeclExprList }
-DeclExprList
-  : {- empty -} { C.Abs.SdexprListNone }
-  | DeclExpr ';' DeclExprList { C.Abs.SdexprListOne $1 $3 }
-
 DeclExpr :: { C.Abs.DeclExpr }
-DeclExpr : Exp { C.Abs.SdExprOne $1 } | Dec { C.Abs.SdExprTwo $1 }
+DeclExpr : Dec { C.Abs.SdExprTwo $1 } | Exp { C.Abs.SdExprOne $1 }
 
 Selection_stm :: { C.Abs.Selection_stm }
 Selection_stm

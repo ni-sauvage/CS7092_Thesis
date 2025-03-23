@@ -23,9 +23,7 @@ data Function_def
     | NewFuncInt Declarator Compound_stm
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data Dec
-    = NoDeclarator [Declaration_specifier]
-    | Declarators [Declaration_specifier] [Init_declarator]
+data Dec = Declarators [Declaration_specifier] [Init_declarator]
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Declaration_specifier
@@ -35,7 +33,7 @@ data Declaration_specifier
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Init_declarator
-    = OnlyDecl Declarator | InitDecl Declarator Initializer
+    = InitDecl Declarator Initializer | OnlyDecl Declarator
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Type_specifier
@@ -60,6 +58,7 @@ data Type_specifier
     | Tevctx
     | Tpsctx
     | Trtta
+    | Ttypedef CIdent
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Storage_class_specifier
@@ -198,11 +197,7 @@ data DecStmList
 data Expression_stm = SexprOne | SexprTwo Exp
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
-data DeclExprList
-    = SdexprListNone | SdexprListOne DeclExpr DeclExprList
-  deriving (C.Eq, C.Ord, C.Show, C.Read)
-
-data DeclExpr = SdExprOne Exp | SdExprTwo Dec
+data DeclExpr = SdExprTwo Dec | SdExprOne Exp
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data Selection_stm

@@ -39,8 +39,8 @@ SpecProp. Declaration_specifier ::= Type_qualifier;
 (:[]).   [Init_declarator] ::= Init_declarator ;
 (:).     [Init_declarator] ::= Init_declarator "," [Init_declarator] ;
 
-OnlyDecl.  Init_declarator ::= Declarator ;
 InitDecl.  Init_declarator ::= Declarator "=" Initializer;
+OnlyDecl.  Init_declarator ::= Declarator ;
 
 
 Tvoid.        Type_specifier ::= "void";
