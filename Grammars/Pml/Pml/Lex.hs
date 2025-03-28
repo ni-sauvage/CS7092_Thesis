@@ -451,7 +451,7 @@ eitherResIdent tv s = treeFind resWords
 -- | The keywords and symbols of the language organized as binary search tree.
 resWords :: BTree
 resWords =
-  b "eval" 47
+  b "false" 48
     (b "=" 24
        (b "-" 12
           (b "(" 6
@@ -472,36 +472,36 @@ resWords =
              (b "break" 39
                 (b "bool" 38 (b "bit" 37 N N) N) (b "chan" 41 (b "byte" 40 N N) N))
              (b "empty" 45
-                (b "else" 44 (b "do" 43 N N) N) (b "enabled" 46 N N)))))
-    (b "printm" 71
-       (b "int" 59
-          (b "goto" 53
-             (b "for" 50
-                (b "fi" 49 (b "false" 48 N N) N)
-                (b "get_priority" 52 (b "full" 51 N N) N))
-             (b "in" 56
-                (b "if" 55 (b "hidden" 54 N N) N)
-                (b "inline" 58 (b "init" 57 N N) N)))
-          (b "np_" 65
-             (b "nempty" 62
-                (b "mtype" 61 (b "len" 60 N N) N)
-                (b "nfull" 64 (b "never" 63 N N) N))
-             (b "pc_value" 68
-                (b "of" 67 (b "od" 66 N N) N)
-                (b "printf" 70 (b "print" 69 N N) N))))
-       (b "true" 83
-          (b "set_priority" 77
-             (b "provided" 74
-                (b "proctype" 73 (b "priority" 72 N N) N)
-                (b "select" 76 (b "run" 75 N N) N))
-             (b "skip" 80
-                (b "show" 79 (b "short" 78 N N) N)
-                (b "trace" 82 (b "timeout" 81 N N) N)))
-          (b "{" 89
-             (b "unsigned" 86
-                (b "unless" 85 (b "typedef" 84 N N) N)
-                (b "xs" 88 (b "xr" 87 N N) N))
-             (b "}" 92 (b "||" 91 (b "|" 90 N N) N) (b "~" 93 N N)))))
+                (b "else" 44 (b "do" 43 N N) N)
+                (b "eval" 47 (b "enabled" 46 N N) N)))))
+    (b "printm" 72
+       (b "len" 60
+          (b "hidden" 54
+             (b "full" 51
+                (b "for" 50 (b "fi" 49 N N) N)
+                (b "goto" 53 (b "get_priority" 52 N N) N))
+             (b "init" 57
+                (b "in" 56 (b "if" 55 N N) N) (b "int" 59 (b "inline" 58 N N) N)))
+          (b "od" 66
+             (b "never" 63
+                (b "nempty" 62 (b "mtype" 61 N N) N)
+                (b "np_" 65 (b "nfull" 64 N N) N))
+             (b "pid" 69
+                (b "pc_value" 68 (b "of" 67 N N) N)
+                (b "printf" 71 (b "print" 70 N N) N))))
+       (b "true" 84
+          (b "set_priority" 78
+             (b "provided" 75
+                (b "proctype" 74 (b "priority" 73 N N) N)
+                (b "select" 77 (b "run" 76 N N) N))
+             (b "skip" 81
+                (b "show" 80 (b "short" 79 N N) N)
+                (b "trace" 83 (b "timeout" 82 N N) N)))
+          (b "{" 90
+             (b "unsigned" 87
+                (b "unless" 86 (b "typedef" 85 N N) N)
+                (b "xs" 89 (b "xr" 88 N N) N))
+             (b "}" 93 (b "||" 92 (b "|" 91 N N) N) (b "~" 94 N N)))))
   where
   b s n = B bs (TS bs n)
     where

@@ -43,6 +43,7 @@ transTypename x = case x of
   Pml.Abs.Typename_int -> failure x
   Pml.Abs.Typename_mtype -> failure x
   Pml.Abs.Typename_chan -> failure x
+  Pml.Abs.Typename_pid -> failure x
   Pml.Abs.TypenamePIdent pident -> failure x
 
 transUnrOp :: Pml.Abs.UnrOp -> Result

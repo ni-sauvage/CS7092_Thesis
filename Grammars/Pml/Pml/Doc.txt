@@ -37,12 +37,12 @@ The reserved words used in Pml are the following:
   | ``hidden`` | ``if`` | ``in`` | ``init``
   | ``inline`` | ``int`` | ``len`` | ``mtype``
   | ``nempty`` | ``never`` | ``nfull`` | ``np_``
-  | ``od`` | ``of`` | ``pc_value`` | ``print``
-  | ``printf`` | ``printm`` | ``priority`` | ``proctype``
-  | ``provided`` | ``run`` | ``select`` | ``set_priority``
-  | ``short`` | ``show`` | ``skip`` | ``timeout``
-  | ``trace`` | ``true`` | ``typedef`` | ``unless``
-  | ``unsigned`` | ``xr`` | ``xs`` |
+  | ``od`` | ``of`` | ``pc_value`` | ``pid``
+  | ``print`` | ``printf`` | ``printm`` | ``priority``
+  | ``proctype`` | ``provided`` | ``run`` | ``select``
+  | ``set_priority`` | ``short`` | ``show`` | ``skip``
+  | ``timeout`` | ``trace`` | ``true`` | ``typedef``
+  | ``unless`` | ``unsigned`` | ``xr`` | ``xs``
 
 The symbols used in Pml are the following:
   | ; | -> | ~ | -
@@ -80,6 +80,7 @@ All other symbols are terminals.
   |  |  **|**  | ``int``
   |  |  **|**  | ``mtype``
   |  |  **|**  | ``chan``
+  |  |  **|**  | ``pid``
   |  |  **|**  | //PIdent//
   | //UnrOp// | -> | ``~``
   |  |  **|**  | ``-``

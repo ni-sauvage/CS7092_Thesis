@@ -17,6 +17,8 @@ import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.List (elemIndex, find, partition)
 import System.Random (randomRIO)
 import qualified Control.Monad
+import qualified Data.Text
+import Control.Monad (forM_)
 
 data Visible = Visible_hidden | Visible_show
   deriving (C.Eq, C.Ord, C.Show, C.Read)
@@ -35,6 +37,7 @@ data Typename
     | Typename_int
     | Typename_mtype
     | Typename_chan
+    | Typename_pid
     | TypenamePIdent PIdent
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
@@ -345,7 +348,8 @@ runProg ms = do
   mapM_ evalModule ms
   execProgramme
 
-evalDcl :: Decl -> ProgState (Vars, Typename, PIdent)
+evalDcl :: Decl -> ProgState [(Vars, Typename, PIdent)]
+evalDcl (DclOne _ _ []) = return []
 evalDcl (DclOne _ typename ((Ivar ident const assign):ivs)) = do
           ((_, _), (tid, _, _, _, _, structs)) <- get
           case (const, assign) of 
@@ -356,19 +360,28 @@ evalDcl (DclOne _ typename ((Ivar ident const assign):ivs)) = do
                     Typename_byte -> By 0
                     Typename_short -> Sh 0
                     Typename_int -> I 0
+                    Typename_pid -> I 0
                     (TypenamePIdent id) -> fromJust $ Data.lookup id structs
-              return (val, typename, ident)
+              dcls <- evalDcl (DclOne DclVisNone typename ivs)
+              return $ (val, typename, ident):dcls
             (IvarConstOne const, IvarAssignNone) -> do
-              return (case const of
+              let val = case const of
                     (ConstInteger i) -> case typename of
+                        Typename_bool -> BlL $ replicate (fromIntegral i) False
                         Typename_bit -> BsL $ replicate (fromIntegral i) 0 
                         Typename_byte -> ByL $ replicate (fromIntegral i) 0
                         Typename_short -> ShL $ replicate (fromIntegral i) 0
                         Typename_int -> IL $ replicate (fromIntegral i) 0
-                    , typename, ident)
+                        Typename_pid -> IL $ replicate (fromIntegral i) 0
+                        (TypenamePIdent id) -> case fromJust $ Data.lookup id structs of 
+                          (S str) -> SL $ replicate (fromIntegral i) str
+                          _ -> error "Struct array was not a struct"
+              dcls <- evalDcl (DclOne DclVisNone typename ivs)
+              return $ (val, typename, ident):dcls
             (IvarConstNone, IvarAssignAnyExpr e) -> do 
               val <- evalAnyExpr e
-              return (val, typename, ident)
+              dcls <- evalDcl (DclOne DclVisNone typename ivs)
+              return $ (val, typename, ident):dcls
             (IvarConstOne const, IvarAssignAnyExpr e) -> do 
               rval <- evalAnyExpr e
               let elem = case rval of 
@@ -382,7 +395,9 @@ evalDcl (DclOne _ typename ((Ivar ident const assign):ivs)) = do
                         Typename_byte -> ByL $ replicate (fromIntegral i) (fromIntegral elem)
                         Typename_short -> ShL $ replicate (fromIntegral i) (fromIntegral elem)
                         Typename_int -> IL $ replicate (fromIntegral i) elem
-              return (val, typename, ident)
+                        Typename_pid -> IL $ replicate (fromIntegral i) elem
+              dcls <- evalDcl (DclOne DclVisNone typename ivs)
+              return $ (val, typename, ident):dcls
 
 evalDcl (DclOneUnsigned _ (UDcl ident const assign)) = do
   ((_, _), (tid, _, _, _, _, _)) <- get
@@ -398,19 +413,20 @@ evalDcl (DclOneUnsigned _ (UDcl ident const assign)) = do
             (Bs a) -> fromIntegral a
             (I a) -> fromIntegral a
             (UI a _) -> fromIntegral a
-      return (UI (v .&. (2^bits)-1) (fromIntegral bits), TypenamePIdent . PIdent $ "unsigned", ident)
-    UDclAssignNone -> return (UI 0 (fromIntegral bits), TypenamePIdent . PIdent $ "unsigned", ident) 
+      return [(UI (v .&. (2^bits)-1) (fromIntegral bits), TypenamePIdent . PIdent $ "unsigned", ident)]
+    UDclAssignNone -> return [(UI 0 (fromIntegral bits), TypenamePIdent . PIdent $ "unsigned", ident)]
             
 evalModule :: Pml.Abs.Module -> ProgState ()
-evalModule (Mproc p) = do 
-  (pm, (tid, ps, is, gt, tstate, structs)) <- get
-  put (pm, (tid, p:ps, is, gt, tstate, structs))
+evalModule m@(Mproc p) = do 
+  (pm, (tid, ps, is, labels, tstate, structs)) <- get
+  let labels' = searchLabelsModule m `Map.union` labels
+  put (pm, (tid, p:ps, is, labels', tstate, structs))
 evalModule (MdeclList dl) = do
   case dl of 
     (DclListOneNoSep dcl) -> do
       ((locals, globals), c) <- get
-      (val, typename, ident) <- evalDcl dcl
-      let globals' = Data.insert ident (val, typename) globals
+      dcls <- evalDcl dcl
+      let globals' = setMem dcls globals
       put ((locals, globals'), c)
     (DclListOne dcl _) -> evalModule (MdeclList $ DclListOneNoSep dcl)
     (DclListCons dcl _ dcls) -> do
@@ -425,24 +441,78 @@ evalModule (Mmtype m) = do
   put ((threads, globals'), c)
 evalModule (Mutype (Utp ident dl)) = do
   struct <- createStruct dl Map.empty
-  (pm, (tid, ps, is, gt, tstate, structs)) <- get
+  (pm, (tid, ps, is, labels, tstate, structs)) <- get
   let structs' = Data.insert ident (S struct) structs
-  put (pm, (tid, ps, is, gt, tstate, structs'))
+  put (pm, (tid, ps, is, labels, tstate, structs'))
 evalModule (Minline i) = do 
-  (pm, (tid, ps, is, gt, tstate, structs)) <- get
-  put (pm, (tid, ps, i:is, gt, tstate, structs))
-evalModule (Minit (Initialise _ sequence)) = do
-  ((threads, globals), (tid, ps, is, gt, tstate, structs)) <- get
-  let threads' = Data.insert 0 (Map.fromList [(PIdent "_pid" , (I 0, Typename_int))]) threads
+  (pm, (tid, ps, is, labels, tstate, structs)) <- get
+  put (pm, (tid, ps, i:is, labels, tstate, structs))
+evalModule m@(Minit (Initialise _ sequence)) = do
+  ((threads, globals), (tid, ps, is, labels, tstate, structs)) <- get
+  let labels' = searchLabelsModule m `Map.union` labels
+  let threads' = Data.insert 0 (Map.fromList [(PIdent "_pid" , (I 0, Typename_pid))]) threads
   let tstate' = Data.insert 0 (Ready, Nothing, [sequence]) tstate
-  put ((threads', globals), (tid, ps, is, gt, tstate', structs))
+  put ((threads', globals), (tid, ps, is, labels', tstate', structs))
+
+appendSeq :: Sequence -> Sequence -> Sequence
+appendSeq (SeqOne step) seq = SeqNoSep step seq
+appendSeq (SeqOneSep step _) seq = SeqNoSep step seq
+appendSeq (SeqNoSep step rm) seq = SeqNoSep step (appendSeq rm seq)
+appendSeq (SeqCons step _ rm) seq = SeqNoSep step (appendSeq rm seq)
+
+searchLabelsModule :: Pml.Abs.Module -> Labels
+searchLabelsModule (Minit (Initialise _ seq)) = searchLabelsSeq seq
+searchLabelsModule (Mproc (Ptype _ _ _ _ _ seq)) = searchLabelsSeq seq
+
+searchLabelsSeq :: Sequence -> Labels
+searchLabelsSeq (SeqOne (StepStmt s _)) = 
+  case s of 
+    (StmtLabel label stmt) -> Map.fromList [(label, SeqOne . flip StepStmt UStmtNone $ stmt)]
+    _ -> searchLabelsStmt s
+searchLabelsSeq (SeqOneSep (StepStmt s _) _) = 
+  case s of 
+    (StmtLabel label stmt) -> Map.fromList [(label, SeqOne . flip StepStmt UStmtNone $ stmt)]
+    _ -> searchLabelsStmt s
+searchLabelsSeq (SeqNoSep step seq) = 
+  case step of 
+    (StepStmt (StmtLabel ident stmt) _) -> 
+      searchLabelsStmt stmt `Map.union` 
+      Map.fromList [(ident, SeqNoSep (StepStmt stmt UStmtNone) seq)] `Map.union`
+      searchLabelsSeq seq
+    (StepStmt stmt _) -> searchLabelsStmt stmt `Map.union` searchLabelsSeq seq
+    _ -> searchLabelsSeq seq
+searchLabelsSeq (SeqCons step _ seq) = 
+  case step of 
+    (StepStmt (StmtLabel ident stmt) _) -> 
+      searchLabelsStmt stmt `Map.union` 
+      Map.fromList [(ident, SeqNoSep (StepStmt stmt UStmtNone) seq)] `Map.union`
+      searchLabelsSeq seq
+    _ -> searchLabelsSeq seq
+
+searchLabelsStmt :: Stmt -> Labels
+searchLabelsStmt (StmtAtomic seq) = 
+  fmap (SeqOne . flip StepStmt UStmtNone . StmtAtomic) (searchLabelsSeq seq)
+searchLabelsStmt (StmtDo opts) = 
+  let loop = SeqOne (StepStmt (StmtDo opts) UStmtNone) in
+  fmap (flip appendSeq loop) (foldl Map.union Map.empty (fmap searchLabelsSeq (optsToSeq opts)))
+searchLabelsStmt (StmtIf opts) = 
+  foldl Map.union Map.empty (fmap searchLabelsSeq (optsToSeq opts))
+searchLabelsStmt _ = Map.empty
+
+setMem :: [(Vars, Typename, PIdent)] -> (Data.Map PIdent (Vars, Typename)) -> (Data.Map PIdent (Vars, Typename))
+setMem [] = id
+setMem ((val, typename, ident):xs) = Map.insert ident (val, typename) <$> setMem xs
+
+setMemStruct :: [(Vars, Typename, PIdent)] -> (Data.Map PIdent Vars) -> (Data.Map PIdent Vars)
+setMemStruct [] = id
+setMemStruct ((val, _, ident):xs) = Map.insert ident val <$> setMemStruct xs
 
 createStruct :: DeclList -> Map.Map PIdent Vars -> ProgState (Map.Map PIdent Vars)
 createStruct dl map = 
   case dl of 
     (DclListOneNoSep dcl) -> do
-      (val, typename, ident) <- evalDcl dcl
-      return $ Data.insert ident val map
+      dcls <- evalDcl dcl
+      return $ setMemStruct dcls map
     (DclListOne dcl _) -> createStruct (DclListOneNoSep dcl) map
     (DclListCons dcl _ dcls) -> do
       map' <- createStruct (DclListOneNoSep dcl) map
@@ -452,7 +522,15 @@ execProgramme :: ProgState ()
 execProgramme = do 
   (_, (_, _, _, _, tstates, _)) <- get
   let tids = Data.keys tstates
-  mapM_ updateBlocked tids
+  -- This is awful but I can explain
+  -- Consider the scenario in which all threads are waiting for the previous thread to be unblocked for themselves
+  -- to be unblocked (Dependencies, yay!). So, thread 4 will be unblocked when thread 5 is unblocked and so on
+  -- We iterate over our threadIds but we can only unblock 5 as that isn't waiting on anything.
+  -- It would now erroneously appear that thread 4 is still blocked.
+  -- To fix this we do an equal amount of passes as there are threads to allow changes to propagate back
+  -- Quick optimisation I do not have time for: only back propagate if change is discovered and only relative to
+  -- change.
+  mapM_ (const (mapM_ updateBlocked tids)) tids
   (pm, c@(tid, p, i, l, tstates, s)) <- get
   let execTids = map fst (filter (\(_, (st, _, _)) -> st == Ready) (Map.toList tstates))
   case execTids of
@@ -466,8 +544,9 @@ execProgramme = do
 
 updateBlocked :: Integer -> ProgState ()
 updateBlocked tid = do
-  (pm@(threads, globals), c@(tid, p, i, l, tstates, s)) <- get
+  (pm@(threads, globals), c@(tid', p, i, l, tstates, s)) <- get
   let (state, seq, rm) = fromJust $ Data.lookup tid tstates
+  put (pm, (tid, p, i, l, tstates, s))
   case seq of 
     Nothing -> 
       case rm of
@@ -475,19 +554,19 @@ updateBlocked tid = do
           ex <- executableSeq x
           let tstate = if ex then Ready else Blocked
           let tstates' = Data.insert tid (tstate, seq, (x:xs)) tstates
-          put (pm, (tid, p, i, l, tstates', s))
+          put (pm, (tid', p, i, l, tstates', s))
         [] -> do 
           Control.Monad.when (state /= Zombie) 
             (do 
               let tstates' = Data.insert tid (Zombie, Nothing, []) tstates
               let (I a, _) = fromJust $ Data.lookup (PIdent "_nr_pr") globals
               let globals' = Data.insert (PIdent "_nr_pr") (I (a-1), Typename_int) globals
-              put ((threads, globals'), (tid, p, i, l, tstates', s)))
+              put ((threads, globals'), (tid', p, i, l, tstates', s)))
     (Just x) -> do
       ex <- executableSeq x
       let ready = if ex then Ready else Blocked
       let tstates' = Data.insert tid (ready, seq, rm) tstates
-      put (pm, (tid, p, i, l, tstates', s))
+      put (pm, (tid', p, i, l, tstates', s))
 
 execThread :: ProgState ()
 execThread = do
@@ -511,8 +590,8 @@ execThreadAtm = do
   case seq of 
     Nothing -> case rm of 
       (x:xs) -> do 
-        let tstates' = Data.insert tid (st, x, xs)
-        put (pm, (tid, p, i, l, tstates, s))
+        let tstates' = Data.insert tid (st, Just x, xs) tstates
+        put (pm, (tid, p, i, l, tstates', s))
         evalSequenceAtm x
       [] -> do
         let tstates' = Data.insert tid (Zombie, Nothing, []) tstates
@@ -579,11 +658,10 @@ evalStep (StepStmt s su) = do
 evalStep (StepDclList dcls) = do
     case dcls of 
         (DclListOneNoSep dcl) -> do
-          (val, typename, ident) <- evalDcl dcl
+          dcls <- evalDcl dcl
           ((threads, g), c@(tid, p, i, l, tstates, s)) <- get
           let locals = fromJust $ Data.lookup tid threads
-          let update = Data.insert ident (val, typename) locals
-          let threads' = Data.insert tid update threads
+          let threads' = Data.insert tid (setMem dcls locals) threads
           let (st, curr, rm) = fromJust $ Data.lookup tid tstates
           let tstates' = Data.insert tid (st, Nothing, rm) tstates
           put ((threads', g), (tid, p, i, l, tstates', s))
@@ -626,7 +704,8 @@ iterateSeq = do
   put (pm, (tid, p, i, l, tstates', s))
 
 evalStmt :: Stmt -> ProgState ()
-evalStmt (StmtAtomic seq) = evalSequenceAtm seq
+evalStmt (StmtAtomic seq) = do 
+  evalSequenceAtm seq
 evalStmt (StmtDAtomic seq) = evalSequenceAtm seq
 evalStmt (StmtDo opts) = do
   seqs <- filterSeq $ optsToSeq opts
@@ -650,15 +729,23 @@ evalStmt (StmtIf opts) = do
   let tstates' = Data.insert tid (Ready, Just seq, rm) tstates
   put (pm, (tid, p, i, l, tstates', s))
 evalStmt (StmtAssign a) = do
+  ((threads, g), c@(tid, _, _, _, _, _)) <- get
   case a of 
     (AssignStd var expr) -> do
-      ((threads, g), c@(tid, _, _, _, _, _)) <- get
       e <- evalAnyExpr expr
       updateVar var e
+    (AssignInc var) -> do
+      val <- evalAnyExpr (AnyExprplus (AnyExprVarRef var) (AnyExprConst . ConstInteger $ 1))
+      updateVar var val
+    (AssignDec var) -> do
+      val <- evalAnyExpr (AnyExprminus (AnyExprVarRef var) (AnyExprConst . ConstInteger $ 1))
+      updateVar var val
   iterateSeq
 evalStmt (StmtPrint _ args) = do 
   str <- evalPrint args
   liftIO . putStr $ str
+  --(pm, c@(tid, p, i, l, tstates, s)) <- get
+  --liftIO . print $ fromJust $ Data.lookup tid tstates
   iterateSeq
 evalStmt (StmtAssert e) = do 
   rv <- executableStmt (StmtExpr e)
@@ -681,6 +768,37 @@ evalStmt StmtBreak = do
   let tstates' = Data.insert tid (Ready, Nothing, xs) tstates
   put (pm, (tid, p, i, l, tstates', s))
 evalStmt StmtElse = iterateSeq
+evalStmt (StmtGoto label) = do
+  (pm, (tid, p, i, l, tstates, s)) <- get
+  let (st, curr, rm) = fromJust $ Data.lookup tid tstates
+  let seq = fromJust $ Data.lookup label l
+  let tstate = (Ready, Nothing, [seq])
+  let tstates' = Data.insert tid tstate tstates
+  put (pm, (tid, p, i, l, tstates', s))
+evalStmt (StmtLabel _ s) = evalStmt s
+evalStmt (StmtCall ident vars) = do
+  (pm, (tid, p, i, l, tstates, s)) <- get
+  let (Iline _ param seq) = fromJust $ find (\(Iline id _ _) -> ident == id) i
+  let subs = fmap (\(AnyExprVarRef a, AnyExprVarRef b) -> (a, b)) (zip param vars)
+  let seq' = replaceVars subs seq
+  evalSequence seq'
+  iterateSeq
+   
+-- Hack of the century right here
+-- When considering inlines, we want to alias one variable to another
+-- Going through an entire ADT to change this would be painful
+-- So we just show the ADT and text replace the variable to its alias
+replaceVars :: [(VarRef, VarRef)] -> Sequence -> Sequence
+replaceVars [] seq = seq
+replaceVars ((pre, replace):xs) seq = replaceVars xs (replaceVar pre replace seq)
+
+replaceVar :: VarRef -> VarRef -> Sequence -> Sequence
+replaceVar v1 v2 seq = 
+  read (Data.Text.unpack $ Data.Text.replace 
+      (Data.String.fromString . show $ v1) 
+      (Data.String.fromString . show $ v2) 
+      (Data.String.fromString . show $ seq))
+
 
 evalPrint :: Pargs -> ProgState String
 evalPrint (PArgsNoString []) = return []
@@ -851,14 +969,15 @@ evalAnyExpr (AnyExprConst const) = do
         (ConstInteger int) -> return . I $ fromIntegral int
         Const_skip -> return . Bl $ True 
 
-evalAnyExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone VarRefTypedefNone)) = do -- Simplest case, struct reference is just a reference to a variable
+-- Simplest case, struct reference is just a reference to a variable
+evalAnyExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone VarRefTypedefNone)) = do 
     ((local, global), cm@(tid, _, _, _, _, _)) <- get
     case Data.lookup id global of -- Check globals
          (Just (v, _)) -> return v
          Nothing -> 
             case Data.lookup id (fromJust $ Data.lookup tid local) of -- then check locals
                 (Just (v, _)) -> return v
-                Nothing -> error $ "Variable " ++ show id ++ "does not exist" -- then cry and give up
+                Nothing -> error $ "Variable " ++ show id ++ "does not exist" ++ show cm-- then cry and give up
 
 evalAnyExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone )) = do -- Now it's a reference to an array
     ((local, global), cm@(tid, _, _, _, _, _)) <- get
@@ -881,7 +1000,7 @@ evalAnyExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone (VarRefTypedefOne vr))) 
 
 evalAnyExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) (VarRefTypedefOne vr))) = do -- We are looking for an element in a struct, in an array
     struct <- evalAnyExpr (AnyExprVarRef (VarRef id (VarRefAnyExprOne e) VarRefTypedefNone)) -- so first index the array for the struct
-    evalAnyExpr (AnyExprVarRef (VarRef id VarRefAnyExprNone (VarRefTypedefOne vr))) -- Then find the element in the struct
+    evalAnyExpr (AnyExprStructRef struct vr) -- Then find the element in the struct
     
 evalAnyExpr (AnyExprStructRef struct (VarRef id VarRefAnyExprNone VarRefTypedefNone)) = -- Logic for finding elements in a struct
     case (struct, id) of -- lookup the element in the struct
@@ -916,6 +1035,7 @@ evalAnyExpr (AnyExprStructRef struct (VarRef id (VarRefAnyExprOne e) VarRefTyped
     case (struct, id) of
         (S m, id) -> listIndex (fromJust $ Data.lookup id m) idx
         _ -> error $ "struct " ++ show struct ++ " does not contain member " ++ show id
+
 evalAnyExpr (AnyExprRun ident args _) = do
   ((threads, g), c@(tid, p, i, l, tstates, s)) <- get
   let arg_lst = case args of
@@ -929,9 +1049,9 @@ evalAnyExpr (AnyExprRun ident args _) = do
   let (I pr, _) = fromJust $ Data.lookup (PIdent "_nr_pr") g
   let globals' = Data.insert (PIdent "_nr_pr") (I (pr+1), Typename_int) g
   let dcls = case vars of 
-        PdeclListNone -> [(PIdent "_pid", Typename_int)]
-        (PdeclListOne dcl) -> dclIdents dcl ++ [(PIdent "_pid", Typename_int)]
-  let locals = setMem (zip args' dcls)
+        PdeclListNone -> [(PIdent "_pid", Typename_pid)]
+        (PdeclListOne dcl) -> dclIdents dcl ++ [(PIdent "_pid", Typename_pid)]
+  let locals = setMem (zip args' dcls) 
   let threads' = Data.insert tid' locals threads
   let tstates' = Data.insert tid' (Ready, Nothing, [seq]) tstates
   put ((threads', globals'), (tid, p, i, l, tstates', s))
@@ -1084,6 +1204,7 @@ listInsert list var idx = do
     (a, b) -> error $ "could not insert into list, type mismatch: " ++ show a ++ " " ++ show b 
 
 evalUnrOp :: UnrOp -> Vars -> Vars
+evalUnrOp UnrOp3 (Bl a) = Bl $ not a
 evalUnrOp UnrOp1 (By a) = By $ complement a
 evalUnrOp UnrOp2 (By a) = By $ - a
 evalUnrOp UnrOp3 (By 0) = By 1 

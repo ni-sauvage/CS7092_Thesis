@@ -2,7 +2,7 @@ terminator nonempty Module "";
 rules Visible ::= "hidden" | "show";
 rules ChanPoll ::= "full" | "empty" "nfull" "nempty";
 rules Separator ::= ";" | "->";
-rules Typename ::= "bit" | "bool" | "byte" | "short" | "int" | "mtype" | "chan" | PIdent;
+rules Typename ::= "bit" | "bool" | "byte" | "short" | "int" | "mtype" | "chan" | "pid" | PIdent;
 rules UnrOp ::= "~" | "-" | "!";
 rules Const ::= "true" | "false" | "skip" | Integer;
 rules PrintType ::= "print" | "printf" | "printm";

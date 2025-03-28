@@ -27,6 +27,7 @@ data Typename
     | Typename_int
     | Typename_mtype
     | Typename_chan
+    | Typename_pid
     | TypenamePIdent PIdent
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 

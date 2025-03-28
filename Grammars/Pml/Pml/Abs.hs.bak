@@ -96,8 +96,8 @@ data Mequals = Meq
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 
 data DeclList
-    = DclListOne Decl Separator
-    | DclListOneNoSep Decl
+    = DclListOneNoSep Decl
+    | DclListOne Decl Separator
     | DclListCons Decl Separator DeclList
   deriving (C.Eq, C.Ord, C.Show, C.Read)
 

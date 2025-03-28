@@ -235,31 +235,32 @@ import Pml.Lex
   'od'           { PT _ (TS _ 66)     }
   'of'           { PT _ (TS _ 67)     }
   'pc_value'     { PT _ (TS _ 68)     }
-  'print'        { PT _ (TS _ 69)     }
-  'printf'       { PT _ (TS _ 70)     }
-  'printm'       { PT _ (TS _ 71)     }
-  'priority'     { PT _ (TS _ 72)     }
-  'proctype'     { PT _ (TS _ 73)     }
-  'provided'     { PT _ (TS _ 74)     }
-  'run'          { PT _ (TS _ 75)     }
-  'select'       { PT _ (TS _ 76)     }
-  'set_priority' { PT _ (TS _ 77)     }
-  'short'        { PT _ (TS _ 78)     }
-  'show'         { PT _ (TS _ 79)     }
-  'skip'         { PT _ (TS _ 80)     }
-  'timeout'      { PT _ (TS _ 81)     }
-  'trace'        { PT _ (TS _ 82)     }
-  'true'         { PT _ (TS _ 83)     }
-  'typedef'      { PT _ (TS _ 84)     }
-  'unless'       { PT _ (TS _ 85)     }
-  'unsigned'     { PT _ (TS _ 86)     }
-  'xr'           { PT _ (TS _ 87)     }
-  'xs'           { PT _ (TS _ 88)     }
-  '{'            { PT _ (TS _ 89)     }
-  '|'            { PT _ (TS _ 90)     }
-  '||'           { PT _ (TS _ 91)     }
-  '}'            { PT _ (TS _ 92)     }
-  '~'            { PT _ (TS _ 93)     }
+  'pid'          { PT _ (TS _ 69)     }
+  'print'        { PT _ (TS _ 70)     }
+  'printf'       { PT _ (TS _ 71)     }
+  'printm'       { PT _ (TS _ 72)     }
+  'priority'     { PT _ (TS _ 73)     }
+  'proctype'     { PT _ (TS _ 74)     }
+  'provided'     { PT _ (TS _ 75)     }
+  'run'          { PT _ (TS _ 76)     }
+  'select'       { PT _ (TS _ 77)     }
+  'set_priority' { PT _ (TS _ 78)     }
+  'short'        { PT _ (TS _ 79)     }
+  'show'         { PT _ (TS _ 80)     }
+  'skip'         { PT _ (TS _ 81)     }
+  'timeout'      { PT _ (TS _ 82)     }
+  'trace'        { PT _ (TS _ 83)     }
+  'true'         { PT _ (TS _ 84)     }
+  'typedef'      { PT _ (TS _ 85)     }
+  'unless'       { PT _ (TS _ 86)     }
+  'unsigned'     { PT _ (TS _ 87)     }
+  'xr'           { PT _ (TS _ 88)     }
+  'xs'           { PT _ (TS _ 89)     }
+  '{'            { PT _ (TS _ 90)     }
+  '|'            { PT _ (TS _ 91)     }
+  '||'           { PT _ (TS _ 92)     }
+  '}'            { PT _ (TS _ 93)     }
+  '~'            { PT _ (TS _ 94)     }
   L_integ        { PT _ (TI $$)       }
   L_quoted       { PT _ (TL $$)       }
   L_PIdent       { PT _ (T_PIdent $$) }
@@ -301,6 +302,7 @@ Typename
   | 'int' { Pml.Abs.Typename_int }
   | 'mtype' { Pml.Abs.Typename_mtype }
   | 'chan' { Pml.Abs.Typename_chan }
+  | 'pid' { Pml.Abs.Typename_pid }
   | PIdent { Pml.Abs.TypenamePIdent $1 }
 
 UnrOp :: { Pml.Abs.UnrOp }

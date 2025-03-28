@@ -123,8 +123,8 @@ All other symbols are terminals.
   |  |  **|**  | ``=``
   | //[PIdent]// | -> | //PIdent//
   |  |  **|**  | //PIdent// ``,`` //[PIdent]//
-  | //DeclList// | -> | //Decl// //Separator//
-  |  |  **|**  | //Decl//
+  | //DeclList// | -> | //Decl//
+  |  |  **|**  | //Decl// //Separator//
   |  |  **|**  | //Decl// //Separator// //DeclList//
   | //Decl// | -> | //DeclVisible// //Typename// //[Ivar]//
   |  |  **|**  | //DeclVisible// //UnsignedDecl//

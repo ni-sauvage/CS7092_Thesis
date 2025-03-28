@@ -140,8 +140,8 @@ transMequals x = case x of
 
 transDeclList :: Pml.Abs.DeclList -> Result
 transDeclList x = case x of
-  Pml.Abs.DclListOne decl separator -> failure x
   Pml.Abs.DclListOneNoSep decl -> failure x
+  Pml.Abs.DclListOne decl separator -> failure x
   Pml.Abs.DclListCons decl separator decllist -> failure x
 
 transDecl :: Pml.Abs.Decl -> Result

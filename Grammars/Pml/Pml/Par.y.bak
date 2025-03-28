@@ -396,8 +396,8 @@ ListPIdent
 
 DeclList :: { Pml.Abs.DeclList }
 DeclList
-  : Decl Separator { Pml.Abs.DclListOne $1 $2 }
-  | Decl { Pml.Abs.DclListOneNoSep $1 }
+  : Decl { Pml.Abs.DclListOneNoSep $1 }
+  | Decl Separator { Pml.Abs.DclListOne $1 $2 }
   | Decl Separator DeclList { Pml.Abs.DclListCons $1 $2 $3 }
 
 Decl :: { Pml.Abs.Decl }

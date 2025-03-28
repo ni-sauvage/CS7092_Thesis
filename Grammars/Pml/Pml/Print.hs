@@ -169,6 +169,7 @@ instance Print Pml.Abs.Typename where
     Pml.Abs.Typename_int -> prPrec i 0 (concatD [doc (showString "int")])
     Pml.Abs.Typename_mtype -> prPrec i 0 (concatD [doc (showString "mtype")])
     Pml.Abs.Typename_chan -> prPrec i 0 (concatD [doc (showString "chan")])
+    Pml.Abs.Typename_pid -> prPrec i 0 (concatD [doc (showString "pid")])
     Pml.Abs.TypenamePIdent pident -> prPrec i 0 (concatD [prt 0 pident])
 
 instance Print Pml.Abs.UnrOp where
