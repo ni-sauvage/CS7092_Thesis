@@ -1,0 +1,18 @@
+@@@ 0 NAME Prototype_Semantics_TestGen
+@@@ 0 DECL int g1
+@@@ 0 DECL int g2
+@@@ 0 INIT
+@@@ 3 TASK Runner
+@@@ 4 TASK Worker
+@@@ 4 SCALAR g1 0
+@@@ 4 SCALAR g2 0
+@@@ 4 CALL update2
+@@@ 4 SCALAR g1 15
+@@@ 4 SCALAR g2 5
+@@@ 4 STATE 2 Zombie
+@@@ 3 SCALAR g1 15
+@@@ 3 SCALAR g2 5
+@@@ 3 CALL update1
+@@@ 3 SCALAR g1 15
+@@@ 3 SCALAR g2 30
+@@@ 3 STATE 1 Zombie

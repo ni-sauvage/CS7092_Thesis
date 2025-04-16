@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Pml.Abs where
 
 import Prelude (Integer, String)
@@ -16,9 +17,8 @@ import Data.Maybe (fromJust)
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.List (elemIndex, find, partition, delete)
 import System.Random (randomRIO)
-import qualified Control.Monad
+import Control.Monad (when)
 import qualified Data.Text
-import Control.Monad (forM_)
 import Control.Monad.Trans.Class (MonadTrans(lift))
 
 data Visible = Visible_hidden | Visible_show
@@ -333,7 +333,7 @@ type Mem = Map.Map PIdent (Vars, Typename) -- Memory is modelled as a mapping fr
 
 runProgState :: [Pml.Abs.Module] -> IO ()
 runProgState prog = do
-  putStr $ "\n\n=====Programme Output=====\n\n"
+  putStr "\n\n=====Programme Output=====\n\n"
   st <- runWriterT $ (runStateT $ runProg prog) 
     ((Map.fromList [(0, Map.empty)], Map.fromList [(PIdent "_nr_pr", (I 1, Typename_int))]), 
     (0::Integer, [], [], Map.empty, Map.fromList [(0, (Ready, Nothing, []))], Map.empty))
@@ -496,16 +496,16 @@ searchLabelsStmt (StmtAtomic seq) =
   fmap (SeqOne . flip StepStmt UStmtNone . StmtAtomic) (searchLabelsSeq seq)
 searchLabelsStmt (StmtDo opts) = 
   let loop = SeqOne (StepStmt (StmtDo opts) UStmtNone) in
-  fmap (flip appendSeq loop) (foldl Map.union Map.empty (fmap searchLabelsSeq (optsToSeq opts)))
+  fmap (`appendSeq` loop) (foldl Map.union Map.empty (fmap searchLabelsSeq (optsToSeq opts)))
 searchLabelsStmt (StmtIf opts) = 
   foldl Map.union Map.empty (fmap searchLabelsSeq (optsToSeq opts))
 searchLabelsStmt _ = Map.empty
 
-setMem :: [(Vars, Typename, PIdent)] -> (Data.Map PIdent (Vars, Typename)) -> (Data.Map PIdent (Vars, Typename))
+setMem :: [(Vars, Typename, PIdent)] -> Data.Map PIdent (Vars, Typename) -> Data.Map PIdent (Vars, Typename)
 setMem [] = id
 setMem ((val, typename, ident):xs) = Map.insert ident (val, typename) <$> setMem xs
 
-setMemStruct :: [(Vars, Typename, PIdent)] -> (Data.Map PIdent Vars) -> (Data.Map PIdent Vars)
+setMemStruct :: [(Vars, Typename, PIdent)] -> Data.Map PIdent Vars -> Data.Map PIdent Vars
 setMemStruct [] = id
 setMemStruct ((val, _, ident):xs) = Map.insert ident val <$> setMemStruct xs
 
@@ -540,7 +540,7 @@ execProgramme = do
     _ -> do
       tidIdx <- liftIO $ randomRIO (0, length execTids -1)
       let tid' = execTids !! tidIdx
-      lift . tell $ ["Thread " ++ show tid' ++ " scheduled, could also have scheduled: " ++ show (Data.List.delete tid' execTids) ]
+      lift . tell $ ["Thread " ++ show tid' ++ " scheduled, could also have scheduled: " ++ show (Data.List.delete tid' execTids)]
       put (pm, (tid', p, i, l, tstates, s))
       execThread
       execProgramme
@@ -556,10 +556,10 @@ updateBlocked tid = do
         (x:xs) -> do 
           ex <- executableSeq x
           let tstate = if ex then Ready else Blocked
-          let tstates' = Data.insert tid (tstate, seq, (x:xs)) tstates
+          let tstates' = Data.insert tid (tstate, seq, x:xs) tstates
           put (pm, (tid', p, i, l, tstates', s))
         [] -> do 
-          Control.Monad.when (state /= Zombie) 
+          when (state /= Zombie) 
             (do 
               let tstates' = Data.insert tid (Zombie, Nothing, []) tstates
               let (I a, _) = fromJust $ Data.lookup (PIdent "_nr_pr") globals
@@ -673,7 +673,7 @@ evalStep (StepDclList dcls) = do
             evalStep (StepDclList (DclListOneNoSep dcl))
             (pm, c@(tid, p, i, l, tstates, s)) <- get
             let (st, curr, rm) = fromJust $ Data.lookup tid tstates
-            let tstates' = Data.insert tid (st, Nothing, (SeqOne (StepDclList dcls')):rm) tstates
+            let tstates' = Data.insert tid (st, Nothing, SeqOne (StepDclList dcls'):rm) tstates
             put (pm, (tid, p, i, l, tstates', s))
 
 optsToSeq :: Options -> [Sequence]
@@ -765,7 +765,7 @@ evalStmt se@(StmtExpr e) = do
 evalStmt StmtBreak = do
   (pm, (tid, p, i, l, tstates, s)) <- get
   let (st, seq, rm) = fromJust $ Data.lookup tid tstates
-  let xs = dropWhile (\x -> case x of {(SeqOne ( StepStmt ( StmtDo _) _)) -> True; _ -> False;}) rm
+  let xs = dropWhile (\case (SeqOne ( StepStmt ( StmtDo _) _)) -> True; _ -> False;) rm
   let tstates' = Data.insert tid (Ready, Nothing, xs) tstates
   put (pm, (tid, p, i, l, tstates', s))
 evalStmt StmtElse = iterateSeq

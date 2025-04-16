@@ -1,2 +1,16 @@
 *.hi
 *.o
+Abs.hs
+ErrM.hs
+Lex.hs
+Par.hs
+Print.hs
+Skel.hs
+Test
+Test.hs
+Makefile
+*.txt
+*.bak
+*.y
+*.x
+*.info
