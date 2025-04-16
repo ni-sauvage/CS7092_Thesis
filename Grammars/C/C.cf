@@ -5,7 +5,7 @@
 -- NOTICE: the C program may need to be preprocessed by cpp. Also types defined
 -- by typedefs have to be eliminated (these are known problems with the
 -- BNF grammar of Ansi C).
-
+-- NOTE: This has been reproduced from the BNFC Grammar [Github](https://github.com/BNFC/bnfc/tree/master/examples/C).
 entrypoints Program, Stm, Exp ;
 
 Progr.  Program ::= [External_declaration] ;
